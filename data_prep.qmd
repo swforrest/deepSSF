@@ -1,0 +1,280 @@
+---
+title: "data_prep"
+author: "Scott Forrest"
+format: html
+---
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "beepr", "tictoc")
+walk(packages, require, character.only = T)
+
+```
+
+## Import data and clean
+
+```{r}
+
+buffalo <- read_csv("data/buffalo.csv")
+
+# remove individuals that have poor data quality or less than about 3 months of data. 
+# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
+buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           2029, 2043, 2265, 2284, 2346))
+
+buffalo <- buffalo %>%  
+  group_by(node) %>% 
+  arrange(DateTime, .by_group = T) %>% 
+  distinct(DateTime, .keep_all = T) %>% 
+  arrange(node) %>% 
+  mutate(ID = node)
+
+buffalo_clean <- buffalo[, c(12, 2, 4, 3)]
+colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
+attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+head(buffalo_clean)
+tz(buffalo_clean$time)
+
+buffalo_ids <- unique(buffalo_clean$id)
+
+```
+
+## Setup trajectory
+
+Use the `amt` package to create a trajectory object from the cleaned data. 
+
+```{r}
+
+buffalo_all <- buffalo_clean %>% mk_track(id = id,
+                                           lon,
+                                           lat, 
+                                           time, 
+                                           all_cols = T,
+                                           crs = 4326) %>% 
+  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# Geoscience Australia Lambert (https://epsg.io/3112)
+
+```
+
+Plot the data coloured by time
+
+```{r}
+
+buffalo_all %>%
+  ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_point(alpha = 0.25, size = 1) + # colour = "black",
+  coord_fixed() +
+  scale_colour_viridis_c() +
+  theme_classic()
+
+```
+
+### Reading in the environmental covariates
+
+```{r}
+
+ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+
+# change the names (these will become the column names when extracting 
+# covariate values at the used and random steps)
+names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+names(slope) <- "slope"
+names(veg_herby) <- "veg_herby"
+names(canopy_cover) <- "canopy_cover"
+
+# plot the rasters
+# plot(ndvi_projected)
+# plot(slope)
+# plot(veg_herby)
+# plot(canopy_cover)
+
+```
+
+Load saved objects
+
+```{r}
+
+# readRDS(paste0("buffalo2005_covs_2024-03-21.rds"))
+
+```
+
+
+```{r}
+
+# nest the data by individual
+buffalo_all_nested <- buffalo_all %>% arrange(id) %>% nest(data = -"id")
+
+```
+
+Starting with a single individual
+
+```{r}
+
+# how much to trim on either side of the location
+buffer <- 2500
+# subset the data
+buffalo2005 <- buffalo_all %>% filter(id == "2005") %>% slice(1:10)
+
+tic()
+
+buffalo2005_covs <- buffalo2005 %>% mutate(
+  
+  x1_ = x_,
+  y1_ = y_,
+  x2_ = lead(x1_, default = NA),
+  y2_ = lead(y1_, default = NA),
+  hour = lubridate::hour(t_),
+  yday = lubridate::yday(t_),
+  
+  sl = c(NA, sqrt(diff(y_)^2 + diff(x_)^2)),
+  bearing = c(NA, atan2(diff(y_), diff(x_))),
+  ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+    
+  # extent for cropping the spatial covariates
+  x_min = x_ - buffer,
+  x_max = x_ + buffer,
+  y_min = y_ - buffer,
+  y_max = y_ + buffer,
+  
+) %>% rowwise() %>% mutate(
+  
+  extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
+  
+  # NDVI
+  ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
+  ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
+                       ext(x_min, x_max, y_min, y_max))),
+  ndvi_cent = list({
+    ndvi_cent <- rep(ndvi_local)
+    ext(ndvi_cent) <- extent_00centre
+    ndvi_cent
+    }),
+
+  # herbaceous vegetation
+  # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
+  veg_herby_cent = list({
+    veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
+    # veg_herby_cent <- rep(veg_herby_local)
+    ext(veg_herby_cent) <- extent_00centre
+    veg_herby_cent
+    }),
+
+  # canopy cover
+  # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
+  canopy_cover_cent = list({
+    canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
+    # canopy_cover_cent <- rep(canopy_cover_local)
+    ext(canopy_cover_cent) <- extent_00centre
+    canopy_cover_cent
+    }),
+  
+  # slope
+  # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
+  slope_cent = list({
+    slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
+    # slope_cent <- rep(slope_local)
+    ext(slope_cent) <- extent_00centre
+    slope_cent
+    }),
+  
+  points_vect = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+  pres = list(rasterize(points_vect, ndvi_cent, background=0))
+  
+)
+
+toc()
+
+buffalo2005_covs
+# buffalo2005_covs$extent_00centre[[1]]
+
+# difftime(buffalo2005$t_[1], terra::time(ndvi_projected))
+# which.min(abs(difftime(buffalo2005$t_[1], terra::time(ndvi_projected))))
+
+```
+
+Plot the covariates
+
+```{r}
+
+# walk(buffalo2005_covs$points_vect, plot)
+
+# walk(buffalo2005_covs$ndvi_local, plot)
+# walk(buffalo2005_covs$veg_herby_local, terra::plot)
+# walk(buffalo2005_covs$canopy_cover_local, terra::plot)
+# walk(buffalo2005_covs$slope_local, terra::plot)
+
+walk(buffalo2005_covs$ndvi_cent, plot)
+walk(buffalo2005_covs$veg_herby_cent, terra::plot)
+walk(buffalo2005_covs$canopy_cover_cent, terra::plot)
+walk(buffalo2005_covs$slope_cent, terra::plot)
+
+walk(buffalo2005_covs$pres, terra::plot)
+
+# saveRDS(buffalo2005_covs, paste0("buffalo2005_covs_", Sys.Date(), ".rds"))
+
+```
+
+Export objects
+
+```{r}
+
+rast(buffalo2005_covs$ndvi_cent) %>% writeRaster("buffalo2005_ndvi_cent.tif", overwrite = T)
+
+```
+
+
+Check the outputs
+
+```{r}
+
+hist(buffalo2005_covs$sl, breaks = 100)
+quantile(buffalo2005_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+hist(buffalo2005_covs$ta, breaks = 100)
+quantile(buffalo2005_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+```
+
+
+Verify the step lengths and turning angles against `amt`
+
+```{r}
+
+buffalo_all_nested_steps <- buffalo_all_nested %>%
+  mutate(steps = map(data, function(x)
+    x %>% 
+      # track_resample(rate = hours(1), tolerance = minutes(10)) %>%
+      # to filter out bursts with less than 3 locations
+      # amt::filter_min_n_burst(min_n = 3) %>% 
+      steps()))
+
+# unnest the data after creating 'steps' objects
+buffalo_all_steps <- buffalo_all_nested_steps %>% 
+  amt::select(id, steps) %>% 
+  amt::unnest(cols = steps)
+
+# plot the step lengths and turning angles
+buffalo_all_steps %>% ggplot() +
+  geom_histogram(aes(x = sl_), bins = 100, alpha = 1) +
+  theme_classic()
+
+buffalo_amt_2005 <- buffalo_all_steps %>% filter(id == "2005")
+quantile(buffalo_amt_2005$sl_, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
+  geom_histogram(aes(x = ta_), bins = 100, alpha = 1) +
+  theme_classic()
+
+quantile(buffalo_amt_2005$ta_, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+```
+
+

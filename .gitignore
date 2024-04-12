@@ -1,5 +1,11 @@
 # Manually added
 data/
+mapping/
+*.tif
+.Rhistory
+buffalo2005*
+sql_info*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
