@@ -121,7 +121,7 @@ Starting with a single individual
 # how much to trim on either side of the location
 buffer <- 2500
 # subset the data
-buffalo2005 <- buffalo_all %>% filter(id == "2005") %>% slice(1:10)
+buffalo2005 <- buffalo_all %>% filter(id == "2005") %>% slice(1:1000)
 
 tic()
 
@@ -226,7 +226,11 @@ Export objects
 
 ```{r}
 
-rast(buffalo2005_covs$ndvi_cent) %>% writeRaster("buffalo2005_ndvi_cent.tif", overwrite = T)
+rast(buffalo2005_covs$ndvi_cent) %>% writeRaster("buffalo2005_ndvi_cent1000.tif", overwrite = T)
+rast(buffalo2005_covs$veg_herby_cent) %>% writeRaster("buffalo2005_veg_herby_cent1000.tif", overwrite = T)
+rast(buffalo2005_covs$canopy_cover_cent) %>% writeRaster("buffalo2005_canopy_cover_cent1000.tif", overwrite = T)
+rast(buffalo2005_covs$slope_cent) %>% writeRaster("buffalo2005_slope_cent1000.tif", overwrite = T)
+rast(buffalo2005_covs$pres) %>% writeRaster("buffalo2005_pres1000.tif", overwrite = T)
 
 ```
 
