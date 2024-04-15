@@ -74,6 +74,8 @@ with rasterio.open(file_path) as ndvi:
 ndvi_stack
 dir(ndvi_stack)
 
+
+
 # using rasterio functions
 # number of layers in the stack (rasterio object)
 ndvi.count
