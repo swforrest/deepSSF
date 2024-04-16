@@ -5,6 +5,8 @@ mapping/
 .Rhistory
 buffalo2005*
 sql_info*
+lossFunctions.py
+dansModel.py
 
 
 # Byte-compiled / optimized / DLL files

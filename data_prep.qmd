@@ -211,12 +211,12 @@ Plot the covariates
 # walk(buffalo2005_covs$canopy_cover_local, terra::plot)
 # walk(buffalo2005_covs$slope_local, terra::plot)
 
-walk(buffalo2005_covs$ndvi_cent, plot)
-walk(buffalo2005_covs$veg_herby_cent, terra::plot)
-walk(buffalo2005_covs$canopy_cover_cent, terra::plot)
-walk(buffalo2005_covs$slope_cent, terra::plot)
+walk(buffalo2005_covs$ndvi_cent[1:10], plot)
+walk(buffalo2005_covs$veg_herby_cent[1:10], terra::plot)
+walk(buffalo2005_covs$canopy_cover_cent[1:10], terra::plot)
+walk(buffalo2005_covs$slope_cent[1:10], terra::plot)
 
-walk(buffalo2005_covs$pres, terra::plot)
+walk(buffalo2005_covs$pres[1:10], terra::plot)
 
 # saveRDS(buffalo2005_covs, paste0("buffalo2005_covs_", Sys.Date(), ".rds"))
 
