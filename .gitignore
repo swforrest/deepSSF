@@ -2,6 +2,7 @@
 data/
 mapping/
 *.tif
+*.json
 .Rhistory
 buffalo2005*
 sql_info*

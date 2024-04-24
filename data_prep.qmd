@@ -64,12 +64,12 @@ Plot the data coloured by time
 
 ```{r}
 
-buffalo_all %>%
-  ggplot(aes(x = x_, y = y_, colour = t_)) +
-  geom_point(alpha = 0.25, size = 1) + # colour = "black",
-  coord_fixed() +
-  scale_colour_viridis_c() +
-  theme_classic()
+# buffalo_all %>%
+#   ggplot(aes(x = x_, y = y_, colour = t_)) +
+#   geom_point(alpha = 0.25, size = 1) + # colour = "black",
+#   coord_fixed() +
+#   scale_colour_viridis_c() +
+#   theme_classic()
 
 ```
 
@@ -109,33 +109,38 @@ Load saved objects
 
 ```{r}
 
+buffalo_all <- buffalo_all %>% arrange(id)
 # nest the data by individual
 buffalo_all_nested <- buffalo_all %>% arrange(id) %>% nest(data = -"id")
 
 ```
 
-Starting with a single individual
+Generating the data to fit the ML models
 
 ```{r}
 
 # how much to trim on either side of the location
-buffer <- 2500
+buffer <- 1250
 # subset the data
-buffalo2005 <- buffalo_all %>% filter(id == "2005") %>% slice(1:10000)
+n_samples <- 10000
+# buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
+buffalo_data <- buffalo_all %>% slice(1:n_samples)
 
 tic()
 
-buffalo2005_covs <- buffalo2005 %>% mutate(
+buffalo_data_covs <- buffalo_data %>% mutate(
   
   x1_ = x_,
   y1_ = y_,
   x2_ = lead(x1_, default = NA),
   y2_ = lead(y1_, default = NA),
+  x2_cent = x2_ - x1_,
+  y2_cent = y2_ - y1_,
   hour = lubridate::hour(t_),
   yday = lubridate::yday(t_),
   
-  sl = c(NA, sqrt(diff(y_)^2 + diff(x_)^2)),
-  bearing = c(NA, atan2(diff(y_), diff(x_))),
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  bearing = c(atan2(diff(y_), diff(x_)), NA),
   ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
     
   # extent for cropping the spatial covariates
@@ -192,11 +197,17 @@ buffalo2005_covs <- buffalo2005 %>% mutate(
 
 toc()
 
-buffalo2005_covs
-# buffalo2005_covs$extent_00centre[[1]]
+# to remove steps greater than the map extent?
+# buffalo_data_covs %>% filter(sl < buffer)
+buffalo_data_covs
 
+# buffalo2005_covs$extent_00centre[[1]]
 # difftime(buffalo2005$t_[1], terra::time(ndvi_projected))
 # which.min(abs(difftime(buffalo2005$t_[1], terra::time(ndvi_projected))))
+
+buffalo_data_covs %>% filter(x2_cent < -1250 | x2_cent > 1250 | y2_cent < -1250 | y2_cent > 1250)
+buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -1250 & x2_cent < 1250 & y2_cent > -1250 & y2_cent < 1250)
+buffalo_data_covs
 
 ```
 
@@ -211,14 +222,18 @@ Plot the covariates
 # walk(buffalo2005_covs$canopy_cover_local, terra::plot)
 # walk(buffalo2005_covs$slope_local, terra::plot)
 
-walk(buffalo2005_covs$ndvi_cent[1:10], plot)
-walk(buffalo2005_covs$veg_herby_cent[1:10], terra::plot)
-walk(buffalo2005_covs$canopy_cover_cent[1:10], terra::plot)
-walk(buffalo2005_covs$slope_cent[1:10], terra::plot)
+n_plots <- 5
 
-walk(buffalo2005_covs$pres[1:10], terra::plot)
+walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
+walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
 
-# saveRDS(buffalo2005_covs, paste0("buffalo2005_covs_", Sys.Date(), ".rds"))
+walk(buffalo_data_covs$pres[1:n_plots], terra::plot)
+
+walk(buffalo_data_covs$pres[695:699], terra::plot)
+
+# saveRDS(buffalo_data_covs, paste0("buffalo_data_covs_", Sys.Date(), ".rds"))
 
 ```
 
@@ -226,11 +241,11 @@ Export objects
 
 ```{r}
 
-rast(buffalo2005_covs$ndvi_cent) %>% writeRaster("buffalo2005_ndvi_cent1000.tif", overwrite = T)
-rast(buffalo2005_covs$veg_herby_cent) %>% writeRaster("buffalo2005_veg_herby_cent1000.tif", overwrite = T)
-rast(buffalo2005_covs$canopy_cover_cent) %>% writeRaster("buffalo2005_canopy_cover_cent1000.tif", overwrite = T)
-rast(buffalo2005_covs$slope_cent) %>% writeRaster("buffalo2005_slope_cent1000.tif", overwrite = T)
-rast(buffalo2005_covs$pres) %>% writeRaster("buffalo2005_pres1000.tif", overwrite = T)
+rast(buffalo_data_covs$ndvi_cent) %>% writeRaster(paste0("buffalo_ndvi_cent50x50_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$veg_herby_cent) %>% writeRaster(paste0("buffalo_herby_cent50x50_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$canopy_cover_cent) %>% writeRaster(paste0("buffalo_canopy_cent50x50_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$slope_cent) %>% writeRaster(paste0("buffalo_slope_cent50x50_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$pres) %>% writeRaster(paste0("buffalo_pres_cent50x50_n", n_samples, ".tif"), overwrite = T)
 
 ```
 
@@ -239,11 +254,11 @@ Check the outputs
 
 ```{r}
 
-hist(buffalo2005_covs$sl, breaks = 100)
-quantile(buffalo2005_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(buffalo_data_covs$sl, breaks = 100)
+quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
 
-hist(buffalo2005_covs$ta, breaks = 100)
-quantile(buffalo2005_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(buffalo_data_covs$ta, breaks = 100)
+quantile(buffalo_data_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
 
 ```
 
@@ -271,13 +286,13 @@ buffalo_all_steps %>% ggplot() +
   theme_classic()
 
 buffalo_amt_2005 <- buffalo_all_steps %>% filter(id == "2005")
-quantile(buffalo_amt_2005$sl_, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+quantile(buffalo_amt_2005$sl_, probs = c(0.5, 0.9, 0.95, 0.977, 0.99, 0.999, 1), na.rm = T)
 
 buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
   geom_histogram(aes(x = ta_), bins = 100, alpha = 1) +
   theme_classic()
 
-quantile(buffalo_amt_2005$ta_, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+quantile(buffalo_amt_2005$ta_, probs = c(0.5, 0.9, 0.95, 0.97, 0.99, 0.999, 1), na.rm = T)
 
 ```
 
