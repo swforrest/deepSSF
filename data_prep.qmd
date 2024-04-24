@@ -121,8 +121,11 @@ Generating the data to fit the ML models
 
 # how much to trim on either side of the location
 buffer <- 1250
+
 # subset the data
-n_samples <- 10000
+# n_samples <- 10000
+n_samples <- nrow(buffalo_all)
+
 # buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
 buffalo_data <- buffalo_all %>% slice(1:n_samples)
 
@@ -231,7 +234,8 @@ walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
 
 walk(buffalo_data_covs$pres[1:n_plots], terra::plot)
 
-walk(buffalo_data_covs$pres[695:699], terra::plot)
+# to check problematic indices
+# walk(buffalo_data_covs$pres[695:699], terra::plot)
 
 # saveRDS(buffalo_data_covs, paste0("buffalo_data_covs_", Sys.Date(), ".rds"))
 
