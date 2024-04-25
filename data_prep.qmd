@@ -122,9 +122,12 @@ Generating the data to fit the ML models
 # how much to trim on either side of the location
 buffer <- 1250
 
+# hourly lag
+hourly_lag <- 6
+
 # subset the data
-# n_samples <- 10000
-n_samples <- nrow(buffalo_all)
+n_samples <- 10000
+# n_samples <- nrow(buffalo_all)
 
 # buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
 buffalo_data <- buffalo_all %>% slice(1:n_samples)
@@ -135,12 +138,16 @@ buffalo_data_covs <- buffalo_data %>% mutate(
   
   x1_ = x_,
   y1_ = y_,
-  x2_ = lead(x1_, default = NA),
-  y2_ = lead(y1_, default = NA),
+  x2_ = lead(x1_, n = hourly_lag, default = NA),
+  y2_ = lead(y1_, n = hourly_lag, default = NA),
   x2_cent = x2_ - x1_,
   y2_cent = y2_ - y1_,
-  hour = lubridate::hour(t_),
-  yday = lubridate::yday(t_),
+  t2_ = lead(t_, n = hourly_lag, default = NA),
+  t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  hour_t1 = lubridate::hour(t_),
+  yday_t1 = lubridate::yday(t_),
+  hour_t2 = lubridate::hour(t2_),
+  yday_t2 = lubridate::yday(t2_),
   
   sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
   bearing = c(atan2(diff(y_), diff(x_)), NA),
@@ -152,10 +159,11 @@ buffalo_data_covs <- buffalo_data %>% mutate(
   y_min = y_ - buffer,
   y_max = y_ + buffer,
   
+# )
 ) %>% rowwise() %>% mutate(
-  
+
   extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
-  
+
   # NDVI
   ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
   ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
@@ -183,7 +191,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     ext(canopy_cover_cent) <- extent_00centre
     canopy_cover_cent
     }),
-  
+
   # slope
   # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
   slope_cent = list({
@@ -192,10 +200,10 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     ext(slope_cent) <- extent_00centre
     slope_cent
     }),
-  
+
   points_vect = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
   pres = list(rasterize(points_vect, ndvi_cent, background=0))
-  
+
 )
 
 toc()
@@ -208,11 +216,107 @@ buffalo_data_covs
 # difftime(buffalo2005$t_[1], terra::time(ndvi_projected))
 # which.min(abs(difftime(buffalo2005$t_[1], terra::time(ndvi_projected))))
 
+```
+
+
+```{r}
+
+hist(buffalo_data_covs$sl, breaks = 100)
+quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+hist(buffalo_data_covs$ta, breaks = 100)
+quantile(buffalo_data_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+
+```
+
+
+```{r}
+
 buffalo_data_covs %>% filter(x2_cent < -1250 | x2_cent > 1250 | y2_cent < -1250 | y2_cent > 1250)
 buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -1250 & x2_cent < 1250 & y2_cent > -1250 & y2_cent < 1250)
 buffalo_data_covs
 
 ```
+
+Plot the spatial distribution of steps
+
+```{r}
+
+# plot step lengths
+ggplot() +
+  geom_histogram(data = buffalo_data_covs,
+                 aes(x = sl),
+                 binwidth = 25) +
+  scale_x_continuous(limits = c(0, 1250)) +
+  theme_bw()
+
+ggplot() +
+  geom_point(data = buffalo_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             size = 0.5,
+             alpha = 0.15) +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = buffalo_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = 25) +
+  # change the colour to log_scale
+  scale_fill_viridis_c() +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = buffalo_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = 25) +
+  # change the colour to log_scale
+  scale_fill_viridis_c(trans = "log") +
+  coord_equal() +
+  theme_bw()
+
+```
+
+Plotting at different times of the day
+
+```{r}
+
+buffalo_temporal_subset <- buffalo_data_covs %>% filter(hour == 6:9 | hour == 15:18)
+
+ggplot() +
+  geom_histogram(data = buffalo_temporal_subset,
+                 aes(x = sl),
+                 binwidth = 25) +
+  scale_x_continuous(limits = c(0, 1250)) +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = buffalo_temporal_subset,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = 25) +
+  # change the colour to log_scale
+  scale_fill_viridis_c() +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = buffalo_temporal_subset,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = 25) +
+  # change the colour to log_scale
+  scale_fill_viridis_c(trans = "log") +
+  coord_equal() +
+  theme_bw()
+
+```
+
+
 
 Plot the covariates
 
@@ -245,33 +349,19 @@ Export objects
 
 ```{r}
 
-rast(buffalo_data_covs$ndvi_cent) %>% writeRaster(paste0("buffalo_ndvi_cent50x50_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$veg_herby_cent) %>% writeRaster(paste0("buffalo_herby_cent50x50_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$canopy_cover_cent) %>% writeRaster(paste0("buffalo_canopy_cent50x50_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$slope_cent) %>% writeRaster(paste0("buffalo_slope_cent50x50_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$pres) %>% writeRaster(paste0("buffalo_pres_cent50x50_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$ndvi_cent) %>% writeRaster(paste0("buffalo_ndvi_cent100x100_lag_", lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$veg_herby_cent) %>% writeRaster(paste0("buffalo_herby_cent100x100_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$canopy_cover_cent) %>% writeRaster(paste0("buffalo_canopy_cent100x100_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$slope_cent) %>% writeRaster(paste0("buffalo_slope_cent100x100_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$pres) %>% writeRaster(paste0("buffalo_pres_cent100x100_n", n_samples, ".tif"), overwrite = T)
 
 ```
-
-
-Check the outputs
-
-```{r}
-
-hist(buffalo_data_covs$sl, breaks = 100)
-quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
-
-hist(buffalo_data_covs$ta, breaks = 100)
-quantile(buffalo_data_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
-
-```
-
 
 Verify the step lengths and turning angles against `amt`
 
 ```{r}
 
-buffalo_all_nested_steps <- buffalo_all_nested %>%
+buffalo_all_nested_steps <- buffalo_all_nested %>% 
   mutate(steps = map(data, function(x)
     x %>% 
       # track_resample(rate = hours(1), tolerance = minutes(10)) %>%
@@ -285,8 +375,9 @@ buffalo_all_steps <- buffalo_all_nested_steps %>%
   amt::unnest(cols = steps)
 
 # plot the step lengths and turning angles
-buffalo_all_steps %>% ggplot() +
+buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
   geom_histogram(aes(x = sl_), bins = 100, alpha = 1) +
+  scale_x_continuous(limits = c(0, 125)) +
   theme_classic()
 
 buffalo_amt_2005 <- buffalo_all_steps %>% filter(id == "2005")
