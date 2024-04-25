@@ -285,7 +285,7 @@ Plotting at different times of the day
 
 ```{r}
 
-buffalo_temporal_subset <- buffalo_data_covs %>% filter(hour == 6:9 | hour == 15:18)
+buffalo_temporal_subset <- buffalo_data_covs %>% filter(hour_t1 == 6 | hour_t1 == 18)
 
 ggplot() +
   geom_histogram(data = buffalo_temporal_subset,
