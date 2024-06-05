@@ -5,6 +5,7 @@ mapping/
 *.json
 .Rhistory
 buffalo2005*
+*0.csv
 sql_info*
 lossFunctions.py
 dansModel.py

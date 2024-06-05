@@ -123,7 +123,7 @@ Generating the data to fit the ML models
 buffer <- 1250
 
 # hourly lag
-hourly_lag <- 6
+hourly_lag <- 1
 
 # subset the data
 n_samples <- 10000
@@ -150,8 +150,13 @@ buffalo_data_covs <- buffalo_data %>% mutate(
   yday_t2 = lubridate::yday(t2_),
   
   sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  log_sl = log(sl),
   bearing = c(atan2(diff(y_), diff(x_)), NA),
-  ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta),
     
   # extent for cropping the spatial covariates
   x_min = x_ - buffer,
@@ -175,7 +180,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     }),
 
   # herbaceous vegetation
-  # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
+  veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
   veg_herby_cent = list({
     veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
     # veg_herby_cent <- rep(veg_herby_local)
@@ -184,7 +189,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     }),
 
   # canopy cover
-  # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
+  canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
   canopy_cover_cent = list({
     canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
     # canopy_cover_cent <- rep(canopy_cover_local)
@@ -193,7 +198,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     }),
 
   # slope
-  # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
+  slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
   slope_cent = list({
     slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
     # slope_cent <- rep(slope_local)
@@ -201,10 +206,15 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     slope_cent
     }),
 
-  points_vect = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-  pres = list(rasterize(points_vect, ndvi_cent, background=0))
+  # rasterised location of the next step
+  points_vect_local = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
+  pres_local = list(rasterize(points_vect_local, ndvi_local, background=0)),
 
-)
+  # rasterised location of the next step - centred on (0,0)
+  points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+  pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0))
+
+) %>% ungroup() # to remove the 'rowwise' class
 
 toc()
 
@@ -216,31 +226,116 @@ buffalo_data_covs
 # difftime(buffalo2005$t_[1], terra::time(ndvi_projected))
 # which.min(abs(difftime(buffalo2005$t_[1], terra::time(ndvi_projected))))
 
+which(is.na(buffalo_data_covs$ta))
+
 ```
 
+Plot the covariates
 
 ```{r}
 
-hist(buffalo_data_covs$sl, breaks = 100)
+# walk(buffalo2005_covs$points_vect, plot)
+
+n_plots <- 5
+
+walk(buffalo_data_covs$ndvi_local[1:n_plots], plot)
+walk(buffalo_data_covs$veg_herby_local[1:n_plots], terra::plot)
+walk(buffalo_data_covs$canopy_cover_local[1:n_plots], terra::plot)
+walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
+walk(buffalo_data_covs$pres_local[1:n_plots], terra::plot)
+
+walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
+walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$pres_cent[1:n_plots], terra::plot)
+
+# to check problematic indices
+# walk(buffalo_data_covs$pres[695:699], terra::plot)
+
+# saveRDS(buffalo_data_covs, paste0("buffalo_data_covs_", Sys.Date(), ".rds"))
+
+```
+
+Filter when the next step is outside the extent and drop NAs from the turning angle column
+
+```{r}
+
+# buffalo_data_covs %>% filter(x2_cent < -1250 | x2_cent > 1250 | y2_cent < -1250 | y2_cent > 1250)
+buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -1250 & x2_cent < 1250 & y2_cent > -1250 & y2_cent < 1250) %>% drop_na(ta)
+buffalo_data_covs
+
+```
+
+Export objects
+
+```{r}
+
+raster_size <- "100x100"
+
+buffalo_data_df <- buffalo_data_covs %>%
+  dplyr::select(-extent_00centre, 
+                -ndvi_local, -ndvi_cent, 
+                -veg_herby_local, -veg_herby_cent, 
+                -canopy_cover_local, -canopy_cover_cent,
+                -slope_local, -slope_cent,
+                -points_vect_local, -points_vect_cent, 
+                -pres_local, -pres_cent)
+
+write_csv(buffalo_data_df, paste0("buffalo_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+
+# rast(buffalo_data_covs$ndvi_local) %>% 
+#   writeRaster(paste0("buffalo_ndvi_local", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(buffalo_data_covs$veg_herby_local) %>% 
+#   writeRaster(paste0("buffalo_herby_local", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(buffalo_data_covs$canopy_cover_local) %>% 
+#   writeRaster(paste0("buffalo_canopy_local", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(buffalo_data_covs$slope_local) %>% 
+#   writeRaster(paste0("buffalo_slope_local", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(buffalo_data_covs$pres_local) %>% 
+#   writeRaster(paste0("buffalo_pres_local", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+
+rast(buffalo_data_covs$ndvi_cent) %>% 
+  writeRaster(paste0("buffalo_ndvi_cent", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$veg_herby_cent) %>% 
+  writeRaster(paste0("buffalo_herby_cent", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$canopy_cover_cent) %>% 
+  writeRaster(paste0("buffalo_canopy_cent", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$slope_cent) %>% 
+  writeRaster(paste0("buffalo_slope_cent", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(buffalo_data_covs$pres_cent) %>% 
+  writeRaster(paste0("buffalo_pres_cent", raster_size, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+
+```
+
+Plot the step lengths and turning angles
+
+```{r}
+
+hist(buffalo_data_covs$sl, breaks = max(buffalo_data_covs$sl, na.rm = T)/25, xlim = c(0,5000))
 quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(buffalo_data_covs$log_sl, breaks = 100)
+
+mean(buffalo_data_covs$sl)
 
 hist(buffalo_data_covs$ta, breaks = 100)
 quantile(buffalo_data_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(buffalo_data_covs$cos_ta, breaks = 100)
 
-```
-
-
-```{r}
-
-buffalo_data_covs %>% filter(x2_cent < -1250 | x2_cent > 1250 | y2_cent < -1250 | y2_cent > 1250)
-buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -1250 & x2_cent < 1250 & y2_cent > -1250 & y2_cent < 1250)
-buffalo_data_covs
+mean(buffalo_data_covs$ta)
 
 ```
 
 Plot the spatial distribution of steps
 
 ```{r}
+
+sum(buffalo_data_covs$sl < 200)/nrow(buffalo_data_covs)
+
+for(i in 1:24) {
+print(buffalo_data_covs %>% filter(hour_t2 == i) %>% ggplot() +
+  geom_histogram(aes(x = sl), binwidth = 25))
+}
 
 # plot step lengths
 ggplot() +
@@ -316,47 +411,6 @@ ggplot() +
 
 ```
 
-
-
-Plot the covariates
-
-```{r}
-
-# walk(buffalo2005_covs$points_vect, plot)
-
-# walk(buffalo2005_covs$ndvi_local, plot)
-# walk(buffalo2005_covs$veg_herby_local, terra::plot)
-# walk(buffalo2005_covs$canopy_cover_local, terra::plot)
-# walk(buffalo2005_covs$slope_local, terra::plot)
-
-n_plots <- 5
-
-walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
-walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
-walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
-walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
-
-walk(buffalo_data_covs$pres[1:n_plots], terra::plot)
-
-# to check problematic indices
-# walk(buffalo_data_covs$pres[695:699], terra::plot)
-
-# saveRDS(buffalo_data_covs, paste0("buffalo_data_covs_", Sys.Date(), ".rds"))
-
-```
-
-Export objects
-
-```{r}
-
-rast(buffalo_data_covs$ndvi_cent) %>% writeRaster(paste0("buffalo_ndvi_cent100x100_lag_", lag, "hr_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$veg_herby_cent) %>% writeRaster(paste0("buffalo_herby_cent100x100_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$canopy_cover_cent) %>% writeRaster(paste0("buffalo_canopy_cent100x100_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$slope_cent) %>% writeRaster(paste0("buffalo_slope_cent100x100_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$pres) %>% writeRaster(paste0("buffalo_pres_cent100x100_n", n_samples, ".tif"), overwrite = T)
-
-```
-
 Verify the step lengths and turning angles against `amt`
 
 ```{r}
@@ -375,7 +429,7 @@ buffalo_all_steps <- buffalo_all_nested_steps %>%
   amt::unnest(cols = steps)
 
 # plot the step lengths and turning angles
-buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
+buffalo_all_steps %>% ggplot() +
   geom_histogram(aes(x = sl_), bins = 100, alpha = 1) +
   scale_x_continuous(limits = c(0, 125)) +
   theme_classic()
@@ -383,7 +437,7 @@ buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
 buffalo_amt_2005 <- buffalo_all_steps %>% filter(id == "2005")
 quantile(buffalo_amt_2005$sl_, probs = c(0.5, 0.9, 0.95, 0.977, 0.99, 0.999, 1), na.rm = T)
 
-buffalo_all_steps %>% filter(id == "2005") %>% ggplot() +
+buffalo_all_steps %>% ggplot() +
   geom_histogram(aes(x = ta_), bins = 100, alpha = 1) +
   theme_classic()
 
