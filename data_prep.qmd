@@ -122,14 +122,14 @@ Generating the data to fit the ML models
 res <- terra::res(ndvi_projected)[1]
 
 # how much to trim on either side of the location
-buffer <- 1250 + res/2
-nxn_cells <- 1262.5*2/res
+buffer <- 1250 + (res/2)
+nxn_cells <- buffer*2/res
 
 # hourly lag
 hourly_lag <- 1
 
 # subset the data
-n_samples <- 100
+n_samples <- 1000
 # n_samples <- nrow(buffalo_all)
 
 # buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
@@ -264,8 +264,8 @@ Filter when the next step is outside the extent and drop NAs from the turning an
 
 ```{r}
 
-# buffalo_data_covs %>% filter(x2_cent < -1250 | x2_cent > 1250 | y2_cent < -1250 | y2_cent > 1250)
-buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -1250 & x2_cent < 1250 & y2_cent > -1250 & y2_cent < 1250) %>% drop_na(ta)
+# buffalo_data_covs %>% filter(x2_cent < -buffer | x2_cent > buffer | y2_cent < -buffer | y2_cent > buffer)
+buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% drop_na(ta)
 buffalo_data_covs
 
 ```
@@ -320,6 +320,11 @@ hist(buffalo_data_covs$sl, breaks = max(buffalo_data_covs$sl, na.rm = T)/25, xli
 quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
 hist(buffalo_data_covs$log_sl, breaks = 100)
 
+buffalo_data_covs %>% ggplot() +
+  geom_histogram(aes(x = sl), bins = 1000, alpha = 1) +
+  scale_x_continuous(limits = c(0, 125)) +
+  theme_classic()
+
 mean(buffalo_data_covs$sl)
 
 hist(buffalo_data_covs$ta, breaks = 100)
@@ -334,19 +339,20 @@ Plot the spatial distribution of steps
 
 ```{r}
 
-sum(buffalo_data_covs$sl < 200)/nrow(buffalo_data_covs)
+# sum(buffalo_data_covs$sl < 200)/nrow(buffalo_data_covs)
 
-for(i in 1:24) {
-print(buffalo_data_covs %>% filter(hour_t2 == i) %>% ggplot() +
-  geom_histogram(aes(x = sl), binwidth = 25))
-}
+# for(i in 1:24) {
+# print(buffalo_data_covs %>% filter(hour_t2 == i) %>% ggplot() +
+#   geom_histogram(aes(x = sl), binwidth = res) +
+#     theme_classic())
+# }
 
 # plot step lengths
 ggplot() +
   geom_histogram(data = buffalo_data_covs,
                  aes(x = sl),
-                 binwidth = 25) +
-  scale_x_continuous(limits = c(0, 1250)) +
+                 binwidth = res) +
+  scale_x_continuous(limits = c(0, buffer)) +
   theme_bw()
 
 ggplot() +
@@ -362,7 +368,7 @@ ggplot() +
   geom_bin2d(data = buffalo_data_covs,
              aes(x = x2_cent,
                  y = y2_cent),
-             binwidth = 25) +
+             binwidth = res) +
   # change the colour to log_scale
   scale_fill_viridis_c() +
   coord_equal() +
@@ -372,7 +378,7 @@ ggplot() +
   geom_bin2d(data = buffalo_data_covs,
              aes(x = x2_cent,
                  y = y2_cent),
-             binwidth = 25) +
+             binwidth = res) +
   # change the colour to log_scale
   scale_fill_viridis_c(trans = "log") +
   coord_equal() +
@@ -389,7 +395,7 @@ buffalo_temporal_subset <- buffalo_data_covs %>% filter(hour_t1 == 6 | hour_t1 =
 ggplot() +
   geom_histogram(data = buffalo_temporal_subset,
                  aes(x = sl),
-                 binwidth = 25) +
+                 binwidth = res) +
   scale_x_continuous(limits = c(0, 1250)) +
   theme_bw()
 
@@ -397,7 +403,7 @@ ggplot() +
   geom_bin2d(data = buffalo_temporal_subset,
              aes(x = x2_cent,
                  y = y2_cent),
-             binwidth = 25) +
+             binwidth = res) +
   # change the colour to log_scale
   scale_fill_viridis_c() +
   coord_equal() +
@@ -407,7 +413,7 @@ ggplot() +
   geom_bin2d(data = buffalo_temporal_subset,
              aes(x = x2_cent,
                  y = y2_cent),
-             binwidth = 25) +
+             binwidth = res) +
   # change the colour to log_scale
   scale_fill_viridis_c(trans = "log") +
   coord_equal() +
@@ -434,7 +440,7 @@ buffalo_all_steps <- buffalo_all_nested_steps %>%
 
 # plot the step lengths and turning angles
 buffalo_all_steps %>% ggplot() +
-  geom_histogram(aes(x = sl_), bins = 100, alpha = 1) +
+  geom_histogram(aes(x = sl_), bins = 1000, alpha = 1) +
   scale_x_continuous(limits = c(0, 125)) +
   theme_classic()
 
