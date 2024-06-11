@@ -129,8 +129,8 @@ nxn_cells <- buffer*2/res
 hourly_lag <- 1
 
 # subset the data
-n_samples <- 1000
-# n_samples <- nrow(buffalo_all)
+n_samples <- 10000
+n_samples <- nrow(buffalo_all)
 
 # buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
 buffalo_data <- buffalo_all %>% slice(1:n_samples)
