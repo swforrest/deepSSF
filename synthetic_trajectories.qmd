@@ -142,7 +142,7 @@ simulate_ssf <- function(
     xy0 # starting location
     ) { 
   
-  tic()
+  # tic()
   
   # vectorisation of the random sampling leads to iterating over hourly coef values
   sl <- rgamma(n_steps * n_ch, 
@@ -222,7 +222,7 @@ simulate_ssf <- function(
   
   }
   
-  (toc())
+  # (toc())
   return(data.frame(step = 1:n_steps,
                     x = x, 
                     y = y, 
@@ -302,6 +302,6 @@ ggplot() +
 
 ```{r}
 
-write_csv(simulated_locs_test, paste0("synthetic_data/synthetic_trajectories_ndvi_beta_", beta_value, "_", n_sims, "sims_", n_steps, "steps.csv"))
+write_csv(simulated_locs_test, paste0("synthetic_trajectories/synthetic_trajectories_ndvi_beta_", beta_value, "_", n_sims, "sims_", n_steps, "steps.csv"))
 
 ```
