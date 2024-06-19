@@ -21,8 +21,8 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-# set.seed(12321)
-# ndvi_dry <- grf(ncell(r), grid="reg", nx=50, ny=50, xlims=c(0,50), ylims=c(0,50), cov.pars=c(1, 10))
+set.seed(12321)
+# env1 <- grf(ncell(r), grid="reg", nx=50, ny=50, xlims=c(0,50), ylims=c(0,50), cov.pars=c(1, 10))
 
 ```
 
@@ -30,11 +30,11 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-# ndvi_dry_raster <- rast(raster(ndvi_dry))
-# plot(ndvi_dry_raster)
-# names(ndvi_dry_raster) <- "ndvi_dry"
+# env1_raster <- rast(raster(env1))
+# plot(env1_raster)
+# names(env1_raster) <- "env1"
 # 
-# hist(values(ndvi_dry_raster), breaks = 30)
+# hist(values(env1_raster), breaks = 30)
 
 ```
 
@@ -93,12 +93,14 @@ ssf_coef <- data.frame(hour = t, beta = f_harmonic)
 
 ```{r}
 
+beta_value = 5
+
 # create a sequence of hours
 t <- seq(1,24,1)
 T <- 24
 
 # create a single function
-f_response <- rep(-2, T)
+f_response <- rep(beta_value, T)
 
 # plot the function
 plot(t, f_response, type = "l", col = "black", 
@@ -237,28 +239,19 @@ simulate_ssf <- function(
 
 ```{r}
 
-simulated_locs_fit <- simulate_ssf(n_steps = 1000,
-                                   n_ch = 50,
-                                   gamma_shape = gamma_shape,
-                                   gamma_scale = gamma_scale,
-                                   coef = ssf_coef,
-                                   resc = ndvi_dry,
-                                   xy0 = c(1e4,1e4))
+# single trajectory
+# simulated_locs_fit <- simulate_ssf(n_steps = 1000,
+#                                    n_ch = 50,
+#                                    gamma_shape = gamma_shape,
+#                                    gamma_scale = gamma_scale,
+#                                    coef = ssf_coef,
+#                                    resc = ndvi_dry,
+#                                    xy0 = c(1e4,1e4))
+# 
+# beep(sound = 2)
 
-beep(sound = 2)
 
-# simulated_locs_fit_list <- lapply(1:10, function(i) {
-#   simulate_ssf(n_steps = 1000,
-#                n_ch = 50,
-#                gamma_shape = gamma_shape,
-#                gamma_scale = gamma_scale,
-#                coef = ssf_coef,
-#                resc = ndvi_dry_raster,
-#                xy0 = c(runif(1, 0, 50), runif(1, 0, 50)))
-# })
-
-# simulated_locs_fit <- bind_rows(simulated_locs_fit_list, .id = "sim")
-
+# multiple trajectories
 n_sims <- 100
 n_steps <- 100
 
@@ -276,12 +269,12 @@ simulated_locs_test_list <- lapply(1:n_sims, function(i) {
 })
 
 # add a column for time
-lapply(simulated_locs_test_list, function(df) {
+simulated_locs_test_list_t <- lapply(simulated_locs_test_list, function(df) {
   df$t = ymd_hm("2019-01-01 00:00") + hours(1:nrow(df))
   return(df)
   })
 
-simulated_locs_test <- bind_rows(simulated_locs_test_list, .id = "sim")
+simulated_locs_test <- bind_rows(simulated_locs_test_list_t, .id = "sim")
 
 beep(sound = 2)
 
@@ -309,6 +302,6 @@ ggplot() +
 
 ```{r}
 
-write_csv(simulated_locs_test, paste0("synthetic_data/synthetic_trajectories_ndvi_", n_sims, "sims_", n_steps, "steps.csv"))
+write_csv(simulated_locs_test, paste0("synthetic_data/synthetic_trajectories_ndvi_beta_", beta_value, "_", n_sims, "sims_", n_steps, "steps.csv"))
 
 ```

@@ -21,7 +21,7 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-synthetic_data <- read_csv("synthetic_data/synthetic_trajectories_ndvi_100sims_100steps.csv")
+synthetic_data <- read_csv("synthetic_data/synthetic_trajectories_ndvi_beta_5_100sims_100steps.csv")
 sim_ids <- unique(synthetic_data$sim)
 
 ```
@@ -198,6 +198,7 @@ synthetic_data_covs <- synthetic_data %>% mutate(
 ) %>% ungroup() # to remove the 'rowwise' class
 
 toc()
+beep(sound = 2)
 
 # to remove steps greater than the map extent?
 # synthetic_data_covs %>% filter(sl < buffer)
@@ -242,13 +243,12 @@ Filter when the next step is outside the extent and drop NAs from the turning an
 
 ```{r}
 
-# synthetic_data_covs %>% filter(x2_cent < -buffer | x2_cent > buffer | y2_cent < -buffer | y2_cent > buffer)
+# filter out locations that are closer than 'buffer' to the edge
+synthetic_data_covs <- synthetic_data_covs %>% filter(x2_ > 0 + buffer & x2_ < 2e4 - buffer & y2_ > 0 + buffer & y2_ < 2e4 - buffer) %>% drop_na(ta)
+# filter out locations that are outside of the local extent
+synthetic_data_covs <- synthetic_data_covs %>% filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% drop_na(ta)
 
-# filter out when closer than 'buffer' to the edge
-synthetic_data_covs2 <- synthetic_data_covs %>% filter(x2_ > 0 + buffer & x2_ < 2e4 - buffer & y2_ > 0 + buffer & y2_ < 2e4 - buffer) %>% drop_na(ta)
-
-synthetic_data_covs2 <- synthetic_data_covs %>% filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% drop_na(ta)
-synthetic_data_covs2
+# synthetic_data_covs
 
 ```
 
@@ -258,6 +258,7 @@ Export objects
 
 # raster_size <- "100x100"
 nxn_cells
+beta_value <- 5 # from the 'synthetic_trajectories' - defines the strength of association to habitat
 
 synthetic_data_df <- synthetic_data_covs %>%
   dplyr::select(-extent_00centre, 
@@ -268,7 +269,7 @@ synthetic_data_df <- synthetic_data_covs %>%
                 -points_vect_local, -points_vect_cent, 
                 -pres_local, -pres_cent)
 
-write_csv(synthetic_data_df, paste0("synthetic_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+write_csv(synthetic_data_df, paste0("synthetic_data_df_ndvi_beta_", beta_value, "_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
 
 # rast(synthetic_data_covs$ndvi_local) %>% 
 #   writeRaster(paste0("synthetic_ndvi_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
@@ -282,7 +283,7 @@ write_csv(synthetic_data_df, paste0("synthetic_data_df_lag_", hourly_lag, "hr_n"
 #   writeRaster(paste0("synthetic_pres_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 
 rast(synthetic_data_covs$ndvi_cent) %>% 
-  writeRaster(paste0("synthetic_ndvi_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+  writeRaster(paste0("synthetic_ndvi_beta_", beta_value, "_ndvi_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 # rast(synthetic_data_covs$veg_herby_cent) %>% 
 #   writeRaster(paste0("synthetic_herby_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 # rast(synthetic_data_covs$canopy_cover_cent) %>% 
@@ -290,7 +291,7 @@ rast(synthetic_data_covs$ndvi_cent) %>%
 # rast(synthetic_data_covs$slope_cent) %>% 
 #   writeRaster(paste0("synthetic_slope_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 rast(synthetic_data_covs$pres_cent) %>% 
-  writeRaster(paste0("synthetic_pres_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+  writeRaster(paste0("synthetic_ndvi_beta_", beta_value, "_pres_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 
 ```
 
@@ -298,13 +299,13 @@ Plot the step lengths and turning angles
 
 ```{r}
 
-hist(synthetic_data_covs$sl, breaks = max(synthetic_data_covs$sl, na.rm = T)/25, xlim = c(0,1000))
+hist(synthetic_data_covs$sl, breaks = max(synthetic_data_covs$sl, na.rm = T)/25) # , xlim = c(0,1000)
 quantile(synthetic_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
 hist(synthetic_data_covs$log_sl, breaks = 100)
 
 synthetic_data_covs %>% ggplot() +
-  geom_histogram(aes(x = sl), bins = 1000, alpha = 1) +
-  scale_x_continuous(limits = c(0, 125)) +
+  geom_histogram(aes(x = sl), colour = "black", binwidth = 25, alpha = 0.25) +
+  scale_x_continuous() + #limits = c(0, 1250)
   theme_classic()
 
 mean(synthetic_data_covs$sl)
@@ -351,7 +352,6 @@ ggplot() +
              aes(x = x2_cent,
                  y = y2_cent),
              binwidth = res) +
-  # change the colour to log_scale
   scale_fill_viridis_c() +
   coord_equal() +
   theme_bw()
