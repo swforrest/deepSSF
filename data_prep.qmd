@@ -129,7 +129,7 @@ nxn_cells <- buffer*2/res
 hourly_lag <- 1
 
 # subset the data
-n_samples <- 10000
+n_samples <- 100
 # n_samples <- nrow(buffalo_all)
 
 # buffalo_data <- buffalo_all %>% filter(id == "2005") %>% slice(1:n_samples)
@@ -239,9 +239,9 @@ Plot the covariates
 
 # walk(buffalo2005_covs$points_vect, plot)
 
-n_plots <- 5
+n_plots <- 10
 
-walk(buffalo_data_covs$ndvi_local[1:n_plots], plot)
+walk(buffalo_data_covs$ndvi_local[1:n_plots], terra::plot)
 walk(buffalo_data_covs$veg_herby_local[1:n_plots], terra::plot)
 walk(buffalo_data_covs$canopy_cover_local[1:n_plots], terra::plot)
 walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
@@ -257,6 +257,32 @@ walk(buffalo_data_covs$pres_cent[1:n_plots], terra::plot)
 # walk(buffalo_data_covs$pres[695:699], terra::plot)
 
 # saveRDS(buffalo_data_covs, paste0("buffalo_data_covs_", Sys.Date(), ".rds"))
+
+for(i in 1:n_plots) {
+  png(filename = paste0("ndvi_cent_", i, ".png"),
+      width = 150, height = 150, units = "mm", res = 600)
+  terra::plot(buffalo_data_covs$ndvi_cent[[i]])
+  dev.off()
+}
+
+# for the pres layers
+for(i in 1:n_plots) {
+  
+  # change the 0 values to NA
+  layer <- buffalo_data_covs$pres_cent[[i]]
+  layer[layer == 0] <- 0.5
+  
+  ndvi_layer <- buffalo_data_covs$ndvi_cent[[i]]
+  new_layer <- layer*ndvi_layer
+  
+  # save the plot
+  png(filename = paste0("pres_cent_", i, ".png"),
+      width = 150, height = 150, units = "mm", res = 600)
+  terra::plot(new_layer)
+  dev.off()
+}
+
+
 
 ```
 
@@ -320,11 +346,6 @@ hist(buffalo_data_covs$sl, breaks = max(buffalo_data_covs$sl, na.rm = T)/25, xli
 quantile(buffalo_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
 hist(buffalo_data_covs$log_sl, breaks = 100)
 
-buffalo_data_covs %>% ggplot() +
-  geom_histogram(aes(x = sl), bins = 1000, alpha = 1) +
-  scale_x_continuous(limits = c(0, 125)) +
-  theme_classic()
-
 mean(buffalo_data_covs$sl)
 
 hist(buffalo_data_covs$ta, breaks = 100)
@@ -348,12 +369,12 @@ Plot the spatial distribution of steps
 # }
 
 # plot step lengths
-ggplot() +
-  geom_histogram(data = buffalo_data_covs,
-                 aes(x = sl),
-                 binwidth = res) +
-  scale_x_continuous(limits = c(0, buffer)) +
-  theme_bw()
+buffalo_data_covs %>% ggplot() +
+  geom_histogram(aes(x = sl), bins = 67,
+                 fill = "orange", colour = "black", alpha = 0.75) +
+  scale_x_continuous("Step length (m)") + #limits = c(0, 1250)
+  ggtitle("Buffalo step length distribution", subtitle = "n = 10,000") +
+  theme_classic()
 
 ggplot() +
   geom_point(data = buffalo_data_covs,

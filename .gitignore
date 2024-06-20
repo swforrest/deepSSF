@@ -6,7 +6,9 @@ buffalo_local_layers/
 synthetic_local_data/
 synthetic_local_layers/
 *.tif
+*.png
 *.json
+*events*
 .Rhistory
 buffalo2005*
 *0.csv
