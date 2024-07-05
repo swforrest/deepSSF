@@ -1,5 +1,5 @@
 ---
-title: "data_prep"
+title: "Preparing data for DL model fitting"
 author: "Scott Forrest"
 format: html
 ---
@@ -92,9 +92,23 @@ names(canopy_cover) <- "canopy_cover"
 
 # plot the rasters
 # plot(ndvi_projected)
-# plot(slope)
+plot(slope)
 # plot(veg_herby)
 # plot(canopy_cover)
+
+```
+
+Late dry season NDVI for simulations (same as in the Ecography SSF paper for comparison)
+
+```{r}
+
+ndvi_2018_late_dry <- ndvi_projected[[8:10]]
+ndvi_2019_late_dry <- ndvi_projected[[19:21]]
+ndvi <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
+names(ndvi) <- "NDVI"
+plot(ndvi)
+
+writeRaster(ndvi, "mapping/cropped rasters/ndvi_2018-19_late_dry.tif", overwrite = T)
 
 ```
 
@@ -241,16 +255,16 @@ Plot the covariates
 
 n_plots <- 10
 
-walk(buffalo_data_covs$ndvi_local[1:n_plots], terra::plot)
-walk(buffalo_data_covs$veg_herby_local[1:n_plots], terra::plot)
-walk(buffalo_data_covs$canopy_cover_local[1:n_plots], terra::plot)
-walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
-walk(buffalo_data_covs$pres_local[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$ndvi_local[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$veg_herby_local[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$canopy_cover_local[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$pres_local[1:n_plots], terra::plot)
 
 walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
-walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
-walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
-walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
+# walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
 walk(buffalo_data_covs$pres_cent[1:n_plots], terra::plot)
 
 # to check problematic indices
@@ -283,6 +297,30 @@ for(i in 1:n_plots) {
 }
 
 
+# other plots
+
+n_plots <- 1
+
+for(i in 1:n_plots) {
+  png(filename = paste0("veg_herby_cent_", i, ".png"),
+      width = 150, height = 150, units = "mm", res = 600)
+  terra::plot(buffalo_data_covs$veg_herby_cent[[i]])
+  dev.off()
+}
+
+for(i in 1:n_plots) {
+  png(filename = paste0("canopy_cover_cent_", i, ".png"),
+      width = 150, height = 150, units = "mm", res = 600)
+  terra::plot(buffalo_data_covs$canopy_cover_cent[[i]])
+  dev.off()
+}
+
+for(i in 1:n_plots) {
+  png(filename = paste0("slope_cent_", i, ".png"),
+      width = 150, height = 150, units = "mm", res = 600)
+  terra::plot(buffalo_data_covs$slope_cent[[i]])
+  dev.off()
+}
 
 ```
 
