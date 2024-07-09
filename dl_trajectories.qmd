@@ -19,7 +19,7 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_334steps.csv")
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_722steps.csv")
 
 
 ggplot() +
@@ -28,7 +28,99 @@ ggplot() +
   coord_equal() +
   theme_bw()
 
+# to convert to amt track:
+# - create a column for time in posixct from the hour and yday columns
+# dl_trajectory_amt <- dl_trajectory %>% mk_track(id = id,
+#                                                 lon,
+#                                            lat, 
+#                                            time, 
+#                                            all_cols = T,
+#                                            crs = 4326) %>% 
+#   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# # Geoscience Australia Lambert (https://epsg.io/3112)
+
 ```
+
+## Calculate step lengths and turning angles etc
+
+```{r}
+
+hourly_lag <- 1
+
+dl_trajectory <- dl_trajectory %>% mutate(
+  
+  x1 = x,
+  y1 = y,
+  x2 = lead(x1, n = hourly_lag, default = NA),
+  y2 = lead(y1, n = hourly_lag, default = NA),
+  # x2_cent = x2 - x1,
+  # y2_cent = y2 - y1,
+  # t2_ = lead(t_, n = hourly_lag, default = NA),
+  # t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  # hour_t1 = lubridate::hour(t_),
+  # yday_t1 = lubridate::yday(t_),
+  # hour_t2 = lubridate::hour(t2_),
+  # yday_t2 = lubridate::yday(t2_),
+  
+  sl = c(sqrt(diff(y)^2 + diff(x)^2), NA),
+  log_sl = log(sl),
+  bearing = c(atan2(diff(y), diff(x)), NA),
+  # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta)
+)
+
+dl_trajectory
+
+```
+
+## Plot step lengths etc
+
+```{r}
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = sl),
+                 binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = bearing),
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = ta),
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  theme_bw()
+
+```
+
+```{r}
+
+for(i in 0:23) {
+print(ggplot() +
+  geom_histogram(data = dl_trajectory |> filter(hour == i),
+                 aes(x = sl),
+                 binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+    scale_x_continuous(limits = c(0, 1500)) +
+  theme_bw())
+}
+
+```
+
 
 
 ## Import data and clean
