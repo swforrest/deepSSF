@@ -93,6 +93,7 @@ names(canopy_cover) <- "canopy_cover"
 # plot the rasters
 # plot(ndvi_projected)
 plot(slope)
+writeRaster(slope, "mapping/cropped rasters/slope.tif", overwrite = T)
 # plot(veg_herby)
 # plot(canopy_cover)
 
