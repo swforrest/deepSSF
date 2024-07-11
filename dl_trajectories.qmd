@@ -19,12 +19,13 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_722steps.csv")
-
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_10000steps.csv")
+head(dl_trajectory)
 
 ggplot() +
   geom_path(data = dl_trajectory,
-            aes(x = x, y = y, colour = yday)) +
+            aes(x = x, y = y, colour = hour)) +
+  scale_colour_viridis_c() +
   coord_equal() +
   theme_bw()
 
@@ -91,6 +92,7 @@ ggplot() +
 ggplot() +
   geom_histogram(data = dl_trajectory,
                  aes(x = bearing),
+                 bins = 100,
                  # binwidth = 25,
                  fill = "orange",
                  colour = "black") +
@@ -99,6 +101,7 @@ ggplot() +
 ggplot() +
   geom_histogram(data = dl_trajectory,
                  aes(x = ta),
+                 bins = 100,
                  # binwidth = 25,
                  fill = "orange",
                  colour = "black") +
@@ -116,12 +119,28 @@ print(ggplot() +
                  fill = "orange",
                  colour = "black") +
     scale_x_continuous(limits = c(0, 1500)) +
+    ggtitle(paste0("Hour: ", i)) +
   theme_bw())
 }
 
 ```
 
+```{r}
 
+for(i in 0:23) {
+print(ggplot() +
+  geom_histogram(data = dl_trajectory |> filter(hour == i),
+                 aes(x = ta),
+                 bins = 50,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+    # scale_x_continuous(limits = c(0, 1500)) +
+    ggtitle(paste0("Hour: ", i)) +
+  theme_bw())
+}
+
+```
 
 ## Import data and clean
 
