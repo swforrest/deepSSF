@@ -402,6 +402,8 @@ hist(buffalo_data_covs$cos_ta, breaks = 100)
 
 mean(buffalo_data_covs$ta)
 
+hist(buffalo_data_covs$bearing, breaks = 100)
+
 ```
 
 Plot the spatial distribution of steps
