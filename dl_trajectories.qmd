@@ -19,7 +19,7 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_10000steps.csv")
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_3659steps.csv")
 head(dl_trajectory)
 
 ggplot() +
