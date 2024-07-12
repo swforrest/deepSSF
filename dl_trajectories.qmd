@@ -19,12 +19,12 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_10000steps2.csv")
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_10000steps.csv")
 head(dl_trajectory)
 
 ggplot() +
   geom_path(data = dl_trajectory,
-            aes(x = x, y = y, colour = hour)) +
+            aes(x = x, y = y, colour = yday)) +
   scale_colour_viridis_c() +
   coord_equal() +
   theme_bw()
@@ -80,6 +80,9 @@ dl_trajectory
 ## Plot step lengths etc
 
 ```{r}
+
+mean(dl_trajectory$sl, na.rm = T)
+median(dl_trajectory$sl, na.rm = T)
 
 ggplot() +
   geom_histogram(data = dl_trajectory,
