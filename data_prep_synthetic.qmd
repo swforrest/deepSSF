@@ -21,7 +21,7 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-synthetic_data <- read_csv("synthetic_data/synthetic_trajectories_ndvi_beta_5_100sims_100steps.csv")
+synthetic_data <- read_csv("synthetic_trajectories/synthetic_trajectories_ndvi_beta_5_100sims_100steps.csv")
 sim_ids <- unique(synthetic_data$sim)
 
 ```
