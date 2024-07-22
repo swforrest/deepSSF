@@ -42,9 +42,118 @@ ggplot() +
 
 ```
 
+## Import multiple deep learning trajectories
+
+```{r}
+
+# read in multiple csv files with similar filenames and bind them together
+sim_data_full_list <- 
+  list.files("Python/outputs/dl_trajectories/isec_pres/", pattern = "*.csv", full.names = T)
+
+sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
+  # grep("3000", x = ., value = T) %>% 
+  map_dfr(read_csv, .id = "id")
+
+# to check the initial locations of the simulated trajectories - 
+# prior to removing the warmup period - these should be the same as the observed
+# data
+sim_data_all %>% group_by(id) %>% slice(1)
+
+ggplot() +
+  geom_path(data = sim_data_all,
+            aes(x = x, y = y, colour = id)) +
+  geom_point(data = sim_data_all |> slice(1),
+            aes(x = x, y = y), colour = "red") +
+  scale_colour_viridis_d() +
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# ggsave("outputs/sim_data_all.png", width = 150, height = 200, units = "mm", dpi = 600)
+
+# sim_data_all <- sim_data_all %>% group_by transmute(id = id, x = x, y = y, t = rep(time_vector,10))
+
+```
+
+## Import data and clean
+
+```{r}
+
+buffalo <- read_csv("data/buffalo.csv")
+
+# remove individuals that have poor data quality or less than about 3 months of data. 
+# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
+buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           2029, 2043, 2265, 2284, 2346))
+
+buffalo <- buffalo %>%  
+  group_by(node) %>% 
+  arrange(DateTime, .by_group = T) %>% 
+  distinct(DateTime, .keep_all = T) %>% 
+  arrange(node) %>% 
+  mutate(ID = node)
+
+buffalo_clean <- buffalo[, c(12, 2, 4, 3)]
+colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
+attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+head(buffalo_clean)
+tz(buffalo_clean$time)
+
+buffalo_ids <- unique(buffalo_clean$id)
+
+buffalo_all <- buffalo_clean %>% mk_track(id = id,
+                                           lon,
+                                           lat, 
+                                           time, 
+                                           all_cols = T,
+                                           crs = 4326) %>% 
+  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# Geoscience Australia Lambert (https://epsg.io/3112)
+
+buffalo_2014_1000samples <- buffalo_all %>% 
+  filter(id == 2014) %>% 
+  arrange(t_) |>  
+  slice(1:100) |> 
+  transmute(id = id, x = x_, y = y_, t = t_)
+
+time_vector = buffalo_2014_1000samples$t
+
+```
+
+## Combine the datasets
+
+```{r}
+
+# combine the observed and simulated data
+all_data <- bind_rows(buffalo_2014_1000samples, sim_data_all)
+
+ggplot() +
+  geom_path(data = sim_data_all,
+            aes(x = x, y = y, colour = id)) +
+  scale_colour_viridis_d() +
+  geom_path(data = buffalo_2014_1000samples,
+            aes(x = x, y = y), colour = "red") +
+  coord_equal() +
+  theme_bw()
+
+```
+
+## moveVis
+
+```{r}
+
+# install.packages("moveVis")
+# library(moveVis)
+
+```
+
+
+
 ## Calculate step lengths and turning angles etc
 
 ```{r}
+
+dl_trajectory <- sim_data_all
 
 hourly_lag <- 1
 
@@ -62,6 +171,7 @@ dl_trajectory <- dl_trajectory %>% mutate(
   # yday_t1 = lubridate::yday(t_),
   # hour_t2 = lubridate::hour(t2_),
   # yday_t2 = lubridate::yday(t2_),
+  # hour = lubridate::hour(t),
   
   sl = c(sqrt(diff(y)^2 + diff(x)^2), NA),
   log_sl = log(sl),
@@ -73,7 +183,7 @@ dl_trajectory <- dl_trajectory %>% mutate(
   cos_ta = cos(ta)
 )
 
-dl_trajectory
+dl_trajectory <- dl_trajectory %>% filter(sl < 1250)
 
 ```
 
@@ -90,7 +200,11 @@ ggplot() +
                  binwidth = 25,
                  fill = "orange",
                  colour = "black") +
+  scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+  scale_y_continuous("Frequency") +
   theme_bw()
+
+ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ggplot() +
   geom_histogram(data = dl_trajectory,
@@ -108,9 +222,15 @@ ggplot() +
                  # binwidth = 25,
                  fill = "orange",
                  colour = "black") +
+  scale_x_continuous("Turning angle (radians)", limits = c(-pi, pi)) +
+  scale_y_continuous("Frequency") +
   theme_bw()
 
+ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
+
 ```
+
+
 
 ```{r}
 
@@ -227,6 +347,24 @@ plot(slope)
 # plot(canopy_cover)
 
 ```
+
+Plots for ISEC presentation
+
+```{r}
+
+x_gamma <- seq(0, 1000, 1)
+plot(x_gamma, dgamma(x_gamma, 2, scale = 100), type = "l", col = "black", xlab = "Distance (m)", ylab = "Density", main = "Gamma distribution")
+
+install.packages("geostats")
+library(geostats)
+# von mises distribution
+x_von_mises <- seq(-pi, pi, 0.01)
+plot(x_von_mises, geostats::vonMises(a = x_von_mises, mu = 0, kappa = 1), type = "l", col = "black", xlab = "Angle (radians)", ylab = "Density", main = "Von Mises distribution", ylim = c(0, 0.375))
+
+
+
+```
+
 
 Late dry season NDVI for simulations (same as in the Ecography SSF paper for comparison)
 

@@ -1,6 +1,7 @@
 # Manually added
 data/
 mapping/
+outputs/
 buffalo_local_data/
 buffalo_local_layers/
 synthetic_local_data/
