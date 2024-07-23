@@ -3,7 +3,9 @@ data/
 mapping/
 outputs/
 buffalo_local_data/
+buffalo_local_data_id/
 buffalo_local_layers/
+buffalo_local_layers_id/
 synthetic_local_data/
 synthetic_local_layers/
 *.tif
