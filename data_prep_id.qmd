@@ -24,6 +24,7 @@ buffalo <- read_csv("data/buffalo.csv")
 # remove individuals that have poor data quality or less than about 3 months of data. 
 # The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
 buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           2005, 2014, 2018, 2021, 2022, 2024,
                                            2029, 2043, 2265, 2284, 2346, 2354))
 
 buffalo <- buffalo %>%  
