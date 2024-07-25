@@ -19,7 +19,7 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_10000steps_1.csv")
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_7641steps_1.csv")
 head(dl_trajectory)
 
 ggplot() +
@@ -39,6 +39,9 @@ ggplot() +
 #                                            crs = 4326) %>% 
 #   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
 # # Geoscience Australia Lambert (https://epsg.io/3112)
+
+sim_data_all <- dl_trajectory %>% 
+  mutate(id = "a") 
 
 ```
 
@@ -110,13 +113,13 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
 # Geoscience Australia Lambert (https://epsg.io/3112)
 
-buffalo_2014_1000samples <- buffalo_all %>% 
-  filter(id == 2014) %>% 
+buffalo_2005_1000samples <- buffalo_all %>% 
+  filter(id == 2005) %>% 
   arrange(t_) |>  
   slice(1:100) |> 
   transmute(id = id, x = x_, y = y_, t = t_)
 
-time_vector = buffalo_2014_1000samples$t
+time_vector = buffalo_2005_1000samples$t
 
 ```
 
@@ -125,13 +128,13 @@ time_vector = buffalo_2014_1000samples$t
 ```{r}
 
 # combine the observed and simulated data
-all_data <- bind_rows(buffalo_2014_1000samples, sim_data_all)
+all_data <- bind_rows(buffalo_2005_1000samples, sim_data_all)
 
 ggplot() +
   geom_path(data = sim_data_all,
             aes(x = x, y = y, colour = id)) +
   scale_colour_viridis_d() +
-  geom_path(data = buffalo_2014_1000samples,
+  geom_path(data = buffalo_2005_1000samples,
             aes(x = x, y = y), colour = "red") +
   coord_equal() +
   theme_bw()
@@ -204,7 +207,17 @@ ggplot() +
   scale_y_continuous("Frequency") +
   theme_bw()
 
-ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = sl),
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_log10("log Step length (m)") +
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+# ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ggplot() +
   geom_histogram(data = dl_trajectory,
@@ -226,7 +239,7 @@ ggplot() +
   scale_y_continuous("Frequency") +
   theme_bw()
 
-ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
+# ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ```
 
