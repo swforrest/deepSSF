@@ -264,11 +264,11 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     # NDVI
     ndvi_filename = paste0("data_layers_single/ndvi/ndvi_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # crop our raster to the extent of the location
-    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
+    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected_norm)))),
     # ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
     #                      ext(x_min, x_max, y_min, y_max))),
     ndvi_cent = list({
-      ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
+      ndvi_cent = crop(ndvi_projected_norm[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
       ext(ndvi_cent) <- extent_00centre
       ndvi_cent
       }),
@@ -281,7 +281,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     herby_filename = paste0("data_layers_single/herby/herby_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
     veg_herby_cent = list({
-      veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
+      veg_herby_cent = crop(veg_herby_norm, ext(x_min, x_max, y_min, y_max))
       # veg_herby_cent <- rep(veg_herby_local)
       ext(veg_herby_cent) <- extent_00centre
       veg_herby_cent
@@ -295,7 +295,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     canopy_filename = paste0("data_layers_single/canopy/canopy_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
     canopy_cover_cent = list({
-      canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
+      canopy_cover_cent = crop(canopy_cover_norm, ext(x_min, x_max, y_min, y_max))
       # canopy_cover_cent <- rep(canopy_cover_local)
       ext(canopy_cover_cent) <- extent_00centre
       canopy_cover_cent
@@ -309,7 +309,7 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     slope_filename = paste0("data_layers_single/slope/slope_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
     slope_cent = list({
-      slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
+      slope_cent <- crop(slope_norm, ext(x_min, x_max, y_min, y_max))
       # slope_cent <- rep(slope_local)
       ext(slope_cent) <- extent_00centre
       slope_cent
