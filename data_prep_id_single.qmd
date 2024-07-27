@@ -100,17 +100,58 @@ names(canopy_cover) <- "canopy_cover"
 
 ```
 
+Normalise the covariates
+
+```{r}
+
+# NDVI
+ndvi_minmax <- terra::minmax(ndvi_projected)
+ndvi_min <- min(ndvi_minmax[1,])
+ndvi_max <- max(ndvi_minmax[2,])
+ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
+plot(ndvi_projected_norm)
+
+# Slope
+slope_minmax <- terra::minmax(slope)
+slope_min <- min(slope_minmax[1,])
+slope_max <- max(slope_minmax[2,])
+slope_norm = (slope - slope_min) / (slope_max - slope_min)
+plot(slope_norm)
+
+# Veg herby
+veg_herby_minmax <- terra::minmax(veg_herby)
+veg_herby_min <- min(veg_herby_minmax[1,])
+veg_herby_max <- max(veg_herby_minmax[2,])
+veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)  
+plot(veg_herby_norm)
+
+# Canopy cover
+canopy_cover_minmax <- terra::minmax(canopy_cover)
+canopy_cover_min <- min(canopy_cover_minmax[1,])
+canopy_cover_max <- max(canopy_cover_minmax[2,])
+canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
+plot(canopy_cover_norm)
+
+# save the layers
+writeRaster(ndvi_projected_norm, "mapping/cropped rasters/ndvi_monthly_norm.tif", overwrite = T)
+writeRaster(slope_norm, "mapping/cropped rasters/slope_norm.tif", overwrite = T)
+writeRaster(veg_herby_norm, "mapping/cropped rasters/veg_herby_norm.tif", overwrite = T)
+writeRaster(canopy_cover_norm, "mapping/cropped rasters/canopy_cover_norm.tif", overwrite = T)
+
+```
+
 Late dry season NDVI for simulations (same as in the Ecography SSF paper for comparison)
 
 ```{r}
 
 ndvi_2018_late_dry <- ndvi_projected[[8:10]]
 ndvi_2019_late_dry <- ndvi_projected[[19:21]]
-ndvi <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
-names(ndvi) <- "NDVI"
+ndvi_late_dry <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
+names(ndvi_late_dry) <- "NDVI"
 # plot(ndvi)
 
-# writeRaster(ndvi, "mapping/cropped rasters/ndvi_2018-19_late_dry.tif", overwrite = T)
+ndvi_late_dry_norm = (ndvi_late_dry - ndvi_min) / (ndvi_max - ndvi_min)
+writeRaster(ndvi_late_dry_norm, "mapping/cropped rasters/ndvi_norm_2018-19_late_dry.tif", overwrite = T)
 
 ```
 
