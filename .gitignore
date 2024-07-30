@@ -8,6 +8,7 @@ buffalo_local_layers/
 buffalo_local_layers_id/
 synthetic_local_data/
 synthetic_local_layers/
+data_layers_single/
 *.tif
 *.png
 *.json

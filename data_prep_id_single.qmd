@@ -24,7 +24,7 @@ buffalo <- read_csv("data/buffalo.csv")
 # remove individuals that have poor data quality or less than about 3 months of data. 
 # The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
 buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
-                                           # 2005, 2014, 2018, 2021, 2022, 2024,
+                                           2005, 2014, 2018, 2021, 2022, 2024, 2039,
                                            2029, 2043, 2265, 2284, 2346, 2354))
 
 buffalo <- buffalo %>%  
@@ -59,6 +59,10 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
 # Geoscience Australia Lambert (https://epsg.io/3112)
 
+buffalo_all <- buffalo_all |> arrange(id, t_) |> group_by(id) %>%
+  mutate(index = row_number()) %>%
+  ungroup()
+
 ```
 
 Plot the data coloured by time
@@ -78,18 +82,18 @@ Plot the data coloured by time
 
 ```{r}
 
-ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
-terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
-slope <- rast("mapping/cropped rasters/slope_raster.tif")
-veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
-canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+# ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+# terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+# slope <- rast("mapping/cropped rasters/slope_raster.tif")
+# veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+# canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
 
 # change the names (these will become the column names when extracting 
 # covariate values at the used and random steps)
-names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
-names(slope) <- "slope"
-names(veg_herby) <- "veg_herby"
-names(canopy_cover) <- "canopy_cover"
+# names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+# names(slope) <- "slope"
+# names(veg_herby) <- "veg_herby"
+# names(canopy_cover) <- "canopy_cover"
 
 # plot the rasters
 # plot(ndvi_projected)
@@ -104,39 +108,54 @@ Normalise the covariates
 
 ```{r}
 
-# NDVI
-ndvi_minmax <- terra::minmax(ndvi_projected)
-ndvi_min <- min(ndvi_minmax[1,])
-ndvi_max <- max(ndvi_minmax[2,])
-ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
+# # NDVI
+# ndvi_minmax <- terra::minmax(ndvi_projected)
+# ndvi_min <- min(ndvi_minmax[1,])
+# ndvi_max <- max(ndvi_minmax[2,])
+# ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
+# plot(ndvi_projected_norm)
+# 
+# # Slope
+# slope_minmax <- terra::minmax(slope)
+# slope_min <- min(slope_minmax[1,])
+# slope_max <- max(slope_minmax[2,])
+# slope_norm = (slope - slope_min) / (slope_max - slope_min)
+# plot(slope_norm)
+# 
+# # Veg herby
+# veg_herby_minmax <- terra::minmax(veg_herby)
+# veg_herby_min <- min(veg_herby_minmax[1,])
+# veg_herby_max <- max(veg_herby_minmax[2,])
+# veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)  
+# plot(veg_herby_norm)
+# 
+# # Canopy cover
+# canopy_cover_minmax <- terra::minmax(canopy_cover)
+# canopy_cover_min <- min(canopy_cover_minmax[1,])
+# canopy_cover_max <- max(canopy_cover_minmax[2,])
+# canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
+# plot(canopy_cover_norm)
+# 
+# # save the layers
+# writeRaster(ndvi_projected_norm, "mapping/cropped rasters/ndvi_monthly_norm.tif", overwrite = T)
+# writeRaster(slope_norm, "mapping/cropped rasters/slope_norm.tif", overwrite = T)
+# writeRaster(veg_herby_norm, "mapping/cropped rasters/veg_herby_norm.tif", overwrite = T)
+# writeRaster(canopy_cover_norm, "mapping/cropped rasters/canopy_cover_norm.tif", overwrite = T)
+
+ndvi_projected_norm <- rast("mapping/cropped rasters/ndvi_monthly_norm.tif")
+slope_norm <- rast("mapping/cropped rasters/slope_norm.tif")
+veg_herby_norm <- rast("mapping/cropped rasters/veg_herby_norm.tif")
+canopy_cover_norm <- rast("mapping/cropped rasters/canopy_cover_norm.tif")
+
+names(ndvi_projected_norm) <- rep("ndvi", terra::nlyr(ndvi_projected_norm))
+names(slope_norm) <- "slope"
+names(veg_herby_norm) <- "veg_herby"
+names(canopy_cover_norm) <- "canopy_cover"
+
 plot(ndvi_projected_norm)
-
-# Slope
-slope_minmax <- terra::minmax(slope)
-slope_min <- min(slope_minmax[1,])
-slope_max <- max(slope_minmax[2,])
-slope_norm = (slope - slope_min) / (slope_max - slope_min)
 plot(slope_norm)
-
-# Veg herby
-veg_herby_minmax <- terra::minmax(veg_herby)
-veg_herby_min <- min(veg_herby_minmax[1,])
-veg_herby_max <- max(veg_herby_minmax[2,])
-veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)  
 plot(veg_herby_norm)
-
-# Canopy cover
-canopy_cover_minmax <- terra::minmax(canopy_cover)
-canopy_cover_min <- min(canopy_cover_minmax[1,])
-canopy_cover_max <- max(canopy_cover_minmax[2,])
-canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
 plot(canopy_cover_norm)
-
-# save the layers
-writeRaster(ndvi_projected_norm, "mapping/cropped rasters/ndvi_monthly_norm.tif", overwrite = T)
-writeRaster(slope_norm, "mapping/cropped rasters/slope_norm.tif", overwrite = T)
-writeRaster(veg_herby_norm, "mapping/cropped rasters/veg_herby_norm.tif", overwrite = T)
-writeRaster(canopy_cover_norm, "mapping/cropped rasters/canopy_cover_norm.tif", overwrite = T)
 
 ```
 
@@ -144,33 +163,14 @@ Late dry season NDVI for simulations (same as in the Ecography SSF paper for com
 
 ```{r}
 
-ndvi_2018_late_dry <- ndvi_projected[[8:10]]
-ndvi_2019_late_dry <- ndvi_projected[[19:21]]
-ndvi_late_dry <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
-names(ndvi_late_dry) <- "NDVI"
-# plot(ndvi)
-
-ndvi_late_dry_norm = (ndvi_late_dry - ndvi_min) / (ndvi_max - ndvi_min)
-writeRaster(ndvi_late_dry_norm, "mapping/cropped rasters/ndvi_norm_2018-19_late_dry.tif", overwrite = T)
-
-```
-
-Load saved objects
-
-```{r}
-
-# readRDS(paste0("buffalo2005_covs_2024-03-21.rds"))
-
-```
-
-
-```{r}
-
-buffalo_all <- buffalo_all %>% arrange(id)
-# nest the data by individual
-buffalo_all_nested <- buffalo_all %>% arrange(id) %>% nest(data = -"id")
-
-buffalo_all_nested$data[[1]]
+# ndvi_2018_late_dry <- ndvi_projected[[8:10]]
+# ndvi_2019_late_dry <- ndvi_projected[[19:21]]
+# ndvi_late_dry <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
+# names(ndvi_late_dry) <- "NDVI"
+# # plot(ndvi)
+# 
+# ndvi_late_dry_norm = (ndvi_late_dry - ndvi_min) / (ndvi_max - ndvi_min)
+# writeRaster(ndvi_late_dry_norm, "mapping/cropped rasters/ndvi_norm_2018-19_late_dry.tif", overwrite = T)
 
 ```
 
@@ -178,9 +178,7 @@ Generating the data to fit the ML models
 
 ```{r}
 
-buffalo_ids <- unique(buffalo_all$id)
-
-res <- terra::res(ndvi_projected)[1]
+res <- terra::res(ndvi_projected_norm)[1]
 
 # how much to trim on either side of the location
 buffer <- 1250 + (res/2)
@@ -208,55 +206,58 @@ Loop over each individual and save the local rasters
 
 ```{r}
 
-# for(i in 1:length(buffalo_ids)) {
+buffalo_ids <- unique(buffalo_all$id)
 
-# buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
+for(i in 1:length(buffalo_ids)) {
+
+buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_data %>% arrange(t_)
 # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:5)
-buffalo_data <- buffalo_all |>  slice(1:1000)
+# buffalo_data <- buffalo_all |>  slice(1:1000)
+
+# for no subsetting
+# buffalo_data <- buffalo_all
 n_samples <- nrow(buffalo_data)
 
 tic()
 
 buffalo_data_covs <- buffalo_data %>% mutate(
+  
+  x1_ = x_,
+  y1_ = y_,
+  x2_ = lead(x1_, n = hourly_lag, default = NA),
+  y2_ = lead(y1_, n = hourly_lag, default = NA),
+  x2_cent = x2_ - x1_,
+  y2_cent = y2_ - y1_,
+  t2_ = lead(t_, n = hourly_lag, default = NA),
+  t2_date = lubridate::date(t2_),
+  t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  hour_t1 = lubridate::hour(t_),
+  yday_t1 = lubridate::yday(t_),
+  hour_t2 = lubridate::hour(t2_),
+  hour_t2_sin = sin(2*pi*hour_t2/24),
+  hour_t2_cos = cos(2*pi*hour_t2/24),
+  yday_t2 = lubridate::yday(t2_),
+  yday_t2_sin = sin(2*pi*yday_t2/365),
+  yday_t2_cos = cos(2*pi*yday_t2/365),
+  
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  log_sl = log(sl),
+  # bearing = c(atan2(diff(y_), diff(x_)), NA),
+  bearing = atan2(y2_ - y1_, x2_ - x1_),
+  bearing_sin = sin(bearing),
+  bearing_cos = cos(bearing),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta),
     
-    index = 1:n_samples,
-    x1_ = x_,
-    y1_ = y_,
-    x2_ = lead(x1_, n = hourly_lag, default = NA),
-    y2_ = lead(y1_, n = hourly_lag, default = NA),
-    x2_cent = x2_ - x1_,
-    y2_cent = y2_ - y1_,
-    t2_ = lead(t_, n = hourly_lag, default = NA),
-    t2_date = lubridate::date(t2_),
-    t_diff = round(difftime(t2_, t_, units = "hours"),0),
-    hour_t1 = lubridate::hour(t_),
-    yday_t1 = lubridate::yday(t_),
-    hour_t2 = lubridate::hour(t2_),
-    hour_t2_sin = sin(2*pi*hour_t2/24),
-    hour_t2_cos = cos(2*pi*hour_t2/24),
-    yday_t2 = lubridate::yday(t2_),
-    yday_t2_sin = sin(2*pi*yday_t2/365),
-    yday_t2_cos = cos(2*pi*yday_t2/365),
+  # extent for cropping the spatial covariates
+  x_min = x_ - buffer,
+  x_max = x_ + buffer,
+  y_min = y_ - buffer,
+  y_max = y_ + buffer,
     
-    sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
-    log_sl = log(sl),
-    # bearing = c(atan2(diff(y_), diff(x_)), NA),
-    bearing = atan2(y2_ - y1_, x2_ - x1_),
-    bearing_sin = sin(bearing),
-    bearing_cos = cos(bearing),
-    ta = c(NA, ifelse(
-      diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
-        diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
-    cos_ta = cos(ta),
-      
-    # extent for cropping the spatial covariates
-    x_min = x_ - buffer,
-    x_max = x_ + buffer,
-    y_min = y_ - buffer,
-    y_max = y_ + buffer,
-    
-  # )
 ) %>% rowwise() %>% mutate(
   
     extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
@@ -265,8 +266,6 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     ndvi_filename = paste0("data_layers_single/ndvi/ndvi_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # crop our raster to the extent of the location
     ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected_norm)))),
-    # ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
-    #                      ext(x_min, x_max, y_min, y_max))),
     ndvi_cent = list({
       ndvi_cent = crop(ndvi_projected_norm[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
       ext(ndvi_cent) <- extent_00centre
@@ -279,10 +278,8 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     
     # herbaceous vegetation
     herby_filename = paste0("data_layers_single/herby/herby_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
     veg_herby_cent = list({
       veg_herby_cent = crop(veg_herby_norm, ext(x_min, x_max, y_min, y_max))
-      # veg_herby_cent <- rep(veg_herby_local)
       ext(veg_herby_cent) <- extent_00centre
       veg_herby_cent
       }),
@@ -293,10 +290,8 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     
     # canopy cover
     canopy_filename = paste0("data_layers_single/canopy/canopy_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
     canopy_cover_cent = list({
       canopy_cover_cent = crop(canopy_cover_norm, ext(x_min, x_max, y_min, y_max))
-      # canopy_cover_cent <- rep(canopy_cover_local)
       ext(canopy_cover_cent) <- extent_00centre
       canopy_cover_cent
       }),
@@ -307,10 +302,8 @@ buffalo_data_covs <- buffalo_data %>% mutate(
   
     # slope
     slope_filename = paste0("data_layers_single/slope/slope_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
     slope_cent = list({
       slope_cent <- crop(slope_norm, ext(x_min, x_max, y_min, y_max))
-      # slope_cent <- rep(slope_local)
       ext(slope_cent) <- extent_00centre
       slope_cent
       }),
@@ -318,11 +311,9 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     # Save the slope_cent raster and store the filename
     slope_filename = save_raster(slope_cent[[1]], slope_filename),
   
-    # rasterised location of the next step
-    # points_vect_local = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
-    # pres_local = list(rasterize(points_vect_local, ndvi_local, background=0)),
-  
-    pres_filename = paste0("data_layers_single/pres/pres_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+    
+    pres_filename = paste0("data_layers_single/pres/pres_id", 
+                           id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # rasterised location of the next step - centred on (0,0)
     points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
     pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
@@ -331,8 +322,6 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     pres_filename = save_raster(pres_cent[[1]], pres_filename)
   
 ) %>% ungroup() # to remove the 'rowwise' class
-  
-  # )
   
   
 buffalo_data_covs <- buffalo_data_covs %>% 
@@ -356,38 +345,26 @@ dplyr::select(-extent_00centre,
               -pres_cent
               )
 
-write_csv(buffalo_data_df, paste0("data_layers_single/all_buffalo", nxn_cells, "x", nxn_cells,
+write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
 
-  # # saving the raster objects
-  # rast(buffalo_data_covs$ndvi_cent) %>% 
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent", 
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$veg_herby_cent) %>% 
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent", 
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$canopy_cover_cent) %>% 
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent", 
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$slope_cent) %>% 
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent", 
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$pres_cent) %>% 
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent", 
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
-  #               overwrite = T)
-  
-# }
+}
 
 toc()
+
+```
+
+Combine the data frames for each individual
+
+```{r}
+
+buffalo_all_df <- bind_rows(list.files("data_layers_single", pattern = "id", full.names = TRUE) %>% 
+  map_dfr(read_csv))
+
+n_samples <- nrow(buffalo_all_df)
+
+# save as a new csv
+write_csv(buffalo_all_df, paste0("data_layers_single/buffalo_all_101x101_data_df_lag_1hr_n", n_samples,".csv"))
 
 ```
 
@@ -422,6 +399,7 @@ n_plots <- 5
 # walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
 # walk(buffalo_data_covs$pres_local[1:n_plots], terra::plot)
 
+# after recentering
 walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
 walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
 walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
@@ -492,48 +470,6 @@ Filter when the next step is outside the extent and drop NAs from the turning an
 # buffalo_data_covs %>% filter(x2_cent < -buffer | x2_cent > buffer | y2_cent < -buffer | y2_cent > buffer)
 buffalo_data_covs <- buffalo_data_covs %>% filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% drop_na(ta)
 buffalo_data_covs
-
-```
-
-Export objects
-
-```{r}
-
-# raster_size <- "100x100"
-nxn_cells
-
-buffalo_data_df <- buffalo_data_covs %>%
-  dplyr::select(-extent_00centre, 
-                -ndvi_local, -ndvi_cent, 
-                -veg_herby_local, -veg_herby_cent, 
-                -canopy_cover_local, -canopy_cover_cent,
-                -slope_local, -slope_cent,
-                -points_vect_local, -points_vect_cent, 
-                -pres_local, -pres_cent)
-
-write_csv(buffalo_data_df, paste0("buffalo_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
-
-# rast(buffalo_data_covs$ndvi_local) %>% 
-#   writeRaster(paste0("buffalo_ndvi_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-# rast(buffalo_data_covs$veg_herby_local) %>% 
-#   writeRaster(paste0("buffalo_herby_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-# rast(buffalo_data_covs$canopy_cover_local) %>% 
-#   writeRaster(paste0("buffalo_canopy_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-# rast(buffalo_data_covs$slope_local) %>% 
-#   writeRaster(paste0("buffalo_slope_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-# rast(buffalo_data_covs$pres_local) %>% 
-#   writeRaster(paste0("buffalo_pres_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-
-rast(buffalo_data_covs$ndvi_cent) %>% 
-  writeRaster(paste0("buffalo_ndvi_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$veg_herby_cent) %>% 
-  writeRaster(paste0("buffalo_herby_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$canopy_cover_cent) %>% 
-  writeRaster(paste0("buffalo_canopy_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$slope_cent) %>% 
-  writeRaster(paste0("buffalo_slope_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
-rast(buffalo_data_covs$pres_cent) %>% 
-  writeRaster(paste0("buffalo_pres_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
 
 ```
 
