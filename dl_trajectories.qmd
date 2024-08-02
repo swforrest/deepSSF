@@ -51,7 +51,7 @@ sim_data_all <- dl_trajectory %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/isec_pres/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/dl_trajectories/ta_mix_vm_mu_0-pi/", pattern = "*.csv", full.names = T)
 
 sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
@@ -116,7 +116,7 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
 buffalo_2005_1000samples <- buffalo_all %>% 
   filter(id == 2005) %>% 
   arrange(t_) |>  
-  slice(1:100) |> 
+  slice(1:1000) |> 
   transmute(id = id, x = x_, y = y_, t = t_)
 
 time_vector = buffalo_2005_1000samples$t
