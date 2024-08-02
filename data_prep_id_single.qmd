@@ -82,11 +82,11 @@ Plot the data coloured by time
 
 ```{r}
 
-# ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
-# terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
-# slope <- rast("mapping/cropped rasters/slope_raster.tif")
-# veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
-# canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
 
 # change the names (these will become the column names when extracting 
 # covariate values at the used and random steps)
@@ -108,33 +108,33 @@ Normalise the covariates
 
 ```{r}
 
-# # NDVI
-# ndvi_minmax <- terra::minmax(ndvi_projected)
-# ndvi_min <- min(ndvi_minmax[1,])
-# ndvi_max <- max(ndvi_minmax[2,])
-# ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
-# plot(ndvi_projected_norm)
-# 
-# # Slope
-# slope_minmax <- terra::minmax(slope)
-# slope_min <- min(slope_minmax[1,])
-# slope_max <- max(slope_minmax[2,])
-# slope_norm = (slope - slope_min) / (slope_max - slope_min)
-# plot(slope_norm)
-# 
-# # Veg herby
-# veg_herby_minmax <- terra::minmax(veg_herby)
-# veg_herby_min <- min(veg_herby_minmax[1,])
-# veg_herby_max <- max(veg_herby_minmax[2,])
-# veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)  
-# plot(veg_herby_norm)
-# 
-# # Canopy cover
-# canopy_cover_minmax <- terra::minmax(canopy_cover)
-# canopy_cover_min <- min(canopy_cover_minmax[1,])
-# canopy_cover_max <- max(canopy_cover_minmax[2,])
-# canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
-# plot(canopy_cover_norm)
+# NDVI
+ndvi_minmax <- terra::minmax(ndvi_projected)
+ndvi_min <- min(ndvi_minmax[1,]) # -0.6637671
+ndvi_max <- max(ndvi_minmax[2,]) # 0.8812606
+ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
+plot(ndvi_projected_norm)
+
+# Slope
+slope_minmax <- terra::minmax(slope)
+slope_min <- min(slope_minmax[1,]) # 0
+slope_max <- max(slope_minmax[2,]) # 15.83363
+slope_norm = (slope - slope_min) / (slope_max - slope_min)
+plot(slope_norm)
+
+# Veg herby
+veg_herby_minmax <- terra::minmax(veg_herby)
+veg_herby_min <- min(veg_herby_minmax[1,]) # 0
+veg_herby_max <- max(veg_herby_minmax[2,]) # 1
+veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)
+plot(veg_herby_norm)
+
+# Canopy cover
+canopy_cover_minmax <- terra::minmax(canopy_cover)
+canopy_cover_min <- min(canopy_cover_minmax[1,]) # 0
+canopy_cover_max <- max(canopy_cover_minmax[2,]) # 82.5
+canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
+plot(canopy_cover_norm)
 # 
 # # save the layers
 # writeRaster(ndvi_projected_norm, "mapping/cropped rasters/ndvi_monthly_norm.tif", overwrite = T)
