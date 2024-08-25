@@ -11,6 +11,8 @@ synthetic_local_layers/
 *.tif
 *.png
 *.json
+*.npy
+*.csv
 *events*
 .Rhistory
 buffalo2005*
