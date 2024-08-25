@@ -24,7 +24,7 @@ buffalo <- read_csv("data/buffalo.csv")
 # remove individuals that have poor data quality or less than about 3 months of data. 
 # The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
 buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
-                                           # 2005, 2014, 2018, 2021, 2022, 2024,
+                                           # 2005, 2014, 2018, 2021, 2022, 2024, 2039,
                                            2029, 2043, 2265, 2284, 2346, 2354))
 
 buffalo <- buffalo %>%  
@@ -90,6 +90,10 @@ Plot the data coloured by time
 
 # change the names (these will become the column names when extracting 
 # covariate values at the used and random steps)
+# names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+# names(slope) <- "slope"
+# names(veg_herby) <- "veg_herby"
+# names(canopy_cover) <- "canopy_cover"
 # names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
 # names(slope) <- "slope"
 # names(veg_herby) <- "veg_herby"
@@ -171,6 +175,14 @@ Late dry season NDVI for simulations (same as in the Ecography SSF paper for com
 # 
 # ndvi_late_dry_norm = (ndvi_late_dry - ndvi_min) / (ndvi_max - ndvi_min)
 # writeRaster(ndvi_late_dry_norm, "mapping/cropped rasters/ndvi_norm_2018-19_late_dry.tif", overwrite = T)
+# ndvi_2018_late_dry <- ndvi_projected[[8:10]]
+# ndvi_2019_late_dry <- ndvi_projected[[19:21]]
+# ndvi_late_dry <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
+# names(ndvi_late_dry) <- "NDVI"
+# # plot(ndvi)
+# 
+# ndvi_late_dry_norm = (ndvi_late_dry - ndvi_min) / (ndvi_max - ndvi_min)
+# writeRaster(ndvi_late_dry_norm, "mapping/cropped rasters/ndvi_norm_2018-19_late_dry.tif", overwrite = T)
 
 ```
 
@@ -178,6 +190,7 @@ Generating the data to fit the ML models
 
 ```{r}
 
+res <- terra::res(ndvi_projected_norm)[1]
 res <- terra::res(ndvi_projected_norm)[1]
 
 # how much to trim on either side of the location
@@ -209,10 +222,18 @@ Loop over each individual and save the local rasters
 buffalo_ids <- unique(buffalo_all$id)
 
 for(i in 1:length(buffalo_ids)) {
+buffalo_ids <- unique(buffalo_all$id)
 
+for(i in 1:length(buffalo_ids)) {
+
+buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_data %>% arrange(t_)
 # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:5)
+# buffalo_data <- buffalo_all |>  slice(1:1000)
+
+# for no subsetting
+# buffalo_data <- buffalo_all
 # buffalo_data <- buffalo_all |>  slice(1:1000)
 
 # for no subsetting
@@ -222,6 +243,41 @@ n_samples <- nrow(buffalo_data)
 tic()
 
 buffalo_data_covs <- buffalo_data %>% mutate(
+  
+  x1_ = x_,
+  y1_ = y_,
+  x2_ = lead(x1_, n = hourly_lag, default = NA),
+  y2_ = lead(y1_, n = hourly_lag, default = NA),
+  x2_cent = x2_ - x1_,
+  y2_cent = y2_ - y1_,
+  t2_ = lead(t_, n = hourly_lag, default = NA),
+  t2_date = lubridate::date(t2_),
+  t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  hour_t1 = lubridate::hour(t_),
+  yday_t1 = lubridate::yday(t_),
+  hour_t2 = lubridate::hour(t2_),
+  hour_t2_sin = sin(2*pi*hour_t2/24),
+  hour_t2_cos = cos(2*pi*hour_t2/24),
+  yday_t2 = lubridate::yday(t2_),
+  yday_t2_sin = sin(2*pi*yday_t2/365),
+  yday_t2_cos = cos(2*pi*yday_t2/365),
+  
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  log_sl = log(sl),
+  # bearing = c(atan2(diff(y_), diff(x_)), NA),
+  bearing = atan2(y2_ - y1_, x2_ - x1_),
+  bearing_sin = sin(bearing),
+  bearing_cos = cos(bearing),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta),
+    
+  # extent for cropping the spatial covariates
+  x_min = x_ - buffer,
+  x_max = x_ + buffer,
+  y_min = y_ - buffer,
+  y_max = y_ + buffer,
   
   x1_ = x_,
   y1_ = y_,
@@ -314,6 +370,9 @@ buffalo_data_covs <- buffalo_data %>% mutate(
     
     pres_filename = paste0("data_layers_single/pres/pres_id", 
                            id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+    
+    pres_filename = paste0("data_layers_single/pres/pres_id", 
+                           id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
     # rasterised location of the next step - centred on (0,0)
     points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
     pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
@@ -346,11 +405,27 @@ dplyr::select(-extent_00centre,
               )
 
 write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
+write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
 
 }
+}
 
 toc()
+
+```
+
+Combine the data frames for each individual
+
+```{r}
+
+buffalo_all_df <- bind_rows(list.files("data_layers_single", pattern = "id", full.names = TRUE) %>% 
+  map_dfr(read_csv))
+
+n_samples <- nrow(buffalo_all_df)
+
+# save as a new csv
+write_csv(buffalo_all_df, paste0("data_layers_single/buffalo_all_101x101_data_df_lag_1hr_n", n_samples,".csv"))
 
 ```
 
@@ -385,6 +460,7 @@ n_plots <- 5
 # walk(buffalo_data_covs$slope_local[1:n_plots], terra::plot)
 # walk(buffalo_data_covs$pres_local[1:n_plots], terra::plot)
 
+# after recentering
 # after recentering
 walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
 walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)

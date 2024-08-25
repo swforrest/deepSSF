@@ -51,7 +51,7 @@ sim_data_all <- dl_trajectory %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/isec_pres/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/dl_trajectories/id2158_ta_mix_vm_mu_0-pi/", pattern = "*.csv", full.names = T)
 
 sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
@@ -113,13 +113,58 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
 # Geoscience Australia Lambert (https://epsg.io/3112)
 
-buffalo_2005_1000samples <- buffalo_all %>% 
-  filter(id == 2005) %>% 
+buffalo_all <- buffalo_all |> arrange(id, t_) |> ungroup()
+
+ggplot() +
+  geom_point(data = buffalo_all |> filter(id == 2158),
+            aes(x = x_, y = y_, colour = id)) +
+  scale_colour_viridis_d() +
+  coord_equal() +
+  theme_bw() #+
+  # theme(legend.position = "none")
+
+```
+
+
+```{r}
+
+hourly_lag <- 1
+
+buffalo_all <- buffalo_all %>% mutate(
+  
+  x1 = x_,
+  y1 = y_,
+  x2 = lead(x1, n = hourly_lag, default = NA),
+  y2 = lead(y1, n = hourly_lag, default = NA),
+  # x2_cent = x2 - x1,
+  # y2_cent = y2 - y1,
+  # t2_ = lead(t_, n = hourly_lag, default = NA),
+  # t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  # hour_t1 = lubridate::hour(t_),
+  # yday_t1 = lubridate::yday(t_),
+  # hour_t2 = lubridate::hour(t2_),
+  # yday_t2 = lubridate::yday(t2_),
+  # hour = lubridate::hour(t),
+  
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  log_sl = log(sl),
+  bearing = c(atan2(diff(y_), diff(x_)), NA),
+  # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta)
+)
+
+buffalo_all <- buffalo_all %>% filter(sl < 1250)
+
+buffalo_id_1000samples <- buffalo_all %>% 
+  filter(id == 2) %>% 
   arrange(t_) |>  
-  slice(1:100) |> 
+  slice(1:1000) |> 
   transmute(id = id, x = x_, y = y_, t = t_)
 
-time_vector = buffalo_2005_1000samples$t
+time_vector = buffalo_id_1000samples$t
 
 ```
 
@@ -128,13 +173,13 @@ time_vector = buffalo_2005_1000samples$t
 ```{r}
 
 # combine the observed and simulated data
-all_data <- bind_rows(buffalo_2005_1000samples, sim_data_all)
+all_data <- bind_rows(buffalo_id_1000samples, sim_data_all)
 
 ggplot() +
   geom_path(data = sim_data_all,
             aes(x = x, y = y, colour = id)) +
   scale_colour_viridis_d() +
-  geom_path(data = buffalo_2005_1000samples,
+  geom_path(data = buffalo_id_1000samples,
             aes(x = x, y = y), colour = "red") +
   coord_equal() +
   theme_bw()
@@ -243,7 +288,7 @@ ggplot() +
 
 ```
 
-
+For each hour of the day
 
 ```{r}
 
@@ -277,61 +322,57 @@ print(ggplot() +
 
 ```
 
-## Import data and clean
+## Plot step lengths etc against observed data
 
 ```{r}
 
-buffalo <- read_csv("data/buffalo.csv")
+mean(dl_trajectory$sl, na.rm = T)
+median(dl_trajectory$sl, na.rm = T)
 
-# remove individuals that have poor data quality or less than about 3 months of data. 
-# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
-buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
-                                           2029, 2043, 2265, 2284, 2346))
+ggplot() +
+  geom_density(data = dl_trajectory,
+                 aes(x = sl),
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+  scale_y_continuous("Frequency") +
+  theme_bw()
 
-buffalo <- buffalo %>%  
-  group_by(node) %>% 
-  arrange(DateTime, .by_group = T) %>% 
-  distinct(DateTime, .keep_all = T) %>% 
-  arrange(node) %>% 
-  mutate(ID = node)
 
-buffalo_clean <- buffalo[, c(12, 2, 4, 3)]
-colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
-attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
-head(buffalo_clean)
-tz(buffalo_clean$time)
+ggplot() +
+  geom_density(data = buffalo_all,
+                 aes(x = sl),
+                 fill = "skyblue", colour = "black", alpha = 0.5) +
+  geom_density(data = dl_trajectory,
+                 aes(x = sl),
+                 fill = "orange", colour = "black", alpha = 0.5) +
+  scale_x_log10("log Step length (m)") +
+  scale_y_continuous("Frequency") +
+  theme_bw()
 
-buffalo_ids <- unique(buffalo_clean$id)
+# ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
-```
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = bearing),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  theme_bw()
 
-## Setup trajectory
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = ta),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)", limits = c(-pi, pi)) +
+  scale_y_continuous("Frequency") +
+  theme_bw()
 
-Use the `amt` package to create a trajectory object from the cleaned data. 
-
-```{r}
-
-buffalo_all <- buffalo_clean %>% mk_track(id = id,
-                                           lon,
-                                           lat, 
-                                           time, 
-                                           all_cols = T,
-                                           crs = 4326) %>% 
-  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
-# Geoscience Australia Lambert (https://epsg.io/3112)
-
-```
-
-Plot the data coloured by time
-
-```{r}
-
-# buffalo_all %>%
-#   ggplot(aes(x = x_, y = y_, colour = t_)) +
-#   geom_point(alpha = 0.25, size = 1) + # colour = "black",
-#   coord_fixed() +
-#   scale_colour_viridis_c() +
-#   theme_classic()
+# ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ```
 
