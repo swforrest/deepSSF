@@ -230,7 +230,7 @@ buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_all
 
 # to subset
-buffalo_data <- buffalo_all |>  slice(1:100)
+# buffalo_data <- buffalo_all |>  slice(1:100)
 n_samples <- nrow(buffalo_data)
 
 tic()
