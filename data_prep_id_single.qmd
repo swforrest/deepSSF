@@ -7,7 +7,6 @@ format: html
 ## Loading packages
 
 ```{r}
-#| warning=FALSE
 
 library(tidyverse)
 packages <- c("amt", "sf", "terra", "beepr", "tictoc")
@@ -20,6 +19,7 @@ walk(packages, require, character.only = T)
 ```{r}
 
 buffalo <- read_csv("data/buffalo.csv")
+
 
 # remove individuals that have poor data quality or less than about 3 months of data. 
 # The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
@@ -191,7 +191,6 @@ Generating the data to fit the ML models
 ```{r}
 
 res <- terra::res(ndvi_projected_norm)[1]
-res <- terra::res(ndvi_projected_norm)[1]
 
 # how much to trim on either side of the location
 buffer <- 1250 + (res/2)
@@ -222,22 +221,16 @@ Loop over each individual and save the local rasters
 buffalo_ids <- unique(buffalo_all$id)
 
 for(i in 1:length(buffalo_ids)) {
-buffalo_ids <- unique(buffalo_all$id)
 
-for(i in 1:length(buffalo_ids)) {
-
-buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_data %>% arrange(t_)
 # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:5)
-# buffalo_data <- buffalo_all |>  slice(1:1000)
 
 # for no subsetting
 # buffalo_data <- buffalo_all
-# buffalo_data <- buffalo_all |>  slice(1:1000)
 
-# for no subsetting
-# buffalo_data <- buffalo_all
+# to subset
+buffalo_data <- buffalo_all |>  slice(1:100)
 n_samples <- nrow(buffalo_data)
 
 tic()
@@ -404,11 +397,10 @@ dplyr::select(-extent_00centre,
               -pres_cent
               )
 
-write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
+
 write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
 
-}
 }
 
 toc()
