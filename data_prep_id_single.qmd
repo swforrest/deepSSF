@@ -156,10 +156,10 @@ names(slope_norm) <- "slope"
 names(veg_herby_norm) <- "veg_herby"
 names(canopy_cover_norm) <- "canopy_cover"
 
-plot(ndvi_projected_norm)
-plot(slope_norm)
-plot(veg_herby_norm)
-plot(canopy_cover_norm)
+# plot(ndvi_projected_norm)
+# plot(slope_norm)
+# plot(veg_herby_norm)
+# plot(canopy_cover_norm)
 
 ```
 
@@ -218,13 +218,11 @@ Loop over each individual and save the local rasters
 
 ```{r}
 
-buffalo_ids <- unique(buffalo_all$id)
-
 for(i in 1:length(buffalo_ids)) {
 
 buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_data %>% arrange(t_)
-# buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:5)
+# buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
 
 # for no subsetting
 # buffalo_data <- buffalo_all
