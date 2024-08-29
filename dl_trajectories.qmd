@@ -7,7 +7,6 @@ format: html
 ## Loading packages
 
 ```{r}
-#| warning=FALSE
 
 library(tidyverse)
 packages <- c("amt", "sf", "terra", "beepr", "tictoc")
@@ -51,7 +50,7 @@ sim_data_all <- dl_trajectory %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/id2158_ta_mix_vm_mu_0-pi/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/dl_trajectories/ta_mix_colab/", pattern = "*.csv", full.names = T)
 
 sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
@@ -116,7 +115,7 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
 buffalo_all <- buffalo_all |> arrange(id, t_) |> ungroup()
 
 ggplot() +
-  geom_point(data = buffalo_all |> filter(id == 2158),
+  geom_point(data = buffalo_all |> filter(id == 2005),
             aes(x = x_, y = y_, colour = id)) +
   scale_colour_viridis_d() +
   coord_equal() +
@@ -159,7 +158,7 @@ buffalo_all <- buffalo_all %>% mutate(
 buffalo_all <- buffalo_all %>% filter(sl < 1250)
 
 buffalo_id_1000samples <- buffalo_all %>% 
-  filter(id == 2) %>% 
+  filter(id == 2005) %>% 
   arrange(t_) |>  
   slice(1:1000) |> 
   transmute(id = id, x = x_, y = y_, t = t_)
@@ -306,6 +305,8 @@ print(ggplot() +
 
 ```
 
+Turning angles
+
 ```{r}
 
 for(i in 0:23) {
@@ -329,18 +330,25 @@ print(ggplot() +
 mean(dl_trajectory$sl, na.rm = T)
 median(dl_trajectory$sl, na.rm = T)
 
+buffalo_id_1000samples_covs <- buffalo_all %>% 
+  filter(id == 2005) %>% 
+  arrange(t_) |>  
+  slice(1:1000)
+
 ggplot() +
+  geom_density(data = buffalo_id_1000samples_covs,
+                 aes(x = sl),
+                 fill = "skyblue", colour = "black", alpha = 0.5) +
   geom_density(data = dl_trajectory,
                  aes(x = sl),
-                 fill = "orange",
-                 colour = "black") +
+                 fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
   scale_y_continuous("Frequency") +
   theme_bw()
 
 
 ggplot() +
-  geom_density(data = buffalo_all,
+  geom_density(data = buffalo_id_1000samples_covs,
                  aes(x = sl),
                  fill = "skyblue", colour = "black", alpha = 0.5) +
   geom_density(data = dl_trajectory,
@@ -353,26 +361,17 @@ ggplot() +
 # ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ggplot() +
-  geom_histogram(data = dl_trajectory,
-                 aes(x = bearing),
-                 bins = 100,
-                 # binwidth = 25,
-                 fill = "orange",
-                 colour = "black") +
-  theme_bw()
-
-ggplot() +
-  geom_histogram(data = dl_trajectory,
+  geom_density(data = buffalo_id_1000samples_covs,
                  aes(x = ta),
-                 bins = 100,
-                 # binwidth = 25,
-                 fill = "orange",
-                 colour = "black") +
-  scale_x_continuous("Turning angle (radians)", limits = c(-pi, pi)) +
+                 fill = "skyblue", colour = "black", alpha = 0.5) +
+  geom_density(data = dl_trajectory,
+                 aes(x = ta),
+                 fill = "orange", colour = "black", alpha = 0.5) +
+  scale_x_continuous("Turning angles (radians)") +
   scale_y_continuous("Frequency") +
   theme_bw()
 
-# ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
+# ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
 ```
 
@@ -793,8 +792,8 @@ ggarrange(hourly_path_sl_plot +
           legend = "bottom",
           common.legend = TRUE)
 
-ggsave(paste0("outputs/plots/manuscript_figs_R1/NOmem_hourly_path_mean_all_", 
-              Sys.Date(), ".png"),
-       width=150, height=120, units="mm", dpi = 600)
+# ggsave(paste0("outputs/plots/manuscript_figs_R1/NOmem_hourly_path_mean_all_", 
+#               Sys.Date(), ".png"),
+#        width=150, height=120, units="mm", dpi = 600)
 
 ```

@@ -7,6 +7,7 @@ format: html
 ## Loading packages
 
 ```{r}
+#| warning=FALSE
 
 library(tidyverse)
 packages <- c("amt", "sf", "terra", "beepr", "tictoc")
@@ -157,7 +158,7 @@ for(i in 1:length(buffalo_ids)) {
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # buffalo_data <- buffalo_data %>% arrange(t_)
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:1000)
   n_samples <- nrow(buffalo_data)
   
   tic()
@@ -184,7 +185,6 @@ for(i in 1:length(buffalo_ids)) {
     sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
     log_sl = log(sl),
     bearing = c(atan2(diff(y_), diff(x_)), NA),
-    bearing_tm1 = lag(bearing, n = hourly_lag, default = NA),
     bearing_sin = sin(bearing),
     bearing_cos = cos(bearing),
     ta = c(NA, ifelse(
@@ -198,112 +198,112 @@ for(i in 1:length(buffalo_ids)) {
     y_min = y_ - buffer,
     y_max = y_ + buffer,
     
-  )
-  
-  # ) %>% rowwise() %>% mutate(
-  # 
-  #   extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
-  # 
-  #   # NDVI
-  #   ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
-  #   # ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
-  #   #                      ext(x_min, x_max, y_min, y_max))),
-  #   ndvi_cent = list({
-  #     ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
-  #     ext(ndvi_cent) <- extent_00centre
-  #     ndvi_cent
-  #     }),
-  # 
-  #   # herbaceous vegetation
-  #   # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
-  #   veg_herby_cent = list({
-  #     veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
-  #     # veg_herby_cent <- rep(veg_herby_local)
-  #     ext(veg_herby_cent) <- extent_00centre
-  #     veg_herby_cent
-  #     }),
-  # 
-  #   # canopy cover
-  #   # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
-  #   canopy_cover_cent = list({
-  #     canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
-  #     # canopy_cover_cent <- rep(canopy_cover_local)
-  #     ext(canopy_cover_cent) <- extent_00centre
-  #     canopy_cover_cent
-  #     }),
-  # 
-  #   # slope
-  #   # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
-  #   slope_cent = list({
-  #     slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
-  #     # slope_cent <- rep(slope_local)
-  #     ext(slope_cent) <- extent_00centre
-  #     slope_cent
-  #     }),
-  # 
-  #   # rasterised location of the next step
-  #   # points_vect_local = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
-  #   # pres_local = list(rasterize(points_vect_local, ndvi_local, background=0)),
-  # 
-  #   # rasterised location of the next step - centred on (0,0)
-  #   points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-  #   pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0))
-  # 
-  # ) %>% ungroup() # to remove the 'rowwise' class
-  
   # )
   
+  ) %>% rowwise() %>% mutate(
+
+    extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
+
+    # NDVI
+    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
+    # ndvi_local = list(crop(ndvi_projected[[ndvi_index]],
+    #                      ext(x_min, x_max, y_min, y_max))),
+    ndvi_cent = list({
+      ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
+      ext(ndvi_cent) <- extent_00centre
+      ndvi_cent
+      }),
+
+    # herbaceous vegetation
+    # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
+    veg_herby_cent = list({
+      veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
+      # veg_herby_cent <- rep(veg_herby_local)
+      ext(veg_herby_cent) <- extent_00centre
+      veg_herby_cent
+      }),
+
+    # canopy cover
+    # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
+    canopy_cover_cent = list({
+      canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
+      # canopy_cover_cent <- rep(canopy_cover_local)
+      ext(canopy_cover_cent) <- extent_00centre
+      canopy_cover_cent
+      }),
+
+    # slope
+    # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
+    slope_cent = list({
+      slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
+      # slope_cent <- rep(slope_local)
+      ext(slope_cent) <- extent_00centre
+      slope_cent
+      }),
+
+    # rasterised location of the next step
+    # points_vect_local = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
+    # pres_local = list(rasterize(points_vect_local, ndvi_local, background=0)),
+
+    # rasterised location of the next step - centred on (0,0)
+    points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+    pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0))
+
+  ) %>% ungroup() # to remove the 'rowwise' class
+
+  # )
+
   toc()
-  
-  
-  buffalo_data_covs <- buffalo_data_covs %>% 
-    filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% 
+
+
+  buffalo_data_covs <- buffalo_data_covs %>%
+    filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>%
     drop_na(ta)
-  
-  
+
+
   buffalo_data_df <- buffalo_data_covs %>%
-  dplyr::select(-extent_00centre, 
-                # -ndvi_local, 
-                -ndvi_cent, 
-                # -veg_herby_local, 
-                -veg_herby_cent, 
-                # -canopy_cover_local, 
+  dplyr::select(-extent_00centre,
+                # -ndvi_local,
+                -ndvi_cent,
+                # -veg_herby_local,
+                -veg_herby_cent,
+                # -canopy_cover_local,
                 -canopy_cover_cent,
-                # -slope_local, 
+                # -slope_local,
                 -slope_cent,
-                # -points_vect_local, 
-                -points_vect_cent, 
-                # -pres_local, 
+                # -points_vect_local,
+                -points_vect_cent,
+                # -pres_local,
                 -pres_cent
                 )
 
-  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_", buffalo_ids[i], 
+  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_", buffalo_ids[i],
                                     "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
-  
+
   # saving the raster objects
-  rast(buffalo_data_covs$ndvi_cent) %>% 
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent", 
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
+  rast(buffalo_data_covs$ndvi_cent) %>%
+    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
-  
-  rast(buffalo_data_covs$veg_herby_cent) %>% 
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent", 
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
+
+  rast(buffalo_data_covs$veg_herby_cent) %>%
+    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
-  
-  rast(buffalo_data_covs$canopy_cover_cent) %>% 
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent", 
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
+
+  rast(buffalo_data_covs$canopy_cover_cent) %>%
+    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
-  
-  rast(buffalo_data_covs$slope_cent) %>% 
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent", 
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
+
+  rast(buffalo_data_covs$slope_cent) %>%
+    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
-  
-  rast(buffalo_data_covs$pres_cent) %>% 
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent", 
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), 
+
+  rast(buffalo_data_covs$pres_cent) %>%
+    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
   
 }
