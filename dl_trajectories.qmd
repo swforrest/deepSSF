@@ -14,69 +14,6 @@ walk(packages, require, character.only = T)
 
 ```
 
-## Import deep learning trajectories
-
-```{r}
-
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_7641steps_1.csv")
-head(dl_trajectory)
-
-ggplot() +
-  geom_path(data = dl_trajectory,
-            aes(x = x, y = y, colour = yday)) +
-  scale_colour_viridis_c() +
-  coord_equal() +
-  theme_bw()
-
-# to convert to amt track:
-# - create a column for time in posixct from the hour and yday columns
-# dl_trajectory_amt <- dl_trajectory %>% mk_track(id = id,
-#                                                 lon,
-#                                            lat, 
-#                                            time, 
-#                                            all_cols = T,
-#                                            crs = 4326) %>% 
-#   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
-# # Geoscience Australia Lambert (https://epsg.io/3112)
-
-sim_data_all <- dl_trajectory %>% 
-  mutate(id = "a") 
-
-```
-
-## Import multiple deep learning trajectories
-
-```{r}
-
-# read in multiple csv files with similar filenames and bind them together
-sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/ta_mix_colab/", pattern = "*.csv", full.names = T)
-
-sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
-  # grep("3000", x = ., value = T) %>% 
-  map_dfr(read_csv, .id = "id")
-
-# to check the initial locations of the simulated trajectories - 
-# prior to removing the warmup period - these should be the same as the observed
-# data
-sim_data_all %>% group_by(id) %>% slice(1)
-
-ggplot() +
-  geom_path(data = sim_data_all,
-            aes(x = x, y = y, colour = id)) +
-  geom_point(data = sim_data_all |> slice(1),
-            aes(x = x, y = y), colour = "red") +
-  scale_colour_viridis_d() +
-  coord_equal() +
-  theme_bw() +
-  theme(legend.position = "none")
-
-# ggsave("outputs/sim_data_all.png", width = 150, height = 200, units = "mm", dpi = 600)
-
-# sim_data_all <- sim_data_all %>% group_by transmute(id = id, x = x, y = y, t = rep(time_vector,10))
-
-```
-
 ## Import data and clean
 
 ```{r}
@@ -124,6 +61,7 @@ ggplot() +
 
 ```
 
+## Calculate step info
 
 ```{r}
 
@@ -164,6 +102,69 @@ buffalo_id_1000samples <- buffalo_all %>%
   transmute(id = id, x = x_, y = y_, t = t_)
 
 time_vector = buffalo_id_1000samples$t
+
+```
+
+## Import deep learning trajectories
+
+```{r}
+
+dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_7641steps_1.csv")
+head(dl_trajectory)
+
+ggplot() +
+  geom_path(data = dl_trajectory,
+            aes(x = x, y = y, colour = yday)) +
+  scale_colour_viridis_c() +
+  coord_equal() +
+  theme_bw()
+
+# to convert to amt track:
+# - create a column for time in posixct from the hour and yday columns
+# dl_trajectory_amt <- dl_trajectory %>% mk_track(id = id,
+#                                                 lon,
+#                                            lat, 
+#                                            time, 
+#                                            all_cols = T,
+#                                            crs = 4326) %>% 
+#   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# # Geoscience Australia Lambert (https://epsg.io/3112)
+
+sim_data_all <- dl_trajectory %>% 
+  mutate(id = "a") 
+
+```
+
+## Import multiple deep learning trajectories
+
+```{r}
+
+# read in multiple csv files with similar filenames and bind them together
+sim_data_full_list <- 
+  list.files("Python/outputs/dl_trajectories/ta_adj_colab/", pattern = "*.csv", full.names = T)
+
+sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
+  # grep("3000", x = ., value = T) %>% 
+  map_dfr(read_csv, .id = "id")
+
+# to check the initial locations of the simulated trajectories - 
+# prior to removing the warmup period - these should be the same as the observed
+# data
+sim_data_all %>% group_by(id) %>% slice(1)
+
+ggplot() +
+  geom_path(data = sim_data_all,
+            aes(x = x, y = y, colour = id)) +
+  geom_point(data = sim_data_all |> slice(1),
+            aes(x = x, y = y), colour = "red") +
+  scale_colour_viridis_d() +
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# ggsave("outputs/sim_data_all.png", width = 150, height = 200, units = "mm", dpi = 600)
+
+# sim_data_all <- sim_data_all %>% group_by transmute(id = id, x = x, y = y, t = rep(time_vector,10))
 
 ```
 
