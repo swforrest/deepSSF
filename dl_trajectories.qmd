@@ -2,6 +2,8 @@
 title: "Preparing data for DL model fitting"
 author: "Scott Forrest"
 format: html
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ## Loading packages
@@ -9,7 +11,7 @@ format: html
 ```{r}
 
 library(tidyverse)
-packages <- c("amt", "sf", "terra", "beepr", "tictoc")
+packages <- c("amt", "sf", "terra", "beepr", "tictoc", "geostats")
 walk(packages, require, character.only = T)
 
 ```
@@ -109,29 +111,29 @@ time_vector = buffalo_id_1000samples$t
 
 ```{r}
 
-dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_7641steps_1.csv")
-head(dl_trajectory)
-
-ggplot() +
-  geom_path(data = dl_trajectory,
-            aes(x = x, y = y, colour = yday)) +
-  scale_colour_viridis_c() +
-  coord_equal() +
-  theme_bw()
-
-# to convert to amt track:
-# - create a column for time in posixct from the hour and yday columns
-# dl_trajectory_amt <- dl_trajectory %>% mk_track(id = id,
-#                                                 lon,
-#                                            lat, 
-#                                            time, 
-#                                            all_cols = T,
-#                                            crs = 4326) %>% 
-#   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
-# # Geoscience Australia Lambert (https://epsg.io/3112)
-
-sim_data_all <- dl_trajectory %>% 
-  mutate(id = "a") 
+# dl_trajectory <- read_csv("Python/outputs/dl_trajectories/dl_trajectory_7641steps_1.csv")
+# head(dl_trajectory)
+# 
+# ggplot() +
+#   geom_path(data = dl_trajectory,
+#             aes(x = x, y = y, colour = yday)) +
+#   scale_colour_viridis_c() +
+#   coord_equal() +
+#   theme_bw()
+# 
+# # to convert to amt track:
+# # - create a column for time in posixct from the hour and yday columns
+# # dl_trajectory_amt <- dl_trajectory %>% mk_track(id = id,
+# #                                                 lon,
+# #                                            lat, 
+# #                                            time, 
+# #                                            all_cols = T,
+# #                                            crs = 4326) %>% 
+# #   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# # # Geoscience Australia Lambert (https://epsg.io/3112)
+# 
+# sim_data_all <- dl_trajectory %>% 
+#   mutate(id = "a") 
 
 ```
 
@@ -141,7 +143,7 @@ sim_data_all <- dl_trajectory %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/ta_adj_colab/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/dl_trajectories/ta_mix_vMmu/", pattern = "*.csv", full.names = T)
 
 sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
@@ -202,6 +204,7 @@ ggplot() +
 ```{r}
 
 dl_trajectory <- sim_data_all
+# dl_trajectory <- buffalo_id_1000samples
 
 hourly_lag <- 1
 
@@ -225,9 +228,12 @@ dl_trajectory <- dl_trajectory %>% mutate(
   log_sl = log(sl),
   bearing = c(atan2(diff(y), diff(x)), NA),
   # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
-  ta = c(NA, ifelse(
-    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
-      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  ta1 = c(NA, diff(bearing)),
+  ta = c(NA, 
+         ifelse(
+           diff(bearing) > pi, diff(bearing)-(2*pi), 
+           ifelse(
+             diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
   cos_ta = cos(ta)
 )
 
@@ -248,7 +254,7 @@ ggplot() +
                  binwidth = 25,
                  fill = "orange",
                  colour = "black") +
-  scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+  # scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
   scale_y_continuous("Frequency") +
   theme_bw()
 
@@ -275,7 +281,7 @@ ggplot() +
 
 ggplot() +
   geom_histogram(data = dl_trajectory,
-                 aes(x = ta),
+                 aes(x = ta1),
                  bins = 100,
                  # binwidth = 25,
                  fill = "orange",
@@ -313,7 +319,7 @@ Turning angles
 for(i in 0:23) {
 print(ggplot() +
   geom_histogram(data = dl_trajectory |> filter(hour == i),
-                 aes(x = ta),
+                 aes(x = ta1),
                  bins = 50,
                  # binwidth = 25,
                  fill = "orange",
@@ -363,7 +369,7 @@ ggplot() +
 
 ggplot() +
   geom_density(data = buffalo_id_1000samples_covs,
-                 aes(x = ta),
+                 aes(x = ta1),
                  fill = "skyblue", colour = "black", alpha = 0.5) +
   geom_density(data = dl_trajectory,
                  aes(x = ta),
@@ -409,8 +415,6 @@ Plots for ISEC presentation
 x_gamma <- seq(0, 1000, 1)
 plot(x_gamma, dgamma(x_gamma, 2, scale = 100), type = "l", col = "black", xlab = "Distance (m)", ylab = "Density", main = "Gamma distribution")
 
-install.packages("geostats")
-library(geostats)
 # von mises distribution
 x_von_mises <- seq(-pi, pi, 0.01)
 plot(x_von_mises, geostats::vonMises(a = x_von_mises, mu = 0, kappa = 1), type = "l", col = "black", xlab = "Angle (radians)", ylab = "Density", main = "Von Mises distribution", ylim = c(0, 0.375))
