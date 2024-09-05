@@ -145,17 +145,17 @@ time_vector = buffalo_id_1000samples$t
 sim_data_full_list <- 
   list.files("Python/outputs/dl_trajectories/ta_mix_vMmu/", pattern = "*.csv", full.names = T)
 
-sim_data_all <- grep("1000steps", sim_data_full_list, value = T) %>% 
+sim_data_all <- grep("", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
   map_dfr(read_csv, .id = "id")
 
 # to check the initial locations of the simulated trajectories - 
 # prior to removing the warmup period - these should be the same as the observed
 # data
-sim_data_all %>% group_by(id) %>% slice(1)
+# sim_data_all %>% group_by(id) %>% slice(1)
 
 ggplot() +
-  geom_path(data = sim_data_all,
+  geom_path(data = sim_data_all %>% filter(id == 1),
             aes(x = x, y = y, colour = id)) +
   geom_point(data = sim_data_all |> slice(1),
             aes(x = x, y = y), colour = "red") +
@@ -214,8 +214,8 @@ dl_trajectory <- dl_trajectory %>% mutate(
   y1 = y,
   x2 = lead(x1, n = hourly_lag, default = NA),
   y2 = lead(y1, n = hourly_lag, default = NA),
-  # x2_cent = x2 - x1,
-  # y2_cent = y2 - y1,
+  date = as.Date(yday - 1, origin = "2018-01-01"),
+  t1 = as.POSIXct(paste(date, hour), format = "%Y-%m-%d %H"),
   # t2_ = lead(t_, n = hourly_lag, default = NA),
   # t_diff = round(difftime(t2_, t_, units = "hours"),0),
   # hour_t1 = lubridate::hour(t_),
@@ -226,18 +226,29 @@ dl_trajectory <- dl_trajectory %>% mutate(
   
   sl = c(sqrt(diff(y)^2 + diff(x)^2), NA),
   log_sl = log(sl),
-  bearing = c(atan2(diff(y), diff(x)), NA),
+  bearing1 = c(NA, atan2(diff(y), diff(x))),
   # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
-  ta1 = c(NA, diff(bearing)),
-  ta = c(NA, 
-         ifelse(
-           diff(bearing) > pi, diff(bearing)-(2*pi), 
-           ifelse(
-             diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
-  cos_ta = cos(ta)
+  ta1 = c(NA, diff(bearing1)),
+  ta_corr1 = c(ifelse(ta1 > pi, ta1-(2*pi), 
+                     ifelse(ta1 < -pi, ta1+(2*pi),
+                            ta1))),
+  cos_ta = cos(ta1)
 )
 
 dl_trajectory <- dl_trajectory %>% filter(sl < 1250)
+head(dl_trajectory)
+
+dl_trajectory %>% filter(id == 1)
+
+```
+
+## Checking the turning angles using amt
+
+```{r}
+
+dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id)
+dl_steps <- dl_track %>% filter(id == 1) %>% amt::steps(keep_cols = "both")
+dl_steps
 
 ```
 
@@ -272,7 +283,7 @@ ggplot() +
 
 ggplot() +
   geom_histogram(data = dl_trajectory,
-                 aes(x = bearing),
+                 aes(x = bearing1),
                  bins = 100,
                  # binwidth = 25,
                  fill = "orange",
@@ -286,7 +297,30 @@ ggplot() +
                  # binwidth = 25,
                  fill = "orange",
                  colour = "black") +
-  scale_x_continuous("Turning angle (radians)", limits = c(-pi, pi)) +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = ta_corr1),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_steps,
+                 aes(x = ta_),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
   scale_y_continuous("Frequency") +
   theme_bw()
 
@@ -319,7 +353,7 @@ Turning angles
 for(i in 0:23) {
 print(ggplot() +
   geom_histogram(data = dl_trajectory |> filter(hour == i),
-                 aes(x = ta1),
+                 aes(x = ta_corr),
                  bins = 50,
                  # binwidth = 25,
                  fill = "orange",
@@ -369,10 +403,10 @@ ggplot() +
 
 ggplot() +
   geom_density(data = buffalo_id_1000samples_covs,
-                 aes(x = ta1),
+                 aes(x = ta),
                  fill = "skyblue", colour = "black", alpha = 0.5) +
   geom_density(data = dl_trajectory,
-                 aes(x = ta),
+                 aes(x = ta_corr),
                  fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_continuous("Turning angles (radians)") +
   scale_y_continuous("Frequency") +
