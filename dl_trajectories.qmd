@@ -353,7 +353,7 @@ Turning angles
 for(i in 0:23) {
 print(ggplot() +
   geom_histogram(data = dl_trajectory |> filter(hour == i),
-                 aes(x = ta_corr),
+                 aes(x = ta_corr1),
                  bins = 50,
                  # binwidth = 25,
                  fill = "orange",
