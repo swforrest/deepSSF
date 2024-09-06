@@ -143,7 +143,7 @@ time_vector = buffalo_id_1000samples$t
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/dl_trajectories/ta_mix_vMmu/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/dl_trajectories/ta_mix/", pattern = "*.csv", full.names = T)
 
 sim_data_all <- grep("", sim_data_full_list, value = T) %>% 
   # grep("3000", x = ., value = T) %>% 
@@ -155,7 +155,7 @@ sim_data_all <- grep("", sim_data_full_list, value = T) %>%
 # sim_data_all %>% group_by(id) %>% slice(1)
 
 ggplot() +
-  geom_path(data = sim_data_all %>% filter(id == 1),
+  geom_path(data = sim_data_all,
             aes(x = x, y = y, colour = id)) +
   geom_point(data = sim_data_all |> slice(1),
             aes(x = x, y = y), colour = "red") +
@@ -246,8 +246,8 @@ dl_trajectory %>% filter(id == 1)
 
 ```{r}
 
-# dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id)
-dl_track <- dl_trajectory %>% amt::mk_track(x, y, t1, all_cols = T, crs = 3112)
+dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id)
+# dl_track <- dl_trajectory %>% amt::mk_track(x, y, t1, all_cols = T, crs = 3112)
 dl_steps <- dl_track %>% filter(id == 1) %>% amt::steps(keep_cols = "both")
 dl_steps
 
@@ -407,11 +407,15 @@ ggplot() +
                  aes(x = ta),
                  fill = "skyblue", colour = "black", alpha = 0.5) +
   geom_density(data = dl_trajectory,
-                 aes(x = ta_corr),
+                 aes(x = ta_corr1),
                  fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_continuous("Turning angles (radians)") +
   scale_y_continuous("Frequency") +
   theme_bw()
+
+x <- seq(-12.5, 12.5, 0.1)
+plot(x, y = dnorm(x, mean = 0, sd = 6.5), type = "l")
+qnorm(c(0.025, 0.5, 0.975), mean = 0, sd = 6.5)
 
 # ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
 
@@ -422,7 +426,7 @@ ggplot() +
 ```{r}
 
 ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
-terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+# terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
 slope <- rast("mapping/cropped rasters/slope_raster.tif")
 veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
 canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
