@@ -246,7 +246,8 @@ dl_trajectory %>% filter(id == 1)
 
 ```{r}
 
-dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id)
+# dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id)
+dl_track <- dl_trajectory %>% amt::mk_track(x, y, t1, all_cols = T, crs = 3112)
 dl_steps <- dl_track %>% filter(id == 1) %>% amt::steps(keep_cols = "both")
 dl_steps
 
