@@ -16,31 +16,416 @@ walk(packages, require, character.only = T)
 
 ```{r}
 
-habitat_predictions <- read_csv("Python/outputs/id2005_habitat_suitability_landscape_subset.csv")
+habitat_predictions <- read_csv("Python/outputs/id2005_hourly_fine_habitat_suitability_landscape_subset.csv")
+# filter out the edge cells that were masked
+habitat_predictions <- habitat_predictions %>% filter(!NDVI %in% c(Inf, -Inf))
 head(habitat_predictions)
-
-# lengthen data frame
-habitat_predictions_long <- habitat_predictions %>%
-  pivot_longer(cols = !Landscape_Predictions, names_to = "Covariate", values_to = "Values")
-
-head(habitat_predictions_long)
 
 ```
 
-## Plot the covariate vs prediction values
+## Thin the data frame with more efficient plotting
 
 ```{r}
 
-habitat_predictions_long %>%
-  ggplot(aes(x = Values, y = Landscape_Predictions, color = Covariate)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(title = "Habitat predictions vs covariates",
-       x = "Covariate values",
-       y = "Habitat predictions")
+habitat_predictions_long_thinned <- habitat_predictions %>% 
+  # slice_sample(prop = 0.1) %>% 
+  pivot_longer(cols = -c(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), names_to = "Hour", values_to = "Values") %>% 
+  mutate(Hour = as.numeric(Hour))
+
+head(habitat_predictions_long_thinned)
 
 ```
 
 
+
+```{r}
+
+hist(habitat_predictions$NDVI, breaks = 100)
+NDVI_quantiles <- quantile(habitat_predictions$NDVI, probs = c(0.01, 0.99))
+NDVI_breaks <- seq(NDVI_quantiles[1], NDVI_quantiles[2], length.out = 100)
+
+habitat_predictions_binned <- habitat_predictions %>% mutate(
+  NDVI_bins = cut(habitat_predictions$NDVI, breaks = NDVI_breaks),
+  Canopy_cover_bins = cut(habitat_predictions$Canopy_cover, breaks = 100),
+  Herbaceous_vegetation_bins = cut(habitat_predictions$Herbaceous_vegetation, breaks = 100),
+  Slope_bins = cut(habitat_predictions$Slope, breaks = 100),
+  .after = Slope
+  )
+
+```
+
+::: {.panel-tabset}
+
+# NDVI
+
+```{r}
+
+NDVI_means <- habitat_predictions_binned %>% 
+  group_by(NDVI_bins) %>% 
+  summarise(across(matches("^\\d+$"), mean, .names = "{.col}"))  # Apply mean to all numeric columns
+
+# lengthen data frame
+NDVI_means_long <- pivot_longer(NDVI_means, cols = -NDVI_bins, names_to = "Hour", values_to = "Values") %>% 
+  mutate(Hour = as.numeric(Hour),
+         NDVI_mid = mean(range(NDVI_bins))) %>% 
+  drop_na()
+
+```
+
+## Canopy cover
+
+```{r}
+
+Canopy_means <- habitat_predictions_binned %>% 
+  group_by(Canopy_cover_bins) %>% 
+  summarise(across(matches("^\\d+$"), mean, .names = "{.col}"))  # Apply mean to all numeric columns
+
+# lengthen data frame
+Canopy_means_long <- pivot_longer(Canopy_means, cols = -Canopy_cover_bins, names_to = "Hour", values_to = "Values") %>% 
+  mutate(Hour = as.numeric(Hour)) %>% 
+  drop_na()
+
+```
+
+## Herbaceous vegetation
+
+```{r}
+
+Herbaceous_means <- habitat_predictions_binned %>% 
+  group_by(Herbaceous_vegetation_bins) %>% 
+  summarise(across(matches("^\\d+$"), mean, .names = "{.col}"))  # Apply mean to all numeric columns
+
+# lengthen data frame
+Herbaceous_means_long <- pivot_longer(Herbaceous_means, cols = -Herbaceous_vegetation_bins, names_to = "Hour", values_to = "Values") %>% 
+  mutate(Hour = as.numeric(Hour)) %>% 
+  drop_na()
+
+```
+
+## Slope
+
+```{r}
+
+Slope_means <- habitat_predictions_binned %>% 
+  group_by(Slope_bins) %>% 
+  summarise(across(matches("^\\d+$"), mean, .names = "{.col}"))  # Apply mean to all numeric columns
+
+# lengthen data frame
+Slope_means_long <- pivot_longer(Slope_means, cols = -Slope_bins, names_to = "Hour", values_to = "Values") %>% 
+  mutate(Hour = as.numeric(Hour)) %>% 
+  drop_na()
+
+```
+
+:::
+
+## Plot the covariate vs prediction values
+
+::: {.panel-tabset}
+
+## NDVI
+
+```{r}
+
+habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(size = 0.1, alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "NDVI values",
+    y = "Habitat predictions"
+    )
+
+ggsave("outputs/NDVI_vs_habitat_predictions.png", width = 120, height = 60, 
+       units = "mm", dpi = 600)
+
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "loess") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+### All hours
+
+```{r}
+
+habitat_predictions_long_thinned %>%
+  ggplot(aes(x = NDVI, y = Values, colour = Hour, fill = Hour)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "gam") +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+ggsave("outputs/NDVI_vs_habitat_hourly_predictions.png", width = 120, height = 60, 
+       units = "mm", dpi = 600)
+
+```
+
+### Selection surface
+
+```{r}
+
+ggplot(data = NDVI_means_long, 
+       aes(x = Hour, y = NDVI_bins)) +
+geom_tile(aes(colour = Values), size = 2) + 
+# geom_contour(aes(z = value), 
+#              breaks = seq(ndvi_contour_increment, 
+#                           ndvi_contour_max, 
+#                           ndvi_contour_increment), 
+#              colour = "black", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), 
+#              breaks = seq(-ndvi_contour_increment, 
+#                           ndvi_contour_min, 
+#                           -ndvi_contour_increment), 
+#              colour = "red", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), breaks = 0, colour = "black", linewidth = 0.5) +
+# scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+# scale_y_continuous("NDVI value", breaks = seq(-1, 1, 0.25)) +
+scale_colour_viridis_c("Average prediction probability") +
+# ggtitle("Normalised Difference Vegetation Index (NDVI)") +
+theme_classic() +
+theme(legend.position = "bottom")
+
+ggsave("outputs/NDVI_vs_habitat_prediction_predictions.png", width = 120, height = 60, 
+       units = "mm", dpi = 600)
+
+
+# Create the plot using stat_summary_2d and geom_tile
+ggplot(habitat_predictions_long_thinned, aes(x = Hour, y = NDVI)) +
+  stat_summary_2d(aes(z = Values), fun = mean, bins = 25) +  # Calculate mean of x in 2D bins
+  scale_fill_viridis_c("Mean X Value") +  # Viridis color scale for the mean values
+  theme_classic() +
+  theme(legend.position = "bottom")
+
+```
+
+## Canopy cover
+
+```{r}
+
+habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = Canopy_cover, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values)) +
+  geom_boxplot(alpha = 0.05) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+### All hours
+
+```{r}
+
+habitat_predictions_long_thinned %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values, colour = Hour)) +
+  geom_boxplot(alpha = 0.05) +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+### Selection surface
+
+```{r}
+
+ggplot(data = Canopy_means_long, 
+       aes(x = Hour, y = Canopy_cover_bins)) +
+geom_point(aes(colour = Values), size = 7) + 
+# geom_contour(aes(z = value), 
+#              breaks = seq(ndvi_contour_increment, 
+#                           ndvi_contour_max, 
+#                           ndvi_contour_increment), 
+#              colour = "black", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), 
+#              breaks = seq(-ndvi_contour_increment, 
+#                           ndvi_contour_min, 
+#                           -ndvi_contour_increment), 
+#              colour = "red", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), breaks = 0, colour = "black", linewidth = 0.5) +
+# scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+# scale_y_continuous("NDVI value", breaks = seq(-1, 1, 0.25)) +
+scale_colour_viridis_c("Selection") +
+# ggtitle("Normalised Difference Vegetation Index (NDVI)") +
+theme_classic() +
+theme(legend.position = "right")
+
+```
+
+## Herbaceous vegetation
+
+```{r}
+
+habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = Herbaceous_vegetation, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = Herbaceous_vegetation, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam",
+              se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+### All hours
+
+```{r}
+
+habitat_predictions_long_thinned %>%
+  ggplot(aes(x = Herbaceous_vegetation, y = Values, colour = Hour)) +
+  geom_jitter(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+## Slope
+
+```{r}
+
+habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = Slope, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+
+habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+  ggplot(aes(x = Slope, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam",
+              se = FALSE) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    # title = "Habitat predictions vs covariates",
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+## All hours
+
+```{r}
+
+habitat_predictions_long_thinned %>%
+  ggplot(aes(x = Slope, y = Values, colour = Hour)) +
+  geom_jitter(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Covariate values",
+    y = "Habitat predictions"
+    )
+
+```
+
+### Selection surface
+
+```{r}
+
+ggplot(data = Slope_means_long, 
+       aes(x = Hour, y = Slope_bins)) +
+geom_point(aes(colour = Values), size = 7) + 
+# geom_contour(aes(z = value), 
+#              breaks = seq(ndvi_contour_increment, 
+#                           ndvi_contour_max, 
+#                           ndvi_contour_increment), 
+#              colour = "black", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), 
+#              breaks = seq(-ndvi_contour_increment, 
+#                           ndvi_contour_min, 
+#                           -ndvi_contour_increment), 
+#              colour = "red", linewidth = 0.25, linetype = "dashed") +
+# geom_contour(aes(z = value), breaks = 0, colour = "black", linewidth = 0.5) +
+# scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+# scale_y_continuous("NDVI value", breaks = seq(-1, 1, 0.25)) +
+scale_colour_viridis_c("Selection") +
+# ggtitle("Normalised Difference Vegetation Index (NDVI)") +
+theme_classic() +
+theme(legend.position = "right")
+
+```
+
+
+
+:::
