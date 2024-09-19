@@ -1,0 +1,46 @@
+---
+title: "Assessing habitat predictions"
+author: "Scott Forrest"
+format: html
+---
+
+## Loading packages
+
+```{r}
+
+library(tidyverse)
+packages <- c("terra", "beepr", "tictoc", "viridis")
+walk(packages, require, character.only = T)
+
+```
+
+```{r}
+
+habitat_predictions <- read_csv("Python/outputs/id2005_habitat_suitability_landscape_subset.csv")
+head(habitat_predictions)
+
+# lengthen data frame
+habitat_predictions_long <- habitat_predictions %>%
+  pivot_longer(cols = !Landscape_Predictions, names_to = "Covariate", values_to = "Values")
+
+head(habitat_predictions_long)
+
+```
+
+## Plot the covariate vs prediction values
+
+```{r}
+
+habitat_predictions_long %>%
+  ggplot(aes(x = Values, y = Landscape_Predictions, color = Covariate)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Habitat predictions vs covariates",
+       x = "Covariate values",
+       y = "Habitat predictions")
+
+```
+
+
