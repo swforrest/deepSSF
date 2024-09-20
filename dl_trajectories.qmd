@@ -57,7 +57,15 @@ plot(ndvi_late_dry)
 
 # for ggplot
 ndvi_late_dry_df <- as.data.frame(ndvi_late_dry, xy = TRUE)
-ndvi_late_dry_df$ndvi_dry_discrete <- cut(ndvi_late_dry_df$NDVI, breaks=9, dig.lab = 2)
+
+hist(ndvi_late_dry_df$NDVI, breaks = 100)
+NDVI_quantiles <- quantile(ndvi_late_dry_df$NDVI, probs = c(0.01, 0.99))
+NDVI_breaks <- seq(0, NDVI_quantiles[2], length.out = 9)
+
+# habitat_predictions_binned <- habitat_predictions %>% mutate(
+#   NDVI_bins = cut(habitat_predictions$NDVI, breaks = NDVI_breaks),
+
+ndvi_late_dry_df$ndvi_dry_discrete <- cut(ndvi_late_dry_df$NDVI, breaks=NDVI_breaks, dig.lab = 2)
 
 ```
 
@@ -190,14 +198,14 @@ time_vector = buffalo_id_1000samples$t
 sim_data_full_list <- 
   list.files("Python/outputs/dl_trajectories/ta_mix_norm_jitter/", pattern = "*.csv", full.names = T)
 
-sim_data_all <- grep("", sim_data_full_list[1:10], value = T) %>% 
+sim_data_all <- grep("3000", sim_data_full_list, value = T) %>% 
   grep("id2005", x = ., value = T) %>%
   map_dfr(read_csv, .id = "id")
 
 # to check the initial locations of the simulated trajectories - 
 # prior to removing the warmup period - these should be the same as the observed
 # data
-# sim_data_all %>% group_by(id) %>% slice(1)
+sim_data_all_subset <- sim_data_all %>% group_by(id) %>% slice_head(n = 1000) %>% ungroup()
 
 ```
 
@@ -208,18 +216,18 @@ sim_data_all <- grep("", sim_data_full_list[1:10], value = T) %>%
 buffer <- 2500
 
 # set the extent of the plot
-plot_extent <- sim_data_all %>%
+plot_extent <- sim_data_all_subset %>%
   summarise(min_x = min(x), min_y = min(y), max_x = max(x), max_y = max(y))
 
 ggplot() +
   geom_raster(data = ndvi_late_dry_df, 
                       aes(x = x, y = y, fill = ndvi_dry_discrete), 
-                      alpha = 0.5) +
-  scale_fill_brewer("NDVI", palette = "Greens", 
+                      alpha = 0.75) +
+  scale_fill_brewer("NDVI", palette = "Greys", 
                     guide = guide_legend(reverse = TRUE)) +
-  geom_path(data = sim_data_all,
-            aes(x = x, y = y, colour = id)) +
-  geom_point(data = sim_data_all |> slice(1),
+  geom_path(data = sim_data_all_subset,
+            aes(x = x, y = y, colour = id), alpha = 0.75) +
+  geom_point(data = sim_data_all_subset |> slice(1),
             aes(x = x, y = y), colour = "red") +
   scale_colour_viridis_d() +
   scale_x_continuous("Easting (m)", 
@@ -232,9 +240,49 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "none")
 
-# ggsave("outputs/sim_data_all.png", width = 150, height = 200, units = "mm", dpi = 600)
+ggsave("outputs/sim_data_all_ndvi.png", width = 150, height = 200, units = "mm", dpi = 600)
 
 # sim_data_all <- sim_data_all %>% group_by transmute(id = id, x = x, y = y, t = rep(time_vector,10))
+
+```
+
+## Loop over trajectories
+
+```{r}
+
+# buffer <- 2500
+# sim_ids <- unique(sim_data_all$id)
+# 
+# for(i in 1:length(sim_ids)) {
+# 
+#   # set the extent of the plot
+#   plot_extent <- sim_data_all_subset  %>% filter(id == sim_ids[i]) %>%
+#     summarise(min_x = min(x), min_y = min(y), max_x = max(x), max_y = max(y))
+#   
+#   ggplot() +
+#     geom_raster(data = ndvi_late_dry_df, 
+#                         aes(x = x, y = y, fill = ndvi_dry_discrete), 
+#                         alpha = 0.75) +
+#     scale_fill_brewer("NDVI", palette = "Greens", 
+#                       guide = guide_legend(reverse = TRUE)) +
+#     geom_path(data = sim_data_all_subset %>% filter(id == sim_ids[i]),
+#               aes(x = x, y = y, colour = id), alpha = 0.75) +
+#     geom_point(data = sim_data_all_subset |> slice(1),
+#               aes(x = x, y = y), colour = "red") +
+#     scale_colour_viridis_d() +
+#     scale_x_continuous("Easting (m)", 
+#                        limits = c(min(plot_extent[[1]])-buffer, 
+#                                   max(plot_extent[[3]])+buffer)) + 
+#     scale_y_continuous("Northing (m)", 
+#                        limits = c(min(plot_extent[[2]])-buffer, 
+#                                   max(plot_extent[[4]])+buffer)) + 
+#     coord_equal() +
+#     theme_bw() +
+#     theme(legend.position = "none")
+#   
+#   ggsave(paste("outputs/sim_data_all_ndvi_sim", sim_ids[i], ".png"), width = 60, height = 100, units = "mm", dpi = 600)
+#   
+# }
 
 ```
 
@@ -250,7 +298,7 @@ ggplot() +
             aes(x = x, y = y, colour = id)) +
   scale_colour_viridis_d() +
   geom_path(data = buffalo_id_1000samples,
-            aes(x = x, y = y), colour = "red") +
+            aes(x = x_, y = y_), colour = "red") +
   coord_equal() +
   theme_bw() +
   theme(legend.position = "right")
@@ -454,7 +502,7 @@ ggplot() +
                  aes(x = sl),
                  fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
-  scale_y_continuous("Frequency") +
+  scale_y_continuous("Density") +
   theme_bw()
 
 ggsave("outputs/step_length.png", width = 100, height = 75, units = "mm", dpi = 600)
@@ -468,7 +516,7 @@ ggplot() +
                  aes(x = sl),
                  fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_log10("log Step length (m)") +
-  scale_y_continuous("Frequency") +
+  scale_y_continuous("Density") +
   theme_bw()
 
 ggsave("outputs/step_length_log.png", width = 100, height = 75, units = "mm", dpi = 600)
@@ -481,7 +529,7 @@ ggplot() +
                  aes(x = ta_corr1),
                  fill = "orange", colour = "black", alpha = 0.5) +
   scale_x_continuous("Turning angles (radians)") +
-  scale_y_continuous("Frequency") +
+  scale_y_continuous("Density") +
   theme_bw()
 
 ggsave("outputs/turning_angles.png", width = 150, height = 75, units = "mm", dpi = 600)

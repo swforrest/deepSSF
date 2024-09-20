@@ -405,7 +405,7 @@ habitat_predictions_long_thinned %>%
 
 ggplot(data = Slope_means_long, 
        aes(x = Hour, y = Slope_bins)) +
-geom_point(aes(colour = Values), size = 7) + 
+geom_tile(aes(colour = Values), size = 7) + 
 # geom_contour(aes(z = value), 
 #              breaks = seq(ndvi_contour_increment, 
 #                           ndvi_contour_max, 
