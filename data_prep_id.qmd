@@ -104,6 +104,9 @@ Late dry season NDVI for simulations (same as in the Ecography SSF paper for com
 
 ```{r}
 
+plot(ndvi_projected[[8]])
+plot(ndvi_projected[[14]])
+
 ndvi_2018_late_dry <- ndvi_projected[[8:10]]
 ndvi_2019_late_dry <- ndvi_projected[[19:21]]
 ndvi <- terra::mean(c(ndvi_2018_late_dry, ndvi_2019_late_dry))
@@ -179,8 +182,8 @@ for(i in 1:length(buffalo_ids)) {
     hour_t2_sin = sin(2*pi*hour_t2/24),
     hour_t2_cos = cos(2*pi*hour_t2/24),
     yday_t2 = lubridate::yday(t2_),
-    yday_t2_sin = sin(2*pi*yday_t2/365),
-    yday_t2_cos = cos(2*pi*yday_t2/365),
+    yday_t2_sin = sin(2*pi*yday_t2/365.25),
+    yday_t2_cos = cos(2*pi*yday_t2/365.25),
     
     sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
     log_sl = log(sl),
