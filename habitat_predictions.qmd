@@ -14,9 +14,13 @@ walk(packages, require, character.only = T)
 
 ```
 
+
+
 ```{r}
 
-habitat_predictions <- read_csv("Python/outputs/id2005_hourly_fine_habitat_suitability_landscape_subset.csv")
+yday <- 225
+
+habitat_predictions <- read_csv(paste0("Python/outputs/id2005_hourly_habitat_suitability_landscape_subset_yday", yday, ".csv"))
 # filter out the edge cells that were masked
 habitat_predictions <- habitat_predictions %>% filter(!NDVI %in% c(Inf, -Inf))
 head(habitat_predictions)
@@ -27,9 +31,25 @@ head(habitat_predictions)
 
 ```{r}
 
+# from the stack of local layers (Python script)
+ndvi_max = 0.8220
+ndvi_min = -0.2772
+canopy_max = 82.5000
+canopy_min = 0.0
+herby_max = 1.0
+herby_min = 0.0
+slope_max = 12.2981
+slope_min = 0.0006
+
 habitat_predictions_long_thinned <- habitat_predictions %>% 
-  # slice_sample(prop = 0.1) %>% 
-  pivot_longer(cols = -c(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), names_to = "Hour", values_to = "Values") %>% 
+  slice_sample(prop = 0.25) %>%
+  mutate(NDVI_natural = (NDVI*(ndvi_max - ndvi_min) + ndvi_min),
+         Canopy_cover_natural = (Canopy_cover*(canopy_max - canopy_min) + canopy_min),
+         Herbaceous_vegetation_natural = (Herbaceous_vegetation*(herby_max - herby_min) + herby_min),
+         Slope_natural = (Slope*(slope_max - slope_min) + slope_min)) %>% 
+  pivot_longer(cols = -c(NDVI, Canopy_cover, Herbaceous_vegetation, Slope, 
+                         NDVI_natural, Canopy_cover_natural, Herbaceous_vegetation_natural, Slope_natural), 
+               names_to = "Hour", values_to = "Values") %>% 
   mutate(Hour = as.numeric(Hour))
 
 head(habitat_predictions_long_thinned)
@@ -40,7 +60,8 @@ head(habitat_predictions_long_thinned)
 
 ```{r}
 
-hist(habitat_predictions$NDVI, breaks = 100)
+hist(habitat_predictions_long_thinned$NDVI, breaks = 100)
+hist(habitat_predictions_long_thinned$NDVI_natural, breaks = 100)
 NDVI_quantiles <- quantile(habitat_predictions$NDVI, probs = c(0.01, 0.99))
 NDVI_breaks <- seq(NDVI_quantiles[1], NDVI_quantiles[2], length.out = 100)
 
@@ -66,8 +87,8 @@ NDVI_means <- habitat_predictions_binned %>%
 
 # lengthen data frame
 NDVI_means_long <- pivot_longer(NDVI_means, cols = -NDVI_bins, names_to = "Hour", values_to = "Values") %>% 
-  mutate(Hour = as.numeric(Hour),
-         NDVI_mid = mean(range(NDVI_bins))) %>% 
+  # mutate(Hour = as.numeric(Hour),
+         # NDVI_mid = mean(range(NDVI_bins))) %>% 
   drop_na()
 
 ```
@@ -127,7 +148,7 @@ Slope_means_long <- pivot_longer(Slope_means, cols = -Slope_bins, names_to = "Ho
 
 ```{r}
 
-habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 12) %>%
   ggplot(aes(x = NDVI, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam") +
@@ -151,7 +172,7 @@ habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
     y = "Habitat predictions"
     )
 
-ggsave("outputs/NDVI_vs_habitat_predictions.png", width = 120, height = 60, 
+ggsave(paste0("outputs/NDVI_vs_habitat_predictions", yday, ".png"), width = 120, height = 60, 
        units = "mm", dpi = 600)
 
 habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
@@ -173,7 +194,7 @@ habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
 ```{r}
 
 habitat_predictions_long_thinned %>%
-  ggplot(aes(x = NDVI, y = Values, colour = Hour, fill = Hour)) +
+  ggplot(aes(x = NDVI, y = Values, colour = Hour)) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
   scale_colour_viridis(discrete = T) +
@@ -184,7 +205,7 @@ habitat_predictions_long_thinned %>%
     y = "Habitat predictions"
     )
 
-ggsave("outputs/NDVI_vs_habitat_hourly_predictions.png", width = 120, height = 60, 
+ggsave(paste0("outputs/NDVI_vs_habitat_hourly_predictions", yday, ".png"), width = 120, height = 60, 
        units = "mm", dpi = 600)
 
 ```
@@ -194,7 +215,7 @@ ggsave("outputs/NDVI_vs_habitat_hourly_predictions.png", width = 120, height = 6
 ```{r}
 
 ggplot(data = NDVI_means_long, 
-       aes(x = Hour, y = NDVI_bins)) +
+       aes(x = as.numeric(Hour), y = NDVI_bins)) +
 geom_tile(aes(colour = Values), size = 2) + 
 # geom_contour(aes(z = value), 
 #              breaks = seq(ndvi_contour_increment, 
@@ -211,19 +232,35 @@ geom_tile(aes(colour = Values), size = 2) +
 # scale_y_continuous("NDVI value", breaks = seq(-1, 1, 0.25)) +
 scale_colour_viridis_c("Average prediction probability") +
 # ggtitle("Normalised Difference Vegetation Index (NDVI)") +
-theme_classic() +
-theme(legend.position = "bottom")
+theme_bw() +
+theme(legend.position = "none")
 
-ggsave("outputs/NDVI_vs_habitat_prediction_predictions.png", width = 120, height = 60, 
-       units = "mm", dpi = 600)
+# ggsave(paste0("outputs/ndvi_habitat_predictions_yday", yday, ".png"), width = 120, height = 120, 
+#        units = "mm", dpi = 600)
 
+```
+
+
+```{r}
+
+NDVI_quantiles <- quantile(habitat_predictions_long_thinned$NDVI_natural, probs = c(0.01, 0.99))
+
+habitat_predictions_long_thinned_ndvi_quantiles <- habitat_predictions_long_thinned %>% 
+  filter(NDVI_natural >= NDVI_quantiles[1] & NDVI_natural <= NDVI_quantiles[2])
 
 # Create the plot using stat_summary_2d and geom_tile
-ggplot(habitat_predictions_long_thinned, aes(x = Hour, y = NDVI)) +
-  stat_summary_2d(aes(z = Values), fun = mean, bins = 25) +  # Calculate mean of x in 2D bins
-  scale_fill_viridis_c("Mean X Value") +  # Viridis color scale for the mean values
-  theme_classic() +
-  theme(legend.position = "bottom")
+ggplot(habitat_predictions_long_thinned_ndvi_quantiles, aes(x = Hour, y = NDVI_natural)) +
+  # stat_summary_hex(aes(z = Values), fun = mean, bins = 23) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = 23) + 
+  scale_fill_viridis_c("Mean X Value") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("NDVI value") + #, limits = c(NDVI_quantiles[1], NDVI_quantiles[2])
+  ggtitle(paste0("Prediction values: Day ", yday)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave(paste0("outputs/ndvi_habitat_predictions_yday", yday, ".png"), width = 90, height = 75, 
+       units = "mm", dpi = 600)
 
 ```
 
@@ -231,7 +268,7 @@ ggplot(habitat_predictions_long_thinned, aes(x = Hour, y = NDVI)) +
 
 ```{r}
 
-habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = Canopy_cover, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam") +
@@ -243,7 +280,7 @@ habitat_predictions_long %>% filter(Hour == "Hour1") %>%
     y = "Habitat predictions"
     )
 
-habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = as.factor(Canopy_cover), y = Values)) +
   geom_boxplot(alpha = 0.05) +
   theme_bw() +
@@ -261,7 +298,7 @@ habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
 ```{r}
 
 habitat_predictions_long_thinned %>%
-  ggplot(aes(x = as.factor(Canopy_cover), y = Values, colour = Hour)) +
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values, colour = as.factor(Hour))) +
   geom_boxplot(alpha = 0.05) +
   scale_colour_viridis(discrete = T) +
   theme_bw() +
@@ -304,7 +341,7 @@ theme(legend.position = "right")
 
 ```{r}
 
-habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = Herbaceous_vegetation, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam") +
@@ -316,7 +353,7 @@ habitat_predictions_long %>% filter(Hour == "Hour1") %>%
     y = "Habitat predictions"
     )
 
-habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = Herbaceous_vegetation, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam",
@@ -336,9 +373,9 @@ habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
 ```{r}
 
 habitat_predictions_long_thinned %>%
-  ggplot(aes(x = Herbaceous_vegetation, y = Values, colour = Hour)) +
-  geom_jitter(alpha = 0.05) +
-  geom_smooth(method = "gam") +
+  ggplot(aes(x = Herbaceous_vegetation, y = as.factor(Values), colour = as.factor(Hour))) +
+  geom_boxplot(alpha = 0.5) +
+  # geom_smooth(method = "gam") +
   scale_colour_viridis(discrete = T) +
   theme_bw() +
   theme(legend.position = "none") +
@@ -353,7 +390,7 @@ habitat_predictions_long_thinned %>%
 
 ```{r}
 
-habitat_predictions_long %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = Slope, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam") +
@@ -366,7 +403,7 @@ habitat_predictions_long %>% filter(Hour == "Hour1") %>%
     )
 
 
-habitat_predictions_long_thinned %>% filter(Hour == "Hour1") %>%
+habitat_predictions_long_thinned %>% filter(Hour == 1) %>%
   ggplot(aes(x = Slope, y = Values)) +
   geom_point(alpha = 0.05) +
   geom_smooth(method = "gam",
@@ -425,6 +462,32 @@ theme_classic() +
 theme(legend.position = "right")
 
 ```
+
+
+
+```{r}
+
+slope_quantiles <- quantile(habitat_predictions_long_thinned$Slope_natural, probs = c(0.01, 0.99))
+
+habitat_predictions_long_thinned_slope_quantiles <- habitat_predictions_long_thinned %>% 
+  filter(Slope_natural >= slope_quantiles[1] & Slope_natural <= slope_quantiles[2])
+
+# Create the plot using stat_summary_2d and geom_tile
+ggplot(habitat_predictions_long_thinned_slope_quantiles, aes(x = Hour, y = Slope_natural)) +
+  # stat_summary_hex(aes(z = Values), fun = mean, bins = 23) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = 23) + 
+  scale_fill_viridis_c("Mean X Value") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Slope value") + #, limits = c(NDVI_quantiles[1], NDVI_quantiles[2])
+  ggtitle(paste0("Prediction values: Day ", yday)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave(paste0("outputs/slope_habitat_predictions_yday", yday, ".png"), width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
 
 
 
