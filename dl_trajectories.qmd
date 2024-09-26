@@ -165,7 +165,8 @@ buffalo_all <- buffalo_all %>% mutate(
   # y2_cent = y2 - y1,
   # t2_ = lead(t_, n = hourly_lag, default = NA),
   # t_diff = round(difftime(t2_, t_, units = "hours"),0),
-  hour = lubridate::hour(t_),
+  hour_t1 = lubridate::hour(t_),
+  hour_t2 = lead(hour_t1, n = hourly_lag, default = NA),
   # yday_t1 = lubridate::yday(t_),
   # hour_t2 = lubridate::hour(t2_),
   # yday_t2 = lubridate::yday(t2_),
@@ -202,6 +203,53 @@ hist(buffalo_all$cos_ta, breaks = 100)
 mean(buffalo_all$ta)
 
 hist(buffalo_all$bearing, breaks = 100)
+
+```
+
+## Plotting at local extent
+
+```{r}
+
+buffer <- 000
+
+# min_x <- 46500
+# max_x <- 49000
+# min_y <- -1435517.707409
+# max_y <- -1432500.624901
+
+centrepoint <- c(47740.841716, -1433609.844645)
+centrepoint_buffer <- 1250
+min_x <- centrepoint[1] - centrepoint_buffer
+max_x <- centrepoint[1] + centrepoint_buffer
+min_y <- centrepoint[2] - centrepoint_buffer
+max_y <- centrepoint[2] + centrepoint_buffer
+
+plot_extent <- c(min_x, min_y, max_x, max_y)
+
+# set the extent of the plot
+# plot_extent <- sim_data_all %>%
+#   summarise(min_x = min(x), min_y = min(y), max_x = max(x), max_y = max(y))
+
+ggplot() +
+  geom_raster(data = ndvi_late_dry_df, 
+                      aes(x = x, y = y, fill = ndvi_dry_discrete), 
+                      alpha = 0.75) +
+  scale_fill_brewer("NDVI", palette = "Greys", 
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_point(data = buffalo_all |> filter(id == 2005),
+            aes(x = x_, y = y_, colour = hour_t2)) +
+  # geom_point(data = buffalo_all |> filter(id == 2005 & hour_t2 %in% 18:20),
+  #           aes(x = x_, y = y_, colour = hour_t2)) +
+  scale_x_continuous("Easting (m)", 
+                     limits = c(min(plot_extent[[1]])-buffer, 
+                                max(plot_extent[[3]])+buffer)) + 
+  scale_y_continuous("Northing (m)", 
+                     limits = c(min(plot_extent[[2]])-buffer, 
+                                max(plot_extent[[4]])+buffer)) + 
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "right")
+
 
 ```
 
