@@ -1,5 +1,6 @@
 ---
 title: "Preparing data for DL model fitting"
+subtitle: "Here we create a single stack (tif file) per covariate for each individual, rather than saving each step for each covariate for each individual as a separate tif file."
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -82,7 +83,7 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
 
 ```
 
-Plot the data coloured by time
+## Plot the data coloured by time
 
 ```{r}
 
@@ -95,7 +96,7 @@ Plot the data coloured by time
 
 ```
 
-### Reading in the environmental covariates
+## Reading in the environmental covariates
 
 ```{r}
 
@@ -121,7 +122,9 @@ names(canopy_cover) <- "canopy_cover"
 
 ```
 
-Late dry season NDVI for simulations (same as in the Ecography SSF paper for comparison)
+## Late dry season NDVI for simulations 
+
+This is the same as in , for comparison
 
 ```{r}
 
