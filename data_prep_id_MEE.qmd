@@ -121,6 +121,25 @@ plot(canopy_cover)
 
 ```
 
+## Sentinel-2 spectral layers
+
+```{r}
+
+s2_1 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000000000-0000000000.tif")
+plot(s2_1[[2]])
+
+s2_2 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000000000-0000004608.tif")
+plot(s2_2[[2]])
+
+s2_3 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000004608-0000000000.tif")
+plot(s2_3[[2]])
+
+s2_4 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000004608-0000004608.tif")
+plot(s2_4[[2]])
+
+```
+
+
 # Generating the data to fit a deepSSF model
 
 ## Set up the spatial extent of the local covariates

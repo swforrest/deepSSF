@@ -1,0 +1,251 @@
+---
+title: "Preparing covariates"
+subtitle: "Importing spatial covariates (rasters) and normalising them prior to the local landscape sampling"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: references.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+---
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("sf", "terra", "beepr", "tictoc")
+walk(packages, require, character.only = T)
+
+```
+
+## Reading in the environmental covariates
+
+```{r}
+
+ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+
+# change the names (these will become the column names when extracting 
+# covariate values at the used and random steps)
+names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+names(slope) <- "slope"
+names(veg_herby) <- "veg_herby"
+names(canopy_cover) <- "canopy_cover"
+
+# to plot the rasters
+plot(ndvi_projected)
+plot(slope)
+plot(veg_herby)
+plot(canopy_cover)
+
+# # NDVI
+ndvi_minmax <- terra::minmax(ndvi_projected)
+ndvi_min <- min(ndvi_minmax[1,])
+ndvi_max <- max(ndvi_minmax[2,])
+ndvi_projected_norm = (ndvi_projected - ndvi_min) / (ndvi_max - ndvi_min)
+# plot(ndvi_projected_norm)
+# 
+# # Slope
+slope_minmax <- terra::minmax(slope)
+slope_min <- min(slope_minmax[1,])
+slope_max <- max(slope_minmax[2,])
+slope_norm = (slope - slope_min) / (slope_max - slope_min)
+# plot(slope_norm)
+# 
+# # Veg herby
+veg_herby_minmax <- terra::minmax(veg_herby)
+veg_herby_min <- min(veg_herby_minmax[1,])
+veg_herby_max <- max(veg_herby_minmax[2,])
+veg_herby_norm = (veg_herby - veg_herby_min) / (veg_herby_max - veg_herby_min)
+# plot(veg_herby_norm)
+# 
+# # Canopy cover
+canopy_cover_minmax <- terra::minmax(canopy_cover)
+canopy_cover_min <- min(canopy_cover_minmax[1,])
+canopy_cover_max <- max(canopy_cover_minmax[2,])
+canopy_cover_norm = (canopy_cover - canopy_cover_min) / (canopy_cover_max - canopy_cover_min)
+# plot(canopy_cover_norm)
+# 
+# # save the layers
+writeRaster(ndvi_projected_norm, "mapping/cropped rasters/ndvi_monthly_norm.tif", overwrite = T)
+writeRaster(slope_norm, "mapping/cropped rasters/slope_norm.tif", overwrite = T)
+writeRaster(veg_herby_norm, "mapping/cropped rasters/veg_herby_norm.tif", overwrite = T)
+writeRaster(canopy_cover_norm, "mapping/cropped rasters/canopy_cover_norm.tif", overwrite = T)
+
+ndvi_projected_norm <- rast("mapping/cropped rasters/ndvi_monthly_norm.tif")
+slope_norm <- rast("mapping/cropped rasters/slope_norm.tif")
+veg_herby_norm <- rast("mapping/cropped rasters/veg_herby_norm.tif")
+canopy_cover_norm <- rast("mapping/cropped rasters/canopy_cover_norm.tif")
+
+names(ndvi_projected_norm) <- rep("ndvi", terra::nlyr(ndvi_projected_norm))
+names(slope_norm) <- "slope"
+names(veg_herby_norm) <- "veg_herby"
+names(canopy_cover_norm) <- "canopy_cover"
+
+# plot(ndvi_projected_norm)
+# plot(slope_norm)
+# plot(veg_herby_norm)
+# plot(canopy_cover_norm)
+
+```
+
+## Sentinel-2 spectral layers
+
+### Import the layers and add times
+
+```{r}
+
+### January 2019
+s2_2019_01 <- rast("mapping/cropped rasters/S2_SR_masked_2019_01.tif")
+plot(s2_2019_01[[2]] > 10000)
+terra::time(s2_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_2019_01))
+# normalise layers
+hist(terra::values(s2_2019_01))
+# terra::values(s2_2019_01) <- terra::clamp(s2_2019_01, 0, 10000)
+s2_2019_01_minmax <- terra::minmax(s2_2019_01)
+s2_2019_01_min <- min(s2_2019_01_minmax[1,])
+s2_2019_01_max <- max(s2_2019_01_minmax[2,])
+s2_2019_01_norm = (s2_2019_01 - s2_2019_01_min) / (s2_2019_01_max - s2_2019_01_min)
+
+### February 2019
+s2_2019_02 <- rast("mapping/cropped rasters/S2_SR_masked_2019_02.tif")
+plot(s2_2019_02[[2]])
+terra::time(s2_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_2019_02))
+s2_2019_02_minmax <- terra::minmax(s2_2019_02)
+s2_2019_02_min <- min(s2_2019_02_minmax[1,])
+s2_2019_02_max <- max(s2_2019_02_minmax[2,])
+s2_2019_02_norm = (s2_2019_02 - s2_2019_02_min) / (s2_2019_02_max - s2_2019_02_min)
+
+### March 2019
+s2_2019_03 <- rast("mapping/cropped rasters/S2_SR_masked_2019_03.tif")
+plot(s2_2019_03[[2]])
+terra::time(s2_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_2019_03))
+s2_2019_03_minmax <- terra::minmax(s2_2019_03)
+s2_2019_03_min <- min(s2_2019_03_minmax[1,])
+s2_2019_03_max <- max(s2_2019_03_minmax[2,])
+s2_2019_03_norm = (s2_2019_03 - s2_2019_03_min) / (s2_2019_03_max - s2_2019_03_min)
+
+### April 2019
+s2_2019_04 <- rast("mapping/cropped rasters/S2_SR_masked_2019_04.tif")
+plot(s2_2019_04[[2]])
+terra::time(s2_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_2019_04))
+s2_2019_04_minmax <- terra::minmax(s2_2019_04)
+s2_2019_04_min <- min(s2_2019_04_minmax[1,])
+s2_2019_04_max <- max(s2_2019_04_minmax[2,])
+s2_2019_04_norm = (s2_2019_04 - s2_2019_04_min) / (s2_2019_04_max - s2_2019_04_min)
+
+### May 2019
+s2_2019_05 <- rast("mapping/cropped rasters/S2_SR_masked_2019_05.tif")
+plot(s2_2019_05[[2]])
+terra::time(s2_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_2019_05))
+s2_2019_05_minmax <- terra::minmax(s2_2019_05)
+s2_2019_05_min <- min(s2_2019_05_minmax[1,])
+s2_2019_05_max <- max(s2_2019_05_minmax[2,])
+s2_2019_05_norm = (s2_2019_05 - s2_2019_05_min) / (s2_2019_05_max - s2_2019_05_min)
+
+### June 2019
+s2_2019_06 <- rast("mapping/cropped rasters/S2_SR_masked_2019_06.tif")
+plot(s2_2019_06[[2]])
+terra::time(s2_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_2019_06))
+s2_2019_06_minmax <- terra::minmax(s2_2019_06)
+s2_2019_06_min <- min(s2_2019_06_minmax[1,])
+s2_2019_06_max <- max(s2_2019_06_minmax[2,])
+s2_2019_06_norm = (s2_2019_06 - s2_2019_06_min) / (s2_2019_06_max - s2_2019_06_min)
+
+### July 2019
+s2_2019_07 <- rast("mapping/cropped rasters/S2_SR_masked_2019_07.tif")
+plot(s2_2019_07[[2]])
+terra::time(s2_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_2019_07))
+s2_2019_07_minmax <- terra::minmax(s2_2019_07)
+s2_2019_07_min <- min(s2_2019_07_minmax[1,])
+s2_2019_07_max <- max(s2_2019_07_minmax[2,])
+s2_2019_07_norm = (s2_2019_07 - s2_2019_07_min) / (s2_2019_07_max - s2_2019_07_min)
+
+### August 2019
+s2_2019_08 <- rast("mapping/cropped rasters/S2_SR_masked_2019_08.tif")
+plot(s2_2019_08[[2]])
+terra::time(s2_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_2019_08))
+s2_2019_08_minmax <- terra::minmax(s2_2019_08)
+s2_2019_08_min <- min(s2_2019_08_minmax[1,])
+s2_2019_08_max <- max(s2_2019_08_minmax[2,])
+s2_2019_08_norm = (s2_2019_08 - s2_2019_08_min) / (s2_2019_08_max - s2_2019_08_min)
+
+### September 2019
+s2_2019_09 <- rast("mapping/cropped rasters/S2_SR_masked_2019_09.tif")
+plot(s2_2019_09[[2]])
+terra::time(s2_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_2019_09))
+s2_2019_09_minmax <- terra::minmax(s2_2019_09)
+s2_2019_09_min <- min(s2_2019_09_minmax[1,])
+s2_2019_09_max <- max(s2_2019_09_minmax[2,])
+s2_2019_09_norm = (s2_2019_09 - s2_2019_09_min) / (s2_2019_09_max - s2_2019_09_min)
+
+### October 2019
+s2_2019_10 <- rast("mapping/cropped rasters/S2_SR_masked_2019_10.tif")
+plot(s2_2019_10[[2]])
+terra::time(s2_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_2019_10))
+s2_2019_10_minmax <- terra::minmax(s2_2019_10)
+s2_2019_10_min <- min(s2_2019_10_minmax[1,])
+s2_2019_10_max <- max(s2_2019_10_minmax[2,])
+s2_2019_10_norm = (s2_2019_10 - s2_2019_10_min) / (s2_2019_10_max - s2_2019_10_min)
+
+### November 2019
+s2_2019_11 <- rast("mapping/cropped rasters/S2_SR_masked_2019_11.tif")
+plot(s2_2019_11[[2]])
+terra::time(s2_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_2019_11))
+s2_2019_11_minmax <- terra::minmax(s2_2019_11)
+s2_2019_11_min <- min(s2_2019_11_minmax[1,])
+s2_2019_11_max <- max(s2_2019_11_minmax[2,])
+s2_2019_11_norm = (s2_2019_11 - s2_2019_11_min) / (s2_2019_11_max - s2_2019_11_min)
+
+### December 2019
+s2_2019_12 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12.tif")
+plot(s2_2019_12[[2]])
+terra::time(s2_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_2019_12))
+s2_2019_12_minmax <- terra::minmax(s2_2019_12)
+s2_2019_12_min <- min(s2_2019_12_minmax[1,])
+s2_2019_12_max <- max(s2_2019_12_minmax[2,])
+s2_2019_12_norm = (s2_2019_12 - s2_2019_12_min) / (s2_2019_12_max - s2_2019_12_min)
+
+```
+
+## Write rasters to file
+
+```{r}
+
+writeRaster(s2_2019_01_norm, "mapping/cropped rasters/S2_SR_masked_2019_01_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_02_norm, "mapping/cropped rasters/S2_SR_masked_2019_02_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_03_norm, "mapping/cropped rasters/S2_SR_masked_2019_03_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_04_norm, "mapping/cropped rasters/S2_SR_masked_2019_04_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_05_norm, "mapping/cropped rasters/S2_SR_masked_2019_05_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_06_norm, "mapping/cropped rasters/S2_SR_masked_2019_06_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_07_norm, "mapping/cropped rasters/S2_SR_masked_2019_07_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_08_norm, "mapping/cropped rasters/S2_SR_masked_2019_08_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_09_norm, "mapping/cropped rasters/S2_SR_masked_2019_09_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_10_norm, "mapping/cropped rasters/S2_SR_masked_2019_10_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_11_norm, "mapping/cropped rasters/S2_SR_masked_2019_11_norm.tif", overwrite = TRUE)
+writeRaster(s2_2019_12_norm, "mapping/cropped rasters/S2_SR_masked_2019_12_norm.tif", overwrite = TRUE)
+
+```
+
