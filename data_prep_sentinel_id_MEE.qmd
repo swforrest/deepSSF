@@ -226,6 +226,9 @@ names(s2_25m_2019_12)
 
 ```{r}
 
+buffalo_all <- buffalo_all %>%  
+  arrange(id, t_)
+
 # create a vector of ids
 buffalo_ids <- unique(buffalo_all$id)
 
