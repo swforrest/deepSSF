@@ -136,78 +136,90 @@ dates <- as.POSIXct(lubridate::ymd("2019-01-15")) + months(0:11)
 ```{r}
 
 ### January 2019
-s2_10m_2019_01 <- rast("mapping/cropped rasters/S2_SR_masked_2019_01.tif")
-plot(s2_10m_2019_01[[2]])
+s2_10m_2019_01 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_01.tif")
+# plot(s2_10m_2019_01[[2]])
 terra::time(s2_10m_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_01))
 # s2_25m_2019_01 <- terra::aggregate(s2_10m_2019_01, fact = 25/10, fun = "mean")
 s2_25m_2019_01 <- terra::resample(s2_10m_2019_01, ndvi_projected, method = "bilinear")
-plot(s2_25m_2019_01[[2]])
+# plot(s2_25m_2019_01[[2]])
+writeRaster(s2_25m_2019_01, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_01.tif", overwrite = T)
 
 ### February 2019
-s2_10m_2019_02 <- rast("mapping/cropped rasters/S2_SR_masked_2019_02.tif")
-plot(s2_10m_2019_02[[2]])
+s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_02.tif")
+# plot(s2_10m_2019_02[[2]])
 terra::time(s2_10m_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_02))
 s2_25m_2019_02 <- terra::resample(s2_10m_2019_02, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_02, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_02.tif", overwrite = T)
 
 ### March 2019
-s2_10m_2019_03 <- rast("mapping/cropped rasters/S2_SR_masked_2019_03.tif")
-plot(s2_10m_2019_03[[2]])
+s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_03.tif")
+# plot(s2_10m_2019_03[[2]])
 terra::time(s2_10m_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_03))
 s2_25m_2019_03 <- terra::resample(s2_10m_2019_03, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_03, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_03.tif", overwrite = T)
 
 ### April 2019
-s2_10m_2019_04 <- rast("mapping/cropped rasters/S2_SR_masked_2019_04.tif")
-plot(s2_10m_2019_04[[2]])
+s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_04.tif")
+# plot(s2_10m_2019_04[[2]])
 terra::time(s2_10m_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_04))
 s2_25m_2019_04 <- terra::resample(s2_10m_2019_04, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_04, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_04.tif", overwrite = T)
 
 ### May 2019
-s2_10m_2019_05 <- rast("mapping/cropped rasters/S2_SR_masked_2019_05.tif")
-plot(s2_10m_2019_05[[2]])
+s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_05.tif")
+# plot(s2_10m_2019_05[[2]])
 terra::time(s2_10m_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_05))
 s2_25m_2019_05 <- terra::resample(s2_10m_2019_05, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_05, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_05.tif", overwrite = T)
 
 ### June 2019
-s2_10m_2019_06 <- rast("mapping/cropped rasters/S2_SR_masked_2019_06.tif")
-plot(s2_10m_2019_06[[2]])
+s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_06.tif")
+# plot(s2_10m_2019_06[[2]])
 terra::time(s2_10m_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_06))
 s2_25m_2019_06 <- terra::resample(s2_10m_2019_06, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_06, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_06.tif", overwrite = T)
 
 ### July 2019
-s2_10m_2019_07 <- rast("mapping/cropped rasters/S2_SR_masked_2019_07.tif")
-plot(s2_10m_2019_07[[2]])
+s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_07.tif")
+# plot(s2_10m_2019_07[[2]])
 terra::time(s2_10m_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_07))
 s2_25m_2019_07 <- terra::resample(s2_10m_2019_07, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_07, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_07.tif", overwrite = T)
 
 ### August 2019
-s2_10m_2019_08 <- rast("mapping/cropped rasters/S2_SR_masked_2019_08.tif")
-plot(s2_10m_2019_08[[2]])
+s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_08.tif")
+# plot(s2_10m_2019_08[[2]])
 terra::time(s2_10m_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_08))
 s2_25m_2019_08 <- terra::resample(s2_10m_2019_08, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_08, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_08.tif", overwrite = T)
 
 ### September 2019
-s2_10m_2019_09 <- rast("mapping/cropped rasters/S2_SR_masked_2019_09.tif")
-plot(s2_10m_2019_09[[2]])
+s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_09.tif")
+# plot(s2_10m_2019_09[[2]])
 terra::time(s2_10m_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_09))
 s2_25m_2019_09 <- terra::resample(s2_10m_2019_09, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_09, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_09.tif", overwrite = T)
 
 ### October 2019
-s2_10m_2019_10 <- rast("mapping/cropped rasters/S2_SR_masked_2019_10.tif")
-plot(s2_10m_2019_10[[2]])
+s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_10.tif")
+# plot(s2_10m_2019_10[[2]])
 terra::time(s2_10m_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_10))
 s2_25m_2019_10 <- terra::resample(s2_10m_2019_10, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_10, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_10.tif", overwrite = T)
 
 ### November 2019
-s2_10m_2019_11 <- rast("mapping/cropped rasters/S2_SR_masked_2019_11.tif")
-plot(s2_10m_2019_11[[2]])
+s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_11.tif")
+# plot(s2_10m_2019_11[[2]])
 terra::time(s2_10m_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_11))
 s2_25m_2019_11 <- terra::resample(s2_10m_2019_11, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_11, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_11.tif", overwrite = T)
 
 ### December 2019
-s2_10m_2019_12 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12.tif")
-plot(s2_10m_2019_12[[2]])
+s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_12.tif")
+# plot(s2_10m_2019_12[[2]])
 terra::time(s2_10m_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_12))
 s2_25m_2019_12 <- terra::resample(s2_10m_2019_12, ndvi_projected, method = "bilinear")
+writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_25m_2019_12.tif", overwrite = T)
 
 ```
 
