@@ -420,7 +420,7 @@ for(i in 1:length(buffalo_ids)) {
     # 
     # rasterised location of the next step - centred on (0,0)
     points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-    pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0))
+    pres_cent = list(rasterize(points_vect_cent, s2_b1_cent, background=0))
 
   ) %>% ungroup() # to remove the 'rowwise' class
 
