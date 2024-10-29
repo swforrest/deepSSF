@@ -1,5 +1,5 @@
 ---
-title: "Preparing data for DL model fitting"
+title: "Assessing deepSSF trajectories"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 

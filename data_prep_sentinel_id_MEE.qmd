@@ -239,7 +239,10 @@ writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_
 
 ```{r}
 
-s2_list <- list(s2_25m_2019_01, s2_25m_2019_02, s2_25m_2019_03, s2_25m_2019_04, s2_25m_2019_05, s2_25m_2019_06, s2_25m_2019_07, s2_25m_2019_08, s2_25m_2019_09, s2_25m_2019_10, s2_25m_2019_11, s2_25m_2019_12)
+s2_list <- list(s2_25m_2019_01, s2_25m_2019_02, s2_25m_2019_03, 
+                s2_25m_2019_04, s2_25m_2019_05, s2_25m_2019_06, 
+                s2_25m_2019_07, s2_25m_2019_08, s2_25m_2019_09, 
+                s2_25m_2019_10, s2_25m_2019_11, s2_25m_2019_12)
 names(s2_25m_2019_12)
 
 ```
@@ -274,7 +277,7 @@ Loop over each individual and save the local rasters
 
 ```{r}
 
-for(i in 1:length(buffalo_ids)) {
+for(i in 8:length(buffalo_ids)) {
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # all data for that individual
