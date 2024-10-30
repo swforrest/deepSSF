@@ -113,120 +113,224 @@ names(canopy_cover_norm) <- "canopy_cover"
 
 ## Sentinel-2 spectral layers
 
-### Import the layers and add times
+### Import the layers and add times - scaling by 10,000
 
 ```{r}
 
 ### January 2019
-s2_2019_01 <- rast("mapping/cropped rasters/S2_SR_masked_2019_01.tif")
-plot(s2_2019_01[[2]] > 10000)
-terra::time(s2_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_2019_01))
-# normalise layers
-hist(terra::values(s2_2019_01))
-# terra::values(s2_2019_01) <- terra::clamp(s2_2019_01, 0, 10000)
-s2_2019_01_minmax <- terra::minmax(s2_2019_01)
-s2_2019_01_min <- min(s2_2019_01_minmax[1,])
-s2_2019_01_max <- max(s2_2019_01_minmax[2,])
-s2_2019_01_norm = (s2_2019_01 - s2_2019_01_min) / (s2_2019_01_max - s2_2019_01_min)
+s2_10m_2019_01 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_01.tif")
+# plot(s2_10m_2019_01[[2]])
+terra::time(s2_10m_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_01))
+# s2_25m_2019_01 <- terra::aggregate(s2_10m_2019_01, fact = 25/10, fun = "mean")
+s2_25m_2019_01 <- terra::resample(s2_10m_2019_01, ndvi_projected, method = "bilinear")
+# plot(s2_25m_2019_01[[2]])
+s2_25m_2019_01 <- s2_25m_2019_01 / 10000
+writeRaster(s2_25m_2019_01, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif", overwrite = T)
 
 ### February 2019
-s2_2019_02 <- rast("mapping/cropped rasters/S2_SR_masked_2019_02.tif")
-plot(s2_2019_02[[2]])
-terra::time(s2_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_2019_02))
-s2_2019_02_minmax <- terra::minmax(s2_2019_02)
-s2_2019_02_min <- min(s2_2019_02_minmax[1,])
-s2_2019_02_max <- max(s2_2019_02_minmax[2,])
-s2_2019_02_norm = (s2_2019_02 - s2_2019_02_min) / (s2_2019_02_max - s2_2019_02_min)
+s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_02.tif")
+# plot(s2_10m_2019_02[[2]])
+terra::time(s2_10m_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_02))
+s2_25m_2019_02 <- terra::resample(s2_10m_2019_02, ndvi_projected, method = "bilinear")
+s2_25m_2019_02 <- s2_25m_2019_02 / 10000
+writeRaster(s2_25m_2019_02, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif", overwrite = T)
 
 ### March 2019
-s2_2019_03 <- rast("mapping/cropped rasters/S2_SR_masked_2019_03.tif")
-plot(s2_2019_03[[2]])
-terra::time(s2_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_2019_03))
-s2_2019_03_minmax <- terra::minmax(s2_2019_03)
-s2_2019_03_min <- min(s2_2019_03_minmax[1,])
-s2_2019_03_max <- max(s2_2019_03_minmax[2,])
-s2_2019_03_norm = (s2_2019_03 - s2_2019_03_min) / (s2_2019_03_max - s2_2019_03_min)
+s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_03.tif")
+# plot(s2_10m_2019_03[[2]])
+terra::time(s2_10m_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_03))
+s2_25m_2019_03 <- terra::resample(s2_10m_2019_03, ndvi_projected, method = "bilinear")
+s2_25m_2019_03 <- s2_25m_2019_03 / 10000
+writeRaster(s2_25m_2019_03, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif", overwrite = T)
 
 ### April 2019
-s2_2019_04 <- rast("mapping/cropped rasters/S2_SR_masked_2019_04.tif")
-plot(s2_2019_04[[2]])
-terra::time(s2_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_2019_04))
-s2_2019_04_minmax <- terra::minmax(s2_2019_04)
-s2_2019_04_min <- min(s2_2019_04_minmax[1,])
-s2_2019_04_max <- max(s2_2019_04_minmax[2,])
-s2_2019_04_norm = (s2_2019_04 - s2_2019_04_min) / (s2_2019_04_max - s2_2019_04_min)
+s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_04.tif")
+# plot(s2_10m_2019_04[[2]])
+terra::time(s2_10m_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_04))
+s2_25m_2019_04 <- terra::resample(s2_10m_2019_04, ndvi_projected, method = "bilinear")
+s2_25m_2019_04 <- s2_25m_2019_04 / 10000
+writeRaster(s2_25m_2019_04, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif", overwrite = T)
 
 ### May 2019
-s2_2019_05 <- rast("mapping/cropped rasters/S2_SR_masked_2019_05.tif")
-plot(s2_2019_05[[2]])
-terra::time(s2_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_2019_05))
-s2_2019_05_minmax <- terra::minmax(s2_2019_05)
-s2_2019_05_min <- min(s2_2019_05_minmax[1,])
-s2_2019_05_max <- max(s2_2019_05_minmax[2,])
-s2_2019_05_norm = (s2_2019_05 - s2_2019_05_min) / (s2_2019_05_max - s2_2019_05_min)
+s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_05.tif")
+# plot(s2_10m_2019_05[[2]])
+terra::time(s2_10m_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_05))
+s2_25m_2019_05 <- terra::resample(s2_10m_2019_05, ndvi_projected, method = "bilinear")
+s2_25m_2019_05 <- s2_25m_2019_05 / 10000
+writeRaster(s2_25m_2019_05, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif", overwrite = T)
 
 ### June 2019
-s2_2019_06 <- rast("mapping/cropped rasters/S2_SR_masked_2019_06.tif")
-plot(s2_2019_06[[2]])
-terra::time(s2_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_2019_06))
-s2_2019_06_minmax <- terra::minmax(s2_2019_06)
-s2_2019_06_min <- min(s2_2019_06_minmax[1,])
-s2_2019_06_max <- max(s2_2019_06_minmax[2,])
-s2_2019_06_norm = (s2_2019_06 - s2_2019_06_min) / (s2_2019_06_max - s2_2019_06_min)
+s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_06.tif")
+# plot(s2_10m_2019_06[[2]])
+terra::time(s2_10m_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_06))
+s2_25m_2019_06 <- terra::resample(s2_10m_2019_06, ndvi_projected, method = "bilinear")
+s2_25m_2019_06 <- s2_25m_2019_06 / 10000
+writeRaster(s2_25m_2019_06, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif", overwrite = T)
 
 ### July 2019
-s2_2019_07 <- rast("mapping/cropped rasters/S2_SR_masked_2019_07.tif")
-plot(s2_2019_07[[2]])
-terra::time(s2_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_2019_07))
-s2_2019_07_minmax <- terra::minmax(s2_2019_07)
-s2_2019_07_min <- min(s2_2019_07_minmax[1,])
-s2_2019_07_max <- max(s2_2019_07_minmax[2,])
-s2_2019_07_norm = (s2_2019_07 - s2_2019_07_min) / (s2_2019_07_max - s2_2019_07_min)
+s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_07.tif")
+# plot(s2_10m_2019_07[[2]])
+terra::time(s2_10m_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_07))
+s2_25m_2019_07 <- terra::resample(s2_10m_2019_07, ndvi_projected, method = "bilinear")
+s2_25m_2019_07 <- s2_25m_2019_07 / 10000
+writeRaster(s2_25m_2019_07, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif", overwrite = T)
 
 ### August 2019
-s2_2019_08 <- rast("mapping/cropped rasters/S2_SR_masked_2019_08.tif")
-plot(s2_2019_08[[2]])
-terra::time(s2_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_2019_08))
-s2_2019_08_minmax <- terra::minmax(s2_2019_08)
-s2_2019_08_min <- min(s2_2019_08_minmax[1,])
-s2_2019_08_max <- max(s2_2019_08_minmax[2,])
-s2_2019_08_norm = (s2_2019_08 - s2_2019_08_min) / (s2_2019_08_max - s2_2019_08_min)
+s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_08.tif")
+# plot(s2_10m_2019_08[[2]])
+terra::time(s2_10m_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_08))
+s2_25m_2019_08 <- terra::resample(s2_10m_2019_08, ndvi_projected, method = "bilinear")
+s2_25m_2019_08 <- s2_25m_2019_08 / 10000
+writeRaster(s2_25m_2019_08, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif", overwrite = T)
 
 ### September 2019
-s2_2019_09 <- rast("mapping/cropped rasters/S2_SR_masked_2019_09.tif")
-plot(s2_2019_09[[2]])
-terra::time(s2_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_2019_09))
-s2_2019_09_minmax <- terra::minmax(s2_2019_09)
-s2_2019_09_min <- min(s2_2019_09_minmax[1,])
-s2_2019_09_max <- max(s2_2019_09_minmax[2,])
-s2_2019_09_norm = (s2_2019_09 - s2_2019_09_min) / (s2_2019_09_max - s2_2019_09_min)
+s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_09.tif")
+# plot(s2_10m_2019_09[[2]])
+terra::time(s2_10m_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_09))
+s2_25m_2019_09 <- terra::resample(s2_10m_2019_09, ndvi_projected, method = "bilinear")
+s2_25m_2019_09 <- s2_25m_2019_09 / 10000
+writeRaster(s2_25m_2019_09, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif", overwrite = T)
 
 ### October 2019
-s2_2019_10 <- rast("mapping/cropped rasters/S2_SR_masked_2019_10.tif")
-plot(s2_2019_10[[2]])
-terra::time(s2_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_2019_10))
-s2_2019_10_minmax <- terra::minmax(s2_2019_10)
-s2_2019_10_min <- min(s2_2019_10_minmax[1,])
-s2_2019_10_max <- max(s2_2019_10_minmax[2,])
-s2_2019_10_norm = (s2_2019_10 - s2_2019_10_min) / (s2_2019_10_max - s2_2019_10_min)
+s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_10.tif")
+# plot(s2_10m_2019_10[[2]])
+terra::time(s2_10m_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_10))
+s2_25m_2019_10 <- terra::resample(s2_10m_2019_10, ndvi_projected, method = "bilinear")
+s2_25m_2019_10 <- s2_25m_2019_10 / 10000
+writeRaster(s2_25m_2019_10, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif", overwrite = T)
 
 ### November 2019
-s2_2019_11 <- rast("mapping/cropped rasters/S2_SR_masked_2019_11.tif")
-plot(s2_2019_11[[2]])
-terra::time(s2_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_2019_11))
-s2_2019_11_minmax <- terra::minmax(s2_2019_11)
-s2_2019_11_min <- min(s2_2019_11_minmax[1,])
-s2_2019_11_max <- max(s2_2019_11_minmax[2,])
-s2_2019_11_norm = (s2_2019_11 - s2_2019_11_min) / (s2_2019_11_max - s2_2019_11_min)
+s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_11.tif")
+# plot(s2_10m_2019_11[[2]])
+terra::time(s2_10m_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_11))
+s2_25m_2019_11 <- terra::resample(s2_10m_2019_11, ndvi_projected, method = "bilinear")
+s2_25m_2019_11 <- s2_25m_2019_11 / 10000
+writeRaster(s2_25m_2019_11, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif", overwrite = T)
 
 ### December 2019
-s2_2019_12 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12.tif")
-plot(s2_2019_12[[2]])
-terra::time(s2_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_2019_12))
-s2_2019_12_minmax <- terra::minmax(s2_2019_12)
-s2_2019_12_min <- min(s2_2019_12_minmax[1,])
-s2_2019_12_max <- max(s2_2019_12_minmax[2,])
-s2_2019_12_norm = (s2_2019_12 - s2_2019_12_min) / (s2_2019_12_max - s2_2019_12_min)
+s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_12.tif")
+# plot(s2_10m_2019_12[[2]])
+terra::time(s2_10m_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_12))
+s2_25m_2019_12 <- terra::resample(s2_10m_2019_12, ndvi_projected, method = "bilinear")
+s2_25m_2019_12 <- s2_25m_2019_12 / 10000
+writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif", overwrite = T)
+
+```
+
+### Import the layers and add times - scaling by min max
+
+```{r}
+
+# ### January 2019
+# s2_2019_01 <- rast("mapping/cropped rasters/S2_SR_masked_2019_01.tif")
+# plot(s2_2019_01[[2]] > 10000)
+# terra::time(s2_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_2019_01))
+# # normalise layers
+# hist(terra::values(s2_2019_01))
+# # terra::values(s2_2019_01) <- terra::clamp(s2_2019_01, 0, 10000)
+# s2_2019_01_minmax <- terra::minmax(s2_2019_01)
+# s2_2019_01_min <- min(s2_2019_01_minmax[1,])
+# s2_2019_01_max <- max(s2_2019_01_minmax[2,])
+# s2_2019_01_norm = (s2_2019_01 - s2_2019_01_min) / (s2_2019_01_max - s2_2019_01_min)
+# 
+# ### February 2019
+# s2_2019_02 <- rast("mapping/cropped rasters/S2_SR_masked_2019_02.tif")
+# plot(s2_2019_02[[2]])
+# terra::time(s2_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_2019_02))
+# s2_2019_02_minmax <- terra::minmax(s2_2019_02)
+# s2_2019_02_min <- min(s2_2019_02_minmax[1,])
+# s2_2019_02_max <- max(s2_2019_02_minmax[2,])
+# s2_2019_02_norm = (s2_2019_02 - s2_2019_02_min) / (s2_2019_02_max - s2_2019_02_min)
+# 
+# ### March 2019
+# s2_2019_03 <- rast("mapping/cropped rasters/S2_SR_masked_2019_03.tif")
+# plot(s2_2019_03[[2]])
+# terra::time(s2_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_2019_03))
+# s2_2019_03_minmax <- terra::minmax(s2_2019_03)
+# s2_2019_03_min <- min(s2_2019_03_minmax[1,])
+# s2_2019_03_max <- max(s2_2019_03_minmax[2,])
+# s2_2019_03_norm = (s2_2019_03 - s2_2019_03_min) / (s2_2019_03_max - s2_2019_03_min)
+# 
+# ### April 2019
+# s2_2019_04 <- rast("mapping/cropped rasters/S2_SR_masked_2019_04.tif")
+# plot(s2_2019_04[[2]])
+# terra::time(s2_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_2019_04))
+# s2_2019_04_minmax <- terra::minmax(s2_2019_04)
+# s2_2019_04_min <- min(s2_2019_04_minmax[1,])
+# s2_2019_04_max <- max(s2_2019_04_minmax[2,])
+# s2_2019_04_norm = (s2_2019_04 - s2_2019_04_min) / (s2_2019_04_max - s2_2019_04_min)
+# 
+# ### May 2019
+# s2_2019_05 <- rast("mapping/cropped rasters/S2_SR_masked_2019_05.tif")
+# plot(s2_2019_05[[2]])
+# terra::time(s2_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_2019_05))
+# s2_2019_05_minmax <- terra::minmax(s2_2019_05)
+# s2_2019_05_min <- min(s2_2019_05_minmax[1,])
+# s2_2019_05_max <- max(s2_2019_05_minmax[2,])
+# s2_2019_05_norm = (s2_2019_05 - s2_2019_05_min) / (s2_2019_05_max - s2_2019_05_min)
+# 
+# ### June 2019
+# s2_2019_06 <- rast("mapping/cropped rasters/S2_SR_masked_2019_06.tif")
+# plot(s2_2019_06[[2]])
+# terra::time(s2_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_2019_06))
+# s2_2019_06_minmax <- terra::minmax(s2_2019_06)
+# s2_2019_06_min <- min(s2_2019_06_minmax[1,])
+# s2_2019_06_max <- max(s2_2019_06_minmax[2,])
+# s2_2019_06_norm = (s2_2019_06 - s2_2019_06_min) / (s2_2019_06_max - s2_2019_06_min)
+# 
+# ### July 2019
+# s2_2019_07 <- rast("mapping/cropped rasters/S2_SR_masked_2019_07.tif")
+# plot(s2_2019_07[[2]])
+# terra::time(s2_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_2019_07))
+# s2_2019_07_minmax <- terra::minmax(s2_2019_07)
+# s2_2019_07_min <- min(s2_2019_07_minmax[1,])
+# s2_2019_07_max <- max(s2_2019_07_minmax[2,])
+# s2_2019_07_norm = (s2_2019_07 - s2_2019_07_min) / (s2_2019_07_max - s2_2019_07_min)
+# 
+# ### August 2019
+# s2_2019_08 <- rast("mapping/cropped rasters/S2_SR_masked_2019_08.tif")
+# plot(s2_2019_08[[2]])
+# terra::time(s2_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_2019_08))
+# s2_2019_08_minmax <- terra::minmax(s2_2019_08)
+# s2_2019_08_min <- min(s2_2019_08_minmax[1,])
+# s2_2019_08_max <- max(s2_2019_08_minmax[2,])
+# s2_2019_08_norm = (s2_2019_08 - s2_2019_08_min) / (s2_2019_08_max - s2_2019_08_min)
+# 
+# ### September 2019
+# s2_2019_09 <- rast("mapping/cropped rasters/S2_SR_masked_2019_09.tif")
+# plot(s2_2019_09[[2]])
+# terra::time(s2_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_2019_09))
+# s2_2019_09_minmax <- terra::minmax(s2_2019_09)
+# s2_2019_09_min <- min(s2_2019_09_minmax[1,])
+# s2_2019_09_max <- max(s2_2019_09_minmax[2,])
+# s2_2019_09_norm = (s2_2019_09 - s2_2019_09_min) / (s2_2019_09_max - s2_2019_09_min)
+# 
+# ### October 2019
+# s2_2019_10 <- rast("mapping/cropped rasters/S2_SR_masked_2019_10.tif")
+# plot(s2_2019_10[[2]])
+# terra::time(s2_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_2019_10))
+# s2_2019_10_minmax <- terra::minmax(s2_2019_10)
+# s2_2019_10_min <- min(s2_2019_10_minmax[1,])
+# s2_2019_10_max <- max(s2_2019_10_minmax[2,])
+# s2_2019_10_norm = (s2_2019_10 - s2_2019_10_min) / (s2_2019_10_max - s2_2019_10_min)
+# 
+# ### November 2019
+# s2_2019_11 <- rast("mapping/cropped rasters/S2_SR_masked_2019_11.tif")
+# plot(s2_2019_11[[2]])
+# terra::time(s2_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_2019_11))
+# s2_2019_11_minmax <- terra::minmax(s2_2019_11)
+# s2_2019_11_min <- min(s2_2019_11_minmax[1,])
+# s2_2019_11_max <- max(s2_2019_11_minmax[2,])
+# s2_2019_11_norm = (s2_2019_11 - s2_2019_11_min) / (s2_2019_11_max - s2_2019_11_min)
+# 
+# ### December 2019
+# s2_2019_12 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12.tif")
+# plot(s2_2019_12[[2]])
+# terra::time(s2_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_2019_12))
+# s2_2019_12_minmax <- terra::minmax(s2_2019_12)
+# s2_2019_12_min <- min(s2_2019_12_minmax[1,])
+# s2_2019_12_max <- max(s2_2019_12_minmax[2,])
+# s2_2019_12_norm = (s2_2019_12 - s2_2019_12_min) / (s2_2019_12_max - s2_2019_12_min)
 
 ```
 

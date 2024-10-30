@@ -82,6 +82,8 @@ Plot the data coloured by time
 
 ## Habitat covariates
 
+These have been normalised to a 0-1 scale. Check the 'covariate_preparation.qmd' script for details on how these were generated, and for the scaling factors.
+
 ```{r}
 
 ndvi_projected_norm <- rast("mapping/cropped rasters/ndvi_monthly_norm.tif")
@@ -103,22 +105,24 @@ names(canopy_cover_norm) <- "canopy_cover"
 
 ## Sentinel 2 imagery
 
-Each raster stack contains the Sentinel 2 bands for a given month in 2019. The bands are normalised to the range 0-1.
+Each raster stack contains the Sentinel 2 bands for a given month in 2019, and have been scaled by 10,000 from what was downloaded from GEE.
 
 ```{r}
 
-s2_2019_01_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_01_norm.tif")
-s2_2019_02_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_02_norm.tif")
-s2_2019_03_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_03_norm.tif")
-s2_2019_04_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_04_norm.tif")
-s2_2019_05_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_05_norm.tif")
-s2_2019_06_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_06_norm.tif")
-s2_2019_07_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_07_norm.tif")
-s2_2019_08_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_08_norm.tif")
-s2_2019_09_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_09_norm.tif")
-s2_2019_10_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_10_norm.tif")
-s2_2019_11_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_11_norm.tif")
-s2_2019_12_norm <- rast("mapping/cropped rasters/S2_SR_masked_2019_12_norm.tif")
+s2_2019_01_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif")
+s2_2019_02_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif")
+s2_2019_03_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif")
+s2_2019_04_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif")
+s2_2019_05_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif")
+s2_2019_06_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif")
+s2_2019_07_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif")
+s2_2019_08_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif")
+s2_2019_09_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif")
+s2_2019_10_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif")
+s2_2019_11_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif")
+s2_2019_12_norm <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif")
+
+s2_2019_01_norm
 
 ```
 
@@ -160,7 +164,7 @@ for(i in 1:length(buffalo_ids)) {
 
 buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
 # buffalo_data <- buffalo_data %>% arrange(t_)
-# buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
+buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
 
 # for no subsetting
 # buffalo_data <- buffalo_all
@@ -206,43 +210,9 @@ buffalo_data_covs <- buffalo_data %>% mutate(
   x_min = x_ - buffer,
   x_max = x_ + buffer,
   y_min = y_ - buffer,
-  y_max = y_ + buffer,
-  
-  x1_ = x_,
-  y1_ = y_,
-  x2_ = lead(x1_, n = hourly_lag, default = NA),
-  y2_ = lead(y1_, n = hourly_lag, default = NA),
-  x2_cent = x2_ - x1_,
-  y2_cent = y2_ - y1_,
-  t2_ = lead(t_, n = hourly_lag, default = NA),
-  t2_date = lubridate::date(t2_),
-  t_diff = round(difftime(t2_, t_, units = "hours"),0),
-  hour_t1 = lubridate::hour(t_),
-  yday_t1 = lubridate::yday(t_),
-  hour_t2 = lubridate::hour(t2_),
-  hour_t2_sin = sin(2*pi*hour_t2/24),
-  hour_t2_cos = cos(2*pi*hour_t2/24),
-  yday_t2 = lubridate::yday(t2_),
-  yday_t2_sin = sin(2*pi*yday_t2/365),
-  yday_t2_cos = cos(2*pi*yday_t2/365),
-  
-  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
-  log_sl = log(sl),
-  # bearing = c(atan2(diff(y_), diff(x_)), NA),
-  bearing = atan2(y2_ - y1_, x2_ - x1_),
-  bearing_sin = sin(bearing),
-  bearing_cos = cos(bearing),
-  ta = c(NA, ifelse(
-    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
-      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
-  cos_ta = cos(ta),
+  y_max = y_ + buffer
     
-  # extent for cropping the spatial covariates
-  x_min = x_ - buffer,
-  x_max = x_ + buffer,
-  y_min = y_ - buffer,
-  y_max = y_ + buffer,
-    
+  
 ) %>% rowwise() %>% mutate(
   
     extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
@@ -319,17 +289,11 @@ buffalo_data_covs <- buffalo_data_covs %>%
 
 buffalo_data_df <- buffalo_data_covs %>%
 dplyr::select(-extent_00centre, 
-              # -ndvi_local, 
               -ndvi_cent, 
-              # -veg_herby_local, 
               -veg_herby_cent, 
-              # -canopy_cover_local, 
               -canopy_cover_cent,
-              # -slope_local, 
               -slope_cent,
-              # -points_vect_local, 
               -points_vect_cent, 
-              # -pres_local, 
               -pres_cent
               )
 

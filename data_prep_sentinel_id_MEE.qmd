@@ -277,7 +277,7 @@ Loop over each individual and save the local rasters
 
 ```{r}
 
-for(i in 8:length(buffalo_ids)) {
+for(i in 1:length(buffalo_ids)) {
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # all data for that individual
@@ -322,7 +322,7 @@ for(i in 8:length(buffalo_ids)) {
     x_min = x_ - buffer,
     x_max = x_ + buffer,
     y_min = y_ - buffer,
-    y_max = y_ + buffer,
+    y_max = y_ + buffer
     
   
     # crop out and store the local covariates centered on the animal's location 
