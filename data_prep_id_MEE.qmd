@@ -78,8 +78,9 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
                                            time, 
                                            all_cols = T,
                                            crs = 4326) %>% 
-  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+  transform_coords(crs_to = 3112, crs_from = 4326) %>% arrange(id) # Transformation to GDA94 / 
 # Geoscience Australia Lambert (https://epsg.io/3112)
+
 
 ```
 
@@ -120,25 +121,6 @@ plot(veg_herby)
 plot(canopy_cover)
 
 ```
-
-## Sentinel-2 spectral layers
-
-```{r}
-
-s2_1 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000000000-0000000000.tif")
-plot(s2_1[[2]])
-
-s2_2 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000000000-0000004608.tif")
-plot(s2_2[[2]])
-
-s2_3 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000004608-0000000000.tif")
-plot(s2_3[[2]])
-
-s2_4 <- rast("mapping/cropped rasters/S2_SR_masked_2019_12-0000004608-0000004608.tif")
-plot(s2_4[[2]])
-
-```
-
 
 # Generating the data to fit a deepSSF model
 
@@ -390,3 +372,55 @@ saveRDS(buffalo_data_covs, paste0("buffalo_data_id_covs_", Sys.Date(), ".rds"))
 # }
 
 ```
+
+# Plotting for CDS/ESA presentations
+
+```{r}
+
+t <- 1:10
+x <- rep(1, length(t))
+
+ggplot() +
+  geom_point(aes(x = t, y = x), size = 1) +
+  scale_x_continuous(limits = c(0, 11), breaks = 1:10) +
+  scale_y_continuous("GPS Fix", limits = c(0.5, 1.5), breaks = 1) +
+  theme_classic()
+
+ggsave("outputs/fix_sequence.png", height = 30, width = 120, units = "mm", dpi = 600)
+
+
+```
+
+
+
+```{r}
+
+# plot step lengths
+buffalo_data_covs %>% filter(sl < 2000) %>% ggplot() +
+  geom_density(aes(x = sl), #, bins = 50
+                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
+  scale_x_continuous("Step length (m)") + #, limits = c(-25, 1250)
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+ggsave("outputs/step_length.png", height = 60, width = 120, units = "mm", dpi = 600)
+
+
+# plot turning angles
+buffalo_data_covs %>% ggplot() +
+  geom_density(aes(x = ta), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
+  # scale_x_continuous(breaks = c(expression(pi))) + #, limits = c(-180, 180)
+  scale_x_continuous("Turning angle (radians)", 
+    breaks = c(-pi, -pi/2, 0, pi/2, pi),
+    labels = c(expression(-pi), expression(-pi/2), "0", expression(pi/2), expression(pi))
+  ) +
+  scale_y_continuous("Density") +
+  ggtitle("Turning angles") +
+  theme_classic()
+
+ggsave("outputs/turning_angle.png", height = 60, width = 120, units = "mm", dpi = 600)  
+
+```
+

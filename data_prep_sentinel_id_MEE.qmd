@@ -143,7 +143,7 @@ terra::time(s2_10m_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz =
 s2_25m_2019_01 <- terra::resample(s2_10m_2019_01, ndvi_projected, method = "bilinear")
 # plot(s2_25m_2019_01[[2]])
 s2_25m_2019_01 <- s2_25m_2019_01 / 10000
-writeRaster(s2_25m_2019_01, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif", overwrite = T)
+# writeRaster(s2_25m_2019_01, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif", overwrite = T)
 
 ### February 2019
 s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_02.tif")
@@ -151,7 +151,7 @@ s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_02))
 s2_25m_2019_02 <- terra::resample(s2_10m_2019_02, ndvi_projected, method = "bilinear")
 s2_25m_2019_02 <- s2_25m_2019_02 / 10000
-writeRaster(s2_25m_2019_02, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif", overwrite = T)
+# writeRaster(s2_25m_2019_02, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif", overwrite = T)
 
 ### March 2019
 s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_03.tif")
@@ -159,7 +159,7 @@ s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_03))
 s2_25m_2019_03 <- terra::resample(s2_10m_2019_03, ndvi_projected, method = "bilinear")
 s2_25m_2019_03 <- s2_25m_2019_03 / 10000
-writeRaster(s2_25m_2019_03, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif", overwrite = T)
+# writeRaster(s2_25m_2019_03, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif", overwrite = T)
 
 ### April 2019
 s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_04.tif")
@@ -167,7 +167,7 @@ s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_04))
 s2_25m_2019_04 <- terra::resample(s2_10m_2019_04, ndvi_projected, method = "bilinear")
 s2_25m_2019_04 <- s2_25m_2019_04 / 10000
-writeRaster(s2_25m_2019_04, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif", overwrite = T)
+# writeRaster(s2_25m_2019_04, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif", overwrite = T)
 
 ### May 2019
 s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_05.tif")
@@ -175,7 +175,7 @@ s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_05))
 s2_25m_2019_05 <- terra::resample(s2_10m_2019_05, ndvi_projected, method = "bilinear")
 s2_25m_2019_05 <- s2_25m_2019_05 / 10000
-writeRaster(s2_25m_2019_05, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif", overwrite = T)
+# writeRaster(s2_25m_2019_05, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif", overwrite = T)
 
 ### June 2019
 s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_06.tif")
@@ -183,7 +183,7 @@ s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_06))
 s2_25m_2019_06 <- terra::resample(s2_10m_2019_06, ndvi_projected, method = "bilinear")
 s2_25m_2019_06 <- s2_25m_2019_06 / 10000
-writeRaster(s2_25m_2019_06, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif", overwrite = T)
+# writeRaster(s2_25m_2019_06, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif", overwrite = T)
 
 ### July 2019
 s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_07.tif")
@@ -191,7 +191,7 @@ s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_07))
 s2_25m_2019_07 <- terra::resample(s2_10m_2019_07, ndvi_projected, method = "bilinear")
 s2_25m_2019_07 <- s2_25m_2019_07 / 10000
-writeRaster(s2_25m_2019_07, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif", overwrite = T)
+# writeRaster(s2_25m_2019_07, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif", overwrite = T)
 
 ### August 2019
 s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_08.tif")
@@ -199,7 +199,7 @@ s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_08))
 s2_25m_2019_08 <- terra::resample(s2_10m_2019_08, ndvi_projected, method = "bilinear")
 s2_25m_2019_08 <- s2_25m_2019_08 / 10000
-writeRaster(s2_25m_2019_08, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif", overwrite = T)
+# writeRaster(s2_25m_2019_08, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif", overwrite = T)
 
 ### September 2019
 s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_09.tif")
@@ -207,7 +207,7 @@ s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_09))
 s2_25m_2019_09 <- terra::resample(s2_10m_2019_09, ndvi_projected, method = "bilinear")
 s2_25m_2019_09 <- s2_25m_2019_09 / 10000
-writeRaster(s2_25m_2019_09, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif", overwrite = T)
+# writeRaster(s2_25m_2019_09, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif", overwrite = T)
 
 ### October 2019
 s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_10.tif")
@@ -215,7 +215,7 @@ s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_10))
 s2_25m_2019_10 <- terra::resample(s2_10m_2019_10, ndvi_projected, method = "bilinear")
 s2_25m_2019_10 <- s2_25m_2019_10 / 10000
-writeRaster(s2_25m_2019_10, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif", overwrite = T)
+# writeRaster(s2_25m_2019_10, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif", overwrite = T)
 
 ### November 2019
 s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_11.tif")
@@ -223,7 +223,7 @@ s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_11))
 s2_25m_2019_11 <- terra::resample(s2_10m_2019_11, ndvi_projected, method = "bilinear")
 s2_25m_2019_11 <- s2_25m_2019_11 / 10000
-writeRaster(s2_25m_2019_11, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif", overwrite = T)
+# writeRaster(s2_25m_2019_11, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif", overwrite = T)
 
 ### December 2019
 s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_12.tif")
@@ -231,7 +231,28 @@ s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_
 terra::time(s2_10m_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_12))
 s2_25m_2019_12 <- terra::resample(s2_10m_2019_12, ndvi_projected, method = "bilinear")
 s2_25m_2019_12 <- s2_25m_2019_12 / 10000
-writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif", overwrite = T)
+# writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif", overwrite = T)
+
+```
+
+Each raster stack contains the Sentinel 2 bands for a given month in 2019, and have been scaled by 10,000 from what was downloaded from GEE.
+
+```{r}
+
+s2_25m_2019_01 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif")
+s2_25m_2019_02 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif")
+s2_25m_2019_03 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif")
+s2_25m_2019_04 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif")
+s2_25m_2019_05 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif")
+s2_25m_2019_06 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif")
+s2_25m_2019_07 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif")
+s2_25m_2019_08 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif")
+s2_25m_2019_09 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif")
+s2_25m_2019_10 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif")
+s2_25m_2019_11 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif")
+s2_25m_2019_12 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif")
+
+s2_25m_2019_01
 
 ```
 
@@ -281,9 +302,9 @@ for(i in 1:length(buffalo_ids)) {
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # all data for that individual
-  buffalo_data <- buffalo_data %>% arrange(t_)
+  # buffalo_data <- buffalo_data %>% arrange(t_)
   # a subset of the data for that individual - mostly for testing
-  # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(4000:4010)
   
   n_samples <- nrow(buffalo_data)
   
@@ -418,36 +439,36 @@ for(i in 1:length(buffalo_ids)) {
       s2_b12_cent
       }),
 
-    # # NDVI
-    # ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
-    # ndvi_cent = list({
-    #   ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
-    #   ext(ndvi_cent) <- extent_00centre
-    #   ndvi_cent
-    #   }),
-    # 
-    # # herbaceous vegetation
-    # veg_herby_cent = list({
-    #   veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
-    #   ext(veg_herby_cent) <- extent_00centre
-    #   veg_herby_cent
-    #   }),
-    # 
-    # # canopy cover
-    # canopy_cover_cent = list({
-    #   canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
-    #   ext(canopy_cover_cent) <- extent_00centre
-    #   canopy_cover_cent
-    #   }),
-    # 
-    # # slope
-    # 
-    # slope_cent = list({
-    #   slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
-    #   ext(slope_cent) <- extent_00centre
-    #   slope_cent
-    #   }),
-    # 
+    # NDVI
+    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
+    ndvi_cent = list({
+      ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
+      ext(ndvi_cent) <- extent_00centre
+      ndvi_cent
+      }),
+
+    # herbaceous vegetation
+    veg_herby_cent = list({
+      veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
+      ext(veg_herby_cent) <- extent_00centre
+      veg_herby_cent
+      }),
+
+    # canopy cover
+    canopy_cover_cent = list({
+      canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
+      ext(canopy_cover_cent) <- extent_00centre
+      canopy_cover_cent
+      }),
+
+    # slope
+
+    slope_cent = list({
+      slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
+      ext(slope_cent) <- extent_00centre
+      slope_cent
+      }),
+
     # rasterised location of the next step - centred on (0,0)
     points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
     pres_cent = list(rasterize(points_vect_cent, s2_b1_cent, background=0))
@@ -477,11 +498,11 @@ for(i in 1:length(buffalo_ids)) {
                 -s2_b9_cent,
                 -s2_b11_cent,
                 -s2_b12_cent,
-                # -ndvi_cent,
-                # -veg_herby_cent,
-                # -canopy_cover_cent,
-                # -slope_cent,
-                # -points_vect_cent,
+                -ndvi_cent,
+                -veg_herby_cent,
+                -canopy_cover_cent,
+                -slope_cent,
+                -points_vect_cent,
                 -pres_cent
                 )
 
@@ -603,73 +624,177 @@ walk(buffalo_data_covs$s2_b4_cent[1:n_plots], terra::plot)
 
 
 # Plot as RGB image
-rgb_image <- c(buffalo_data_covs$s2_b4_cent[[1]], buffalo_data_covs$s2_b3_cent[[1]], buffalo_data_covs$s2_b2_cent[[1]])
-terra::plotRGB(rgb_image, r = 1, g = 2, b = 3, scale = 2500)  # adjust 'scale' if needed
+rgb_image <- c(buffalo_data_covs$s2_b4_cent[[5]]*1e4, buffalo_data_covs$s2_b3_cent[[5]]*1e4, buffalo_data_covs$s2_b2_cent[[5]]*1e4)
 
-# walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
-# walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
-# walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
-# walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
-# walk(buffalo_data_covs$pres_cent[1:n_plots], terra::plot)
+# Save plot as a PNG image
+png("outputs/rgb_local_env.png", width = 120, height = 120, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plotRGB(rgb_image, r = 1, g = 2, b = 3, 
+               smooth = FALSE, mar = 1.5, axes = TRUE)  # adjust 'scale' if needed
+dev.off()  # Close the graphic device to save the file
+
+walk(buffalo_data_covs$ndvi_cent[1:n_plots], plot)
+walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
+walk(buffalo_data_covs$pres_cent[1:n_plots], terra::plot)
+
+# find which coordinates the 1 is
+buffalo_data_covs$pres_cent[1]
+which(buffalo_data_covs$pres_cent[1] == 1)
+
+# Find the cell index of the first occurrence of 1
+cell_index <- which(values(buffalo_data_covs$pres_cent[[5]]) == 1)[1]  # First occurrence
+
+# Get the coordinates of this cell
+coordinates <- terra::xyFromCell(buffalo_data_covs$pres_cent[[5]], cell_index)
 
 buffalo_data_covs$s2_b2_cent[1]
 
-saveRDS(buffalo_data_covs, paste0("buffalo_data_id_covs_", Sys.Date(), ".rds"))
+# saveRDS(buffalo_data_covs, paste0("buffalo_data_id_covs_", Sys.Date(), ".rds"))
 
 ```
+
+Save plots for presentation
+
+```{r}
+
+# NDVI
+png("outputs/ndvi_local_env.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(buffalo_data_covs$ndvi_cent[[5]], main = "NDVI")
+dev.off()  # Close the graphic device to save the file
+
+# Herby vegetation
+png("outputs/herby_local_env.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(buffalo_data_covs$veg_herby_cent[[5]], main = "Herbaceous veg")
+dev.off()  # Close the graphic device to save the file
+
+# Canopy cover
+png("outputs/canopy_local_env.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(buffalo_data_covs$canopy_cover_cent[[5]], main = "Canopy cover")
+dev.off()  # Close the graphic device to save the file
+
+# Slope
+png("outputs/slope_local_env.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(buffalo_data_covs$slope_cent[[5]], main = "Slope")
+dev.off()  # Close the graphic device to save the file
+
+```
+
+With coefficients
+
+```{r}
+
+ndvi_beta <- 2
+ndvi2_beta <- -1
+herby_beta <- 0.25
+canopy_beta <- -0.01
+slope_beta <- -0.5
+
+ndvi_coef <- (buffalo_data_covs$ndvi_cent[[5]] * ndvi_beta) + (buffalo_data_covs$ndvi_cent[[5]]^2 * ndvi2_beta)
+herby_coef <- buffalo_data_covs$veg_herby_cent[[5]] * herby_beta
+canopy_coef <- buffalo_data_covs$canopy_cover_cent[[5]] * canopy_beta
+slope_coef <- buffalo_data_covs$slope_cent[[5]] * slope_beta
+
+# NDVI
+png("outputs/ndvi_local_env_beta.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(ndvi_coef, main = "NDVI")
+dev.off()  # Close the graphic device to save the file
+
+# Herby vegetation
+png("outputs/herby_local_env_beta.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(herby_coef, main = "Herbaceous veg")
+dev.off()  # Close the graphic device to save the file
+
+# Canopy cover
+png("outputs/canopy_local_env_beta.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(canopy_coef, main = "Canopy cover")
+dev.off()  # Close the graphic device to save the file
+
+# Slope
+png("outputs/slope_local_env_beta.png", width = 75, height = 60, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(slope_coef, main = "Slope")
+dev.off()  # Close the graphic device to save the file
+
+rsf <- exp(ndvi_coef + herby_coef + canopy_coef + slope_coef)
+
+# RSF
+png("outputs/rsf_local_env.png", width = 90, height = 90, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
+terra::plot(rsf, main = "RSF")
+dev.off()  # Close the graphic device to save the file
+
+
+```
+
 
 ## To save some plots
 
 ```{r}
 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("ndvi_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$ndvi_cent[[i]])
-#   dev.off()
-# }
-# 
-# # for the pres layers
-# for(i in 1:n_plots) {
-#   
-#   # change the 0 values to NA
-#   layer <- buffalo_data_covs$pres_cent[[i]]
-#   layer[layer == 0] <- 0.5
-#   
-#   ndvi_layer <- buffalo_data_covs$ndvi_cent[[i]]
-#   new_layer <- layer*ndvi_layer
-#   
-#   # save the plot
-#   png(filename = paste0("pres_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(new_layer)
-#   dev.off()
-# }
-# 
-# 
-# # other plots
-# 
-# n_plots <- 1
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("veg_herby_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$veg_herby_cent[[i]])
-#   dev.off()
-# }
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("canopy_cover_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$canopy_cover_cent[[i]])
-#   dev.off()
-# }
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("slope_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$slope_cent[[i]])
-#   dev.off()
-# }
+# Load necessary libraries
+library(terra)
+library(circular)
+
+# Define raster parameters
+ncol <- 101   # Number of columns
+nrow <- 101   # Number of rows
+res <- 25     # Resolution in meters
+
+# Create an empty SpatRaster with specified dimensions and resolution
+r <- rast(nrows = nrow, ncols = ncol, xmin = 0, xmax = ncol * res,
+          ymin = 0, ymax = nrow * res)
+
+# Define the reference point (center of the raster)
+x0 <- (xmin(r) + xmax(r)) / 2
+y0 <- (ymin(r) + ymax(r)) / 2
+
+# Get the coordinates of each cell center
+coords <- crds(r, df = TRUE)
+
+# Calculate distances from each cell to the reference point
+dx <- coords$x - x0
+dy <- coords$y - y0
+distances <- sqrt(dx^2 + dy^2)
+
+# Calculate bearings from the reference point to each cell (in degrees from North)
+bearings_rad <- atan2(dx, dy)  # Note: atan2(x, y)
+bearings_deg <- (bearings_rad * 180 / pi + 360) %% 360
+
+# Convert bearings to circular data suitable for the von Mises distribution
+bearings_circular <- circular(bearings_deg, units = "degrees", template = "geographics")
+
+# Define parameters for the gamma distribution
+gamma_shape <- 1    # Shape parameter
+gamma_scale <- 300   # Scale parameter
+
+# Define parameters for the von Mises distribution
+mean_direction <- circular(90, units = "degrees", template = "geographics")  # Mean direction at 90 degrees (East)
+kappa <- 0.25  # Concentration parameter
+
+# Calculate the gamma density for each distance
+gamma_densities <- dgamma(distances, shape = gamma_shape, scale = gamma_scale)
+
+# Calculate the von Mises density for each bearing
+vonmises_densities <- dvonmises(bearings_circular, mu = mean_direction, kappa = kappa)
+
+# Compute the joint density by multiplying the gamma and von Mises densities
+joint_densities <- gamma_densities * vonmises_densities
+
+# Assign the joint densities to the raster cells
+values(r) <- joint_densities
+
+# Plot the resulting density raster
+png("outputs/move_local_env.png", width = 90, height = 90, units = "mm", res = 600)
+plot(r, 
+     # main = "Movement Distribution",
+     xlab = "x", ylab = "y"
+     )
+dev.off()  
+
+ext(r) <- ext(rsf)
+
+# Plot the next-step density raster
+png("outputs/step_local_env.png", width = 90, height = 90, units = "mm", res = 600)
+plot(r * rsf)
+dev.off()  
 
 ```

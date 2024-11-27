@@ -126,7 +126,16 @@ s2_2019_01_norm
 
 ```
 
+### Combine the monthly Sentinel 2 raster stacks into a list so they can be subsetted
 
+```{r}
+
+s2_list <- list(s2_2019_01_norm, s2_2019_02_norm, s2_2019_03_norm, 
+                s2_2019_04_norm, s2_2019_05_norm, s2_2019_06_norm, 
+                s2_2019_07_norm, s2_2019_08_norm, s2_2019_09_norm, 
+                s2_2019_10_norm, s2_2019_11_norm, s2_2019_12_norm)
+
+```
 
 Generating the data to fit the ML models
 
@@ -160,146 +169,308 @@ Loop over each individual and save the local rasters
 
 ```{r}
 
-for(i in 1:length(buffalo_ids)) {
-
-buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
-# buffalo_data <- buffalo_data %>% arrange(t_)
-buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
-
-# for no subsetting
-# buffalo_data <- buffalo_all
-
-# to subset
-# buffalo_data <- buffalo_all |>  slice(1:100)
-n_samples <- nrow(buffalo_data)
-
 tic()
 
-buffalo_data_covs <- buffalo_data %>% mutate(
-  
-  x1_ = x_,
-  y1_ = y_,
-  x2_ = lead(x1_, n = hourly_lag, default = NA),
-  y2_ = lead(y1_, n = hourly_lag, default = NA),
-  x2_cent = x2_ - x1_,
-  y2_cent = y2_ - y1_,
-  t2_ = lead(t_, n = hourly_lag, default = NA),
-  t2_date = lubridate::date(t2_),
-  t_diff = round(difftime(t2_, t_, units = "hours"),0),
-  hour_t1 = lubridate::hour(t_),
-  yday_t1 = lubridate::yday(t_),
-  hour_t2 = lubridate::hour(t2_),
-  hour_t2_sin = sin(2*pi*hour_t2/24),
-  hour_t2_cos = cos(2*pi*hour_t2/24),
-  yday_t2 = lubridate::yday(t2_),
-  yday_t2_sin = sin(2*pi*yday_t2/365),
-  yday_t2_cos = cos(2*pi*yday_t2/365),
-  
-  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
-  log_sl = log(sl),
-  # bearing = c(atan2(diff(y_), diff(x_)), NA),
-  bearing = atan2(y2_ - y1_, x2_ - x1_),
-  bearing_sin = sin(bearing),
-  bearing_cos = cos(bearing),
-  ta = c(NA, ifelse(
-    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
-      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
-  cos_ta = cos(ta),
-    
-  # extent for cropping the spatial covariates
-  x_min = x_ - buffer,
-  x_max = x_ + buffer,
-  y_min = y_ - buffer,
-  y_max = y_ + buffer
-    
-  
-) %>% rowwise() %>% mutate(
-  
-    extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
-  
-    # NDVI
-    ndvi_filename = paste0("data_layers_single/ndvi/ndvi_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    # crop our raster to the extent of the location
-    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected_norm)))),
-    ndvi_cent = list({
-      ndvi_cent = crop(ndvi_projected_norm[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
-      ext(ndvi_cent) <- extent_00centre
-      ndvi_cent
-      }),
-    
-    # Save the ndvi_cent raster and store the filename
-    ndvi_filename = save_raster(ndvi_cent[[1]], ndvi_filename),
-  
-    
-    # herbaceous vegetation
-    herby_filename = paste0("data_layers_single/herby/herby_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    veg_herby_cent = list({
-      veg_herby_cent = crop(veg_herby_norm, ext(x_min, x_max, y_min, y_max))
-      ext(veg_herby_cent) <- extent_00centre
-      veg_herby_cent
-      }),
-    
-    # Save the herby_cent raster and store the filename
-    herby_filename = save_raster(veg_herby_cent[[1]], herby_filename),
-  
-    
-    # canopy cover
-    canopy_filename = paste0("data_layers_single/canopy/canopy_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    canopy_cover_cent = list({
-      canopy_cover_cent = crop(canopy_cover_norm, ext(x_min, x_max, y_min, y_max))
-      ext(canopy_cover_cent) <- extent_00centre
-      canopy_cover_cent
-      }),
-    
-    # Save the canopy_cent raster and store the filename
-    canopy_filename = save_raster(canopy_cover_cent[[1]], canopy_filename),
-    
-  
-    # slope
-    slope_filename = paste0("data_layers_single/slope/slope_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    slope_cent = list({
-      slope_cent <- crop(slope_norm, ext(x_min, x_max, y_min, y_max))
-      ext(slope_cent) <- extent_00centre
-      slope_cent
-      }),
-    
-    # Save the slope_cent raster and store the filename
-    slope_filename = save_raster(slope_cent[[1]], slope_filename),
-  
-    
-    pres_filename = paste0("data_layers_single/pres/pres_id", 
-                           id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    
-    pres_filename = paste0("data_layers_single/pres/pres_id", 
-                           id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
-    # rasterised location of the next step - centred on (0,0)
-    points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-    pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
-    
-    # Save the pres_cent raster and store the filename
-    pres_filename = save_raster(pres_cent[[1]], pres_filename)
-  
-) %>% ungroup() # to remove the 'rowwise' class
-  
-  
-buffalo_data_covs <- buffalo_data_covs %>% 
-  filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% 
-  drop_na(ta)
+for(i in 1:length(buffalo_ids)) {
 
-
-buffalo_data_df <- buffalo_data_covs %>%
-dplyr::select(-extent_00centre, 
-              -ndvi_cent, 
-              -veg_herby_cent, 
-              -canopy_cover_cent,
-              -slope_cent,
-              -points_vect_cent, 
-              -pres_cent
-              )
-
-
-write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
-                                  "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+  buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
+  # buffalo_data <- buffalo_data %>% arrange(t_)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
+  
+  # for no subsetting
+  # buffalo_data <- buffalo_all
+  
+  # to subset
+  # buffalo_data <- buffalo_all |>  slice(1:100)
+  n_samples <- nrow(buffalo_data)
+  
+  tic()
+  
+  buffalo_data_covs <- buffalo_data %>% mutate(
+    
+    x1_ = x_,
+    y1_ = y_,
+    x2_ = lead(x1_, n = hourly_lag, default = NA),
+    y2_ = lead(y1_, n = hourly_lag, default = NA),
+    x2_cent = x2_ - x1_,
+    y2_cent = y2_ - y1_,
+    t2_ = lead(t_, n = hourly_lag, default = NA),
+    t2_date = lubridate::date(t2_),
+    t_diff = round(difftime(t2_, t_, units = "hours"),0),
+    hour_t1 = lubridate::hour(t_),
+    yday_t1 = lubridate::yday(t_),
+    hour_t2 = lubridate::hour(t2_),
+    hour_t2_sin = sin(2*pi*hour_t2/24),
+    hour_t2_cos = cos(2*pi*hour_t2/24),
+    yday_t2 = lubridate::yday(t2_),
+    yday_t2_sin = sin(2*pi*yday_t2/365),
+    yday_t2_cos = cos(2*pi*yday_t2/365),
+    
+    sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+    log_sl = log(sl),
+    # bearing = c(atan2(diff(y_), diff(x_)), NA),
+    bearing = atan2(y2_ - y1_, x2_ - x1_),
+    bearing_sin = sin(bearing),
+    bearing_cos = cos(bearing),
+    ta = c(NA, ifelse(
+      diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+        diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+    cos_ta = cos(ta),
+      
+    # extent for cropping the spatial covariates
+    x_min = x_ - buffer,
+    x_max = x_ + buffer,
+    y_min = y_ - buffer,
+    y_max = y_ + buffer
+      
+    
+  ) %>% rowwise() %>% mutate(
+    
+      extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
+    
+      # NDVI
+      ndvi_filename = paste0("data_layers_single/ndvi/ndvi_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      # crop our raster to the extent of the location
+      ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected_norm)))),
+      ndvi_cent = list({
+        ndvi_cent = crop(ndvi_projected_norm[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
+        ext(ndvi_cent) <- extent_00centre
+        ndvi_cent
+        }),
+      
+      # Save the ndvi_cent raster and store the filename
+      ndvi_filename = save_raster(ndvi_cent[[1]], ndvi_filename),
+    
+      
+      # herbaceous vegetation
+      herby_filename = paste0("data_layers_single/herby/herby_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      veg_herby_cent = list({
+        veg_herby_cent = crop(veg_herby_norm, ext(x_min, x_max, y_min, y_max))
+        ext(veg_herby_cent) <- extent_00centre
+        veg_herby_cent
+        }),
+      
+      # Save the herby_cent raster and store the filename
+      herby_filename = save_raster(veg_herby_cent[[1]], herby_filename),
+    
+      
+      # canopy cover
+      canopy_filename = paste0("data_layers_single/canopy/canopy_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      canopy_cover_cent = list({
+        canopy_cover_cent = crop(canopy_cover_norm, ext(x_min, x_max, y_min, y_max))
+        ext(canopy_cover_cent) <- extent_00centre
+        canopy_cover_cent
+        }),
+      
+      # Save the canopy_cent raster and store the filename
+      canopy_filename = save_raster(canopy_cover_cent[[1]], canopy_filename),
+      
+    
+      # slope
+      slope_filename = paste0("data_layers_single/slope/slope_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      slope_cent = list({
+        slope_cent <- crop(slope_norm, ext(x_min, x_max, y_min, y_max))
+        ext(slope_cent) <- extent_00centre
+        slope_cent
+        }),
+      
+      # Save the slope_cent raster and store the filename
+      slope_filename = save_raster(slope_cent[[1]], slope_filename),
+      
+      
+      # Sentinel 2
+      # index of the Sentinel 2 image closest to the time of the location, which is just the month
+      s2_index = lubridate::month(t_),
+      
+      # Sentinel 2 - B1
+      s2_b1_filename = paste0("data_layers_single/s2_b1/s2_b1_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b1_cent = list({
+        s2_b1_cent <- crop(s2_list[[s2_index]][[1]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b1_cent) <- extent_00centre
+        s2_b1_cent
+        }),
+      
+      # Save the s2_b1_cent raster and store the filename
+      s2_b1_filename = save_raster(s2_b1_cent[[1]], s2_b1_filename),
+      
+      
+      # Sentinel 2 - B2
+      s2_b2_filename = paste0("data_layers_single/s2_b2/s2_b2_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b2_cent = list({
+        s2_b2_cent <- crop(s2_list[[s2_index]][[2]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b2_cent) <- extent_00centre
+        s2_b2_cent
+        }),
+      
+      # Save the s2_b2_cent raster and store the filename
+      s2_b2_filename = save_raster(s2_b2_cent[[1]], s2_b2_filename),
+      
+      
+      # Sentinel 2 - B3
+      s2_b3_filename = paste0("data_layers_single/s2_b3/s2_b3_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b3_cent = list({
+        s2_b3_cent <- crop(s2_list[[s2_index]][[3]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b3_cent) <- extent_00centre
+        s2_b3_cent
+        }),
+      
+      # Save the s2_b3_cent raster and store the filename
+      s2_b3_filename = save_raster(s2_b3_cent[[1]], s2_b3_filename),
+      
+      
+      # Sentinel 2 - B4
+      s2_b4_filename = paste0("data_layers_single/s2_b4/s2_b4_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b4_cent = list({
+        s2_b4_cent <- crop(s2_list[[s2_index]][[4]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b4_cent) <- extent_00centre
+        s2_b4_cent
+        }),
+      
+      # Save the s2_b4_cent raster and store the filename
+      s2_b4_filename = save_raster(s2_b4_cent[[1]], s2_b4_filename),
+      
+      
+      # Sentinel 2 - B5
+      s2_b5_filename = paste0("data_layers_single/s2_b5/s2_b5_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b5_cent = list({
+        s2_b5_cent <- crop(s2_list[[s2_index]][[5]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b5_cent) <- extent_00centre
+        s2_b5_cent
+        }),
+      
+      # Save the s2_b5_cent raster and store the filename
+      s2_b5_filename = save_raster(s2_b5_cent[[1]], s2_b5_filename),
+      
+      
+      # Sentinel 2 - B6
+      s2_b6_filename = paste0("data_layers_single/s2_b6/s2_b6_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b6_cent = list({
+        s2_b6_cent <- crop(s2_list[[s2_index]][[6]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b6_cent) <- extent_00centre
+        s2_b6_cent
+        }),
+      
+      # Save the s2_b6_cent raster and store the filename
+      s2_b6_filename = save_raster(s2_b6_cent[[1]], s2_b6_filename),
+      
+      
+      # Sentinel 2 - B7
+      s2_b7_filename = paste0("data_layers_single/s2_b7/s2_b7_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b7_cent = list({
+        s2_b7_cent <- crop(s2_list[[s2_index]][[7]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b7_cent) <- extent_00centre
+        s2_b7_cent
+        }),
+      
+      # Save the s2_b7_cent raster and store the filename
+      s2_b7_filename = save_raster(s2_b7_cent[[1]], s2_b7_filename),
+      
+      
+      # Sentinel 2 - B8
+      s2_b8_filename = paste0("data_layers_single/s2_b8/s2_b8_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b8_cent = list({
+        s2_b8_cent <- crop(s2_list[[s2_index]][[8]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b8_cent) <- extent_00centre
+        s2_b8_cent
+        }),
+      
+      # Save the s2_b8_cent raster and store the filename
+      s2_b8_filename = save_raster(s2_b8_cent[[1]], s2_b8_filename),
+      
+      
+      # Sentinel 2 - B8A
+      s2_b8a_filename = paste0("data_layers_single/s2_b8a/s2_b8a_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b8a_cent = list({
+        s2_b8a_cent <- crop(s2_list[[s2_index]][[9]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b8a_cent) <- extent_00centre
+        s2_b8a_cent
+        }),
+      
+      # Save the s2_b8a_cent raster and store the filename
+      s2_b8a_filename = save_raster(s2_b8a_cent[[1]], s2_b8a_filename),
+      
+      
+      # Sentinel 2 - B9
+      s2_b9_filename = paste0("data_layers_single/s2_b9/s2_b9_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b9_cent = list({
+        s2_b9_cent <- crop(s2_list[[s2_index]][[10]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b9_cent) <- extent_00centre
+        s2_b9_cent
+        }),
+      
+      # Save the s2_b9_cent raster and store the filename
+      s2_b9_filename = save_raster(s2_b9_cent[[1]], s2_b9_filename),
+      
+      
+      # Sentinel 2 - B11
+      s2_b11_filename = paste0("data_layers_single/s2_b11/s2_b11_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b11_cent = list({
+        s2_b11_cent <- crop(s2_list[[s2_index]][[11]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b11_cent) <- extent_00centre
+        s2_b11_cent
+        }),
+      
+      # Save the s2_b11_cent raster and store the filename
+      s2_b11_filename = save_raster(s2_b11_cent[[1]], s2_b11_filename),
+      
+      
+      # Sentinel 2 - B12
+      s2_b12_filename = paste0("data_layers_single/s2_b12/s2_b12_id", id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      s2_b12_cent = list({
+        s2_b12_cent <- crop(s2_list[[s2_index]][[12]], ext(x_min, x_max, y_min, y_max))
+        ext(s2_b12_cent) <- extent_00centre
+        s2_b12_cent
+        }),
+      
+      # Save the s2_b12_cent raster and store the filename
+      s2_b12_filename = save_raster(s2_b12_cent[[1]], s2_b12_filename),
+      
+      
+      pres_filename = paste0("data_layers_single/pres/pres_id", 
+                             id, "_index_", index, "_t2_", t2_date, "_hr_", hour_t2, ".tif"),
+      
+      # rasterised location of the next step - centred on (0,0)
+      points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+      pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
+      
+      # Save the pres_cent raster and store the filename
+      pres_filename = save_raster(pres_cent[[1]], pres_filename)
+    
+  ) %>% ungroup() # to remove the 'rowwise' class
+    
+    
+  buffalo_data_covs <- buffalo_data_covs %>% 
+    filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% 
+    drop_na(ta)
+  
+  
+  buffalo_data_df <- buffalo_data_covs %>%
+  dplyr::select(-extent_00centre, 
+                -ndvi_cent, 
+                -veg_herby_cent, 
+                -canopy_cover_cent,
+                -slope_cent,
+                -s2_b1_cent,
+                -s2_b2_cent,
+                -s2_b3_cent,
+                -s2_b4_cent,
+                -s2_b5_cent,
+                -s2_b6_cent,
+                -s2_b7_cent,
+                -s2_b8_cent,
+                -s2_b8a_cent,
+                -s2_b9_cent,
+                -s2_b11_cent,
+                -s2_b12_cent,
+                -points_vect_cent, 
+                -pres_cent
+                )
+  
+  
+  write_csv(buffalo_data_df, paste0("data_layers_single/buffalo_S2_id", buffalo_ids[i], "_", nxn_cells, "x", nxn_cells,
+                                    "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+  
+  toc()
 
 }
 
@@ -311,13 +482,13 @@ Combine the data frames for each individual
 
 ```{r}
 
-buffalo_all_df <- bind_rows(list.files("data_layers_single", pattern = "id", full.names = TRUE) %>% 
+buffalo_all_df <- bind_rows(list.files("data_layers_single", pattern = "S2_id", full.names = TRUE) %>% 
   map_dfr(read_csv))
 
 n_samples <- nrow(buffalo_all_df)
 
 # save as a new csv
-write_csv(buffalo_all_df, paste0("data_layers_single/buffalo_all_101x101_data_df_lag_1hr_n", n_samples,".csv"))
+write_csv(buffalo_all_df, paste0("data_layers_single/buffalo_S2_all_101x101_data_df_lag_1hr_n", n_samples,".csv"))
 
 ```
 
@@ -566,5 +737,6 @@ buffalo_all_steps %>% ggplot() +
 quantile(buffalo_amt_2005$ta_, probs = c(0.5, 0.9, 0.95, 0.97, 0.99, 0.999, 1), na.rm = T)
 
 ```
+
 
 
