@@ -32,7 +32,7 @@ editor:
 #| warning=FALSE
 
 library(tidyverse)
-packages <- c("amt", "sf", "terra", "beepr", "tictoc", "circular", "matrixStats")
+packages <- c("amt", "sf", "terra", "beepr", "tictoc", "circular", "matrixStats", "progress")
 walk(packages, require, character.only = T)
 
 ```
@@ -193,7 +193,7 @@ bearing_values <- terra::values(bearing_layer)
 
 ```{r}
 
-ssf_coefs <- read_csv("ssf_coefficients/TwoStep_2pDaily_coefs_dry_2024-09-05.csv")
+ssf_coefs <- read_csv("ssf_coefficients/TwoStep_0pDaily_coefs_dry_2024-09-05.csv")
 
 # keep only the integer hours using the modulo operator
 ssf_coefs <- ssf_coefs %>% filter(ssf_coefs$hour %% 1 == 0) #%>% 
@@ -207,11 +207,20 @@ head(ssf_coefs)
 
 ```{r}
 
-test_data <- data_id2005 %>% slice(1:1000)
+test_data <- data_id2005 %>% slice(1:100)
+
+n <- nrow(test_data)
+
+pb <- progress_bar$new(
+  format = "  Progress [:bar] :percent in :elapsed",
+  total = n,
+  clear = FALSE
+)
+
 
 tic()
 
-for (i in 2:nrow(test_data)) {
+for (i in 2:n) {
   
   sample_tm1 <- test_data[i-1, ] # get the step at t - 1 for the bearing of the approaching step
   sample <- test_data[i, ]
@@ -296,9 +305,11 @@ for (i in 2:nrow(test_data)) {
   
   # probability value at the next step
   prob_next_step <- as.numeric(terra::extract(next_step_pred, next_step_vect)[2])
-  print(prob_next_step)
+  # print(prob_next_step)
   
   test_data[i, "prob_next_step_ssf"] <- prob_next_step
+  
+  pb$tick()  # Update progress bar
   
 }
 
@@ -317,9 +328,9 @@ ggplot() +
 
 ggplot() +
   geom_point(data = test_data, 
-             aes(x = hour_t2, y = prob_next_step_ssf, fill = yday_t2), 
-             alpha = 0.1) +
-  scale_fill_viridis_c() +
+             aes(x = hour_t2, y = prob_next_step_ssf, colour = yday_t2), 
+             alpha = 0.5) +
+  scale_colour_viridis_c() +
   theme_bw()
 
 ```
