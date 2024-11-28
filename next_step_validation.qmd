@@ -323,13 +323,15 @@ Plotting the next-step probabilities
 
 ggplot() +
   geom_line(data = test_data, 
-            aes(x = t_, y = prob_next_step_ssf)) +
+            aes(x = t_, y = prob_next_step_ssf),
+            alpha = 1) +
   theme_bw()
 
 ggplot() +
-  geom_point(data = test_data, 
+  geom_jitter(data = test_data, 
              aes(x = hour_t2, y = prob_next_step_ssf, colour = yday_t2), 
-             alpha = 0.5) +
+             alpha = 0.5,
+             width = 0.3) +
   scale_colour_viridis_c() +
   theme_bw()
 
