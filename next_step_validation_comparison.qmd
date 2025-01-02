@@ -213,16 +213,9 @@ bearing_values <- terra::values(bearing_layer)
 ```{r}
 
 model_harmonics <- "0p"
-
-# for dry season
-# season <- "dry"
-# model_date <- "2024-12-06"
-
-# for wet season
 season <- "wet"
-model_date <- "2024-12-17"
 
-ssf_coefs <- read_csv(paste0("ssf_coefficients/TwoStep_", model_harmonics, "Daily_coefs_", season, "_", model_date, ".csv"))
+ssf_coefs <- read_csv(paste0("ssf_coefficients/TwoStep_", model_harmonics, "Daily_coefs_", season, "_2024-12-17.csv"))
 
 # keep only the integer hours using the modulo operator
 ssf_coefs <- ssf_coefs %>% filter(ssf_coefs$hour %% 1 == 0) #%>% 
