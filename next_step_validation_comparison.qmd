@@ -152,6 +152,55 @@ validation_all_long <- validation_all_long %>% filter(value > 0)
 
 ```
 
+## deepSSF Sentinel 2 probabilities
+
+```{r}
+
+# create vector of GPS data filenames
+validation_deepssf_s2 <- list.files(path = "outputs", pattern = "next_step_probs_S2") 
+validation_ids <- substr(validation_deepssf_s2, 22, 25)
+
+# import data
+validation_deepssf_s2_list <- vector(mode = "list", length = length(validation_deepssf_s2))
+
+for(i in 1:length(validation_deepssf_s2)){
+  validation_deepssf_s2_list[[i]] <-  read_csv(paste("outputs/",
+                                             validation_deepssf_s2[[i]], 
+                                             sep = ""))
+  
+  # validation_deepssf_s2_list[i]$id <- validation_ids[i]
+  attr(validation_deepssf_s2_list[[i]]$t_, "tzone") <- "Australia/Queensland"
+  attr(validation_deepssf_s2_list[[i]]$t2_, "tzone") <- "Australia/Queensland"
+  
+}
+
+validation_deepssf_s2_list
+
+validation_deepssf_s2_all <- bind_rows(validation_deepssf_s2_list)
+
+```
+
+Lengthening data frames to stack together for plotting
+
+```{r}
+
+validation_deepssf_s2_long <- validation_deepssf_s2_all %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("probs")) %>% 
+  pivot_longer(cols = contains("probs"),
+               names_to = "full_name",
+               values_to = "value") %>% 
+  mutate(model = "deepSSF_S2",
+         probability = gsub("_probs", "", full_name),
+         .after = "full_name")
+
+validation_all_long <- bind_rows(validation_ssf_long,
+                                 validation_deepssf_long,
+                                 validation_deepssf_s2_long)
+
+validation_all_long <- validation_all_long %>% filter(value > 0)
+
+```
+
 # Plot the validation data
 
 ```{r}
@@ -251,7 +300,7 @@ validation_all_long %>% filter(probability == "habitat") %>%
               alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
   scale_y_continuous() +
-  # scale_y_log10(limits = c(1e-6, 1e-2)) + 
+  scale_y_log10(limits = c(1e-6, 1e-2)) +
   # scale_colour_viridis_d() +
   theme_bw()
 
