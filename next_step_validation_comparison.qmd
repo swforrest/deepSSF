@@ -37,229 +37,6 @@ walk(packages, require, character.only = T)
 
 ```
 
-# Plotting the next-step probabilities
-
-## Import deep learning validation
-
-```{r}
-
-# SSF validation
-ssf_validation <- read_csv("outputs/next_step_probs_ssf_id2005_2024-12-04.csv") %>% dplyr::select(-...1)
-attr(ssf_validation$t_, "tzone") <- "Australia/Queensland"
-attr(ssf_validation$t2_, "tzone") <- "Australia/Queensland"
-
-# deepSSF validation
-deepssf_validation <- read_csv("outputs/next_step_probs_TAmix_id2005_2024-12-03.csv") %>% dplyr::select(-...1)
-attr(deepssf_validation$t_, "tzone") <- "Australia/Queensland"
-attr(deepssf_validation$t2_, "tzone") <- "Australia/Queensland"
-
-head(ssf_validation)
-head(deepssf_validation)
-
-# merge the two datasets
-validation_data <- dplyr::left_join(ssf_validation, deepssf_validation)
-
-validation_data <- data_frame(ssf_validation,
-                              deepssf_habitat = deepssf_validation$habitat_probs,
-                              deepssf_movement = deepssf_validation$move_probs,
-                              deepssf_next_step = deepssf_validation$next_step_probs)
-
-validation_data_hab_long <- validation_data %>% 
-  pivot_longer(cols = contains("habitat"),
-               names_to = "habitat_model",
-               values_to = "habitat_probs")
-
-validation_data_move_long <- validation_data %>% 
-  pivot_longer(cols = contains("movement"),
-               names_to = "movement_model",
-               values_to = "movement_probs")
-
-validation_data_step_long <- validation_data %>% 
-  pivot_longer(cols = contains("next_step"),
-               names_to = "next_step_model",
-               values_to = "next_step_probs")
-
-
-validation_data_long <- data_frame(validation_data_hab_long,
-                                   movement_model = validation_data_move_long$movement_model,
-                                   movement_probs = validation_data_move_long$movement_probs,
-                                   next_step_model = validation_data_step_long$next_step_model,
-                                   next_step_probs = validation_data_step_long$next_step_probs)
-
-validation_data_long <- validation_data_long %>% mutate(
-  year_t2 = year(t2_)
-)
-
-```
-
-# Plot the validation data
-
-```{r}
-
-validation_data_long %>%
-  ggplot() +
-  geom_point(aes(x = t_, y = habitat_probs, colour = habitat_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = habitat_probs, colour = habitat_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_point(aes(x = t_, y = movement_probs, colour = movement_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = movement_probs, colour = movement_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_point(aes(x = t_, y = next_step_probs, colour = next_step_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = next_step_probs, colour = next_step_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-Subset
-
-```{r}
-
-validation_data_long %>% filter(year_t2 == 2019 & yday_t2 %in% c(4)) %>% 
-  ggplot() +
-  geom_line(aes(x = t_, y = habitat_probs, colour = habitat_model), 
-             alpha = 1) +
-  # geom_smooth(aes(x = t_, y = habitat_probs, colour = habitat_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-
-Log-probabilities
-
-```{r}
-
-validation_data_long %>% 
-  ggplot() +
-  geom_point(aes(x = t_, y = log(habitat_probs), colour = habitat_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(habitat_probs), colour = habitat_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_y_continuous(limits = c(-12, -6)) +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_point(aes(x = t_, y = log(movement_probs), colour = movement_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(movement_probs), colour = movement_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_point(aes(x = t_, y = log(next_step_probs), colour = next_step_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(next_step_probs), colour = next_step_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-## Hourly
-
-```{r}
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = habitat_probs, colour = habitat_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = habitat_probs, colour = habitat_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = movement_probs, colour = movement_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = movement_probs, colour = movement_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = next_step_probs, colour = next_step_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = next_step_probs, colour = next_step_model)) +
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  # scale_y_log10() +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-## Hourly log-probabilities
-
-```{r}
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(habitat_probs), colour = habitat_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(habitat_probs), colour = habitat_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_y_continuous(limits = c(-12, -6)) +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(movement_probs), colour = movement_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(movement_probs), colour = movement_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_data_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(next_step_probs), colour = next_step_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(next_step_probs), colour = next_step_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-
-```{r}
-
-validation_data_long %>% group_by(habitat_model) %>% 
-  summarise(average_habitat_prob = mean(habitat_probs, na.rm = T),
-            sd_habitat_prob = sd(habitat_probs, na.rm = T),
-            average_movement_prob = mean(movement_probs, na.rm = T),
-            sd_movement_prob = sd(movement_probs, na.rm = T),
-            average_next_step_prob = mean(next_step_probs, na.rm = T),
-            sd_next_step_prob = sd(next_step_probs, na.rm = T))
-
-```
-
-
-
-
-
 ## Step selection function probabilities
 
 ```{r}
@@ -290,36 +67,21 @@ validation_ssf_all <- bind_rows(validation_ssf_list)
 
 ```
 
-Checking for NAs
+Lengthening data frames to stack together for plotting
 
 ```{r}
 
-# # deepSSF validation
-# deepssf_validation <- read_csv("outputs/next_step_probs_TAmix_id2005_2024-12-03.csv") %>% dplyr::select(-...1)
-# attr(deepssf_validation$t_, "tzone") <- "Australia/Queensland"
-# attr(deepssf_validation$t2_, "tzone") <- "Australia/Queensland"
-# 
-# head(deepssf_validation)
-# 
-# # merge the two datasets
-# validation_data <- data_frame(ssf_validation,
-#                               deepssf_habitat = deepssf_validation$habitat_probs,
-#                               deepssf_movement = deepssf_validation$move_probs,
-#                               deepssf_next_step = deepssf_validation$next_step_probs)
-
-
-
 validation_ssf_move <- validation_ssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, contains("prob_movement")) %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_movement")) %>% 
   pivot_longer(cols = contains("movement"),
                names_to = "full_name",
                values_to = "value") %>% 
   mutate(model = gsub("prob_movement_", "", full_name),
-         probability = "movement",
+         probability = "move",
          .after = "full_name")
 
 validation_ssf_habitat <- validation_ssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, contains("prob_habitat")) %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_habitat")) %>% 
   pivot_longer(cols = contains("habitat"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -328,7 +90,7 @@ validation_ssf_habitat <- validation_ssf_all %>%
          .after = "full_name")
 
 validation_ssf_next_step <- validation_ssf_all %>%
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, contains("prob_next_step")) %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_next_step")) %>% 
   pivot_longer(cols = contains("next_step"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -340,31 +102,53 @@ validation_ssf_long <- bind_rows(validation_ssf_move,
                                  validation_ssf_habitat,
                                  validation_ssf_next_step)
 
+```
 
+## deepSSF probabilities
 
-# validation_ssf_all_long <- validation_ssf_all
-# 
-# # lengthen dataframe for plotting
-# validation_ssf_all_hab_long <- validation_ssf_all %>% 
-#   pivot_longer(cols = contains("habitat"),
-#                names_to = "habitat_model",
-#                values_to = "habitat_probs")
-# 
-# validation_ssf_all_move_long <- validation_ssf_all %>% 
-#   pivot_longer(cols = contains("move"),
-#                names_to = "movement_model",
-#                values_to = "movement_probs")
-# 
-# validation_ssf_all_step_long <- validation_ssf_all %>% 
-#   pivot_longer(cols = contains("next_step"),
-#                names_to = "next_step_model",
-#                values_to = "next_step_probs")
-# 
-# validation_ssf_all_long <- data_frame(validation_ssf_all_hab_long,
-#                                    movement_model = validation_ssf_all_move_long$movement_model,
-#                                    movement_probs = validation_ssf_all_move_long$movement_probs,
-#                                    next_step_model = validation_ssf_all_step_long$next_step_model,
-#                                    next_step_probs = validation_ssf_all_step_long$next_step_probs)
+```{r}
+
+# create vector of GPS data filenames
+validation_deepssf <- list.files(path = "outputs", pattern = "next_step_probs_TAmix") 
+validation_ids <- substr(validation_deepssf, 25, 28)
+
+# import data
+validation_deepssf_list <- vector(mode = "list", length = length(validation_deepssf))
+
+for(i in 1:length(validation_deepssf)){
+  validation_deepssf_list[[i]] <-  read_csv(paste("outputs/",
+                                             validation_deepssf[[i]], 
+                                             sep = ""))
+  
+  # validation_deepssf_list[i]$id <- validation_ids[i]
+  attr(validation_deepssf_list[[i]]$t_, "tzone") <- "Australia/Queensland"
+  attr(validation_deepssf_list[[i]]$t2_, "tzone") <- "Australia/Queensland"
+  
+}
+
+validation_deepssf_list
+
+validation_deepssf_all <- bind_rows(validation_deepssf_list)
+
+```
+
+Lengthening data frames to stack together for plotting
+
+```{r}
+
+validation_deepssf_long <- validation_deepssf_all %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("probs")) %>% 
+  pivot_longer(cols = contains("probs"),
+               names_to = "full_name",
+               values_to = "value") %>% 
+  mutate(model = "deepSSF",
+         probability = gsub("_probs", "", full_name),
+         .after = "full_name")
+
+validation_all_long <- bind_rows(validation_ssf_long,
+                                 validation_deepssf_long)
+
+validation_all_long <- validation_all_long %>% filter(value > 0)
 
 ```
 
@@ -375,36 +159,59 @@ validation_ssf_long <- bind_rows(validation_ssf_move,
 # if there were uniform probabilities (i.e. no selection)
 uniform_prob <- 1/(101*101)
 
-validation_ssf_long %>% filter(probability == "habitat") %>%
+validation_all_long %>% filter(probability == "habitat") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = value, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = value, colour = as.factor(id))) +
+  geom_point(aes(x = t_,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
   scale_y_log10() +
-  scale_colour_viridis_d() +
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_long %>% filter(probability == "movement") %>%
+validation_all_long %>% filter(probability == "move") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = value, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = value, colour = as.factor(id))) +
+  geom_point(aes(x = t_,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
   scale_y_log10() +
-  scale_colour_viridis_d() +
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_long %>% filter(probability == "next_step") %>%
+validation_all_long %>% filter(probability == "next_step") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = value, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = value, colour = as.factor(id))) +
+  geom_point(aes(x = t_,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
   scale_y_log10() +
-  scale_colour_viridis_d() +
+  # scale_colour_viridis_d() +
   theme_bw()
-
 
 ```
 
@@ -412,9 +219,11 @@ Subset
 
 ```{r}
 
-validation_ssf_all_long %>% filter(year_t2 == 2019 & yday_t2 %in% c(4)) %>% 
+validation_ssf_long %>% filter(probability == "habitat" &
+                                 year_t2 == 2019 & 
+                                 yday_t2 %in% c(4)) %>% 
   ggplot() +
-  geom_line(aes(x = t_, y = habitat_probs, colour = as.factor(id)), 
+  geom_line(aes(x = t_, y = value, colour = as.factor(id)), 
              alpha = 1) +
   # geom_smooth(aes(x = t_, y = habitat_probs, colour = habitat_model)) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
@@ -424,38 +233,64 @@ validation_ssf_all_long %>% filter(year_t2 == 2019 & yday_t2 %in% c(4)) %>%
 
 ```
 
-
-Log-probabilities
+## Hourly
 
 ```{r}
 
-validation_ssf_all_long %>% 
+validation_all_long %>% filter(probability == "habitat") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = log(habitat_probs), colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(habitat_probs), colour = as.factor(id))) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_y_continuous(limits = c(-12, -6)) +
-  scale_colour_viridis_d() +
+  geom_jitter(aes(x = hour_t2,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  scale_y_continuous() +
+  # scale_y_log10(limits = c(1e-6, 1e-2)) + 
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_all_long %>%
+validation_all_long %>% filter(probability == "move") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = log(move_probs), colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(move_probs), colour = as.factor(id))) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
+  geom_jitter(aes(x = hour_t2,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
+  scale_y_log10() +
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_all_long %>%
+validation_all_long %>% filter(probability == "next_step") %>%
   ggplot() +
-  geom_point(aes(x = t_, y = log(next_step_probs), colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = t_, y = log(next_step_probs), colour = as.factor(id))) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
+  geom_jitter(aes(x = hour_t2,
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
+  scale_y_log10() +
+  # scale_colour_viridis_d() +
   theme_bw()
+
 
 ```
 
@@ -463,81 +298,70 @@ validation_ssf_all_long %>%
 
 ```{r}
 
-validation_ssf_all_long %>%
+validation_all_long %>% filter(probability == "habitat" & id == 2005) %>%
   ggplot() +
-  geom_jitter(aes(x = hour_t2, y = habitat_probs, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = habitat_probs, colour = as.factor(id))) +
+  geom_jitter(aes(x = factor(hour_t2),
+                 y = value,
+                 colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = factor(hour_t2), 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)
+                  ), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_log10(limits = c(1e-6, 1e-3)) +
-  scale_colour_viridis_d() +
+  # scale_y_continuous() +
+  scale_y_log10() + # limits = c(1e-5, 1e-3)
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_all_long %>%
+validation_all_long %>% filter(probability == "move" & id == 2005) %>%
   ggplot() +
-  geom_jitter(aes(x = hour_t2, y = move_probs, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = move_probs, colour = as.factor(id))) +
+  geom_jitter(aes(x = hour_t2,
+                  y = value,
+                  colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
   scale_y_log10() +
-  scale_colour_viridis_d() +
+  # scale_colour_viridis_d() +
   theme_bw()
 
-validation_ssf_all_long %>%
+validation_all_long %>% filter(probability == "next_step" & id == 2005) %>%
   ggplot() +
-  geom_jitter(aes(x = hour_t2, y = next_step_probs, colour = as.factor(id)), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = next_step_probs, colour = as.factor(id))) +
+  geom_jitter(aes(x = hour_t2,
+                  y = value,
+                  colour = model,
+                 group = interaction(id, model)),
+             alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
   scale_y_log10() +
-  scale_colour_viridis_d() +
+  # scale_colour_viridis_d() +
   theme_bw()
+
 
 ```
 
-## Hourly log-probabilities
+# Summary statistics
 
 ```{r}
 
-validation_ssf_all_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(habitat_probs), colour = habitat_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(habitat_probs), colour = habitat_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_y_continuous(limits = c(-12, -6)) +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_ssf_all_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(movement_probs), colour = movement_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(movement_probs), colour = movement_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-validation_ssf_all_long %>%
-  ggplot() +
-  geom_jitter(aes(x = hour_t2, y = log(next_step_probs), colour = next_step_model), 
-             alpha = 0.1) +
-  geom_smooth(aes(x = hour_t2, y = log(next_step_probs), colour = next_step_model)) +
-  geom_hline(yintercept = log(uniform_prob), linetype = "dashed") +
-  scale_colour_viridis_d() +
-  theme_bw()
-
-```
-
-
-```{r}
-
-validation_ssf_all_long %>% group_by(habitat_model) %>% 
-  summarise(average_habitat_prob = mean(habitat_probs, na.rm = T),
-            sd_habitat_prob = sd(habitat_probs, na.rm = T),
-            average_movement_prob = mean(movement_probs, na.rm = T),
-            sd_movement_prob = sd(movement_probs, na.rm = T),
-            average_next_step_prob = mean(next_step_probs, na.rm = T),
-            sd_next_step_prob = sd(next_step_probs, na.rm = T))
+validation_all_long %>% group_by(model, probability) %>% 
+  summarise(average_prob = mean(value, na.rm = T),
+            sd_prob = sd(value, na.rm = T))
 
 ```
