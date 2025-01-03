@@ -2,6 +2,7 @@
 data/
 mapping/
 outputs/
+ssf_coefficients/
 buffalo_local_data/
 buffalo_local_data_id/
 buffalo_local_layers/
