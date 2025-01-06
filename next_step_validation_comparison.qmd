@@ -210,11 +210,11 @@ uniform_prob <- 1/(101*101)
 
 validation_all_long %>% filter(probability == "habitat") %>%
   ggplot() +
-  geom_point(aes(x = t_,
-                 y = value,
-                 colour = model,
-                 group = interaction(id, model)),
-             alpha = 0.01) +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
   geom_smooth(aes(x = t_, 
                   y = value, 
                   colour = model, 
@@ -225,14 +225,93 @@ validation_all_long %>% filter(probability == "habitat") %>%
   scale_y_log10() +
   # scale_colour_viridis_d() +
   theme_bw()
+
+```
+
+
+
+```{r}
+
+# if there were uniform probabilities (i.e. no selection)
+uniform_prob <- 1/(101*101)
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 id == 2005) %>%
+  ggplot() +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
+  scale_y_log10() +
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 grepl("ssf", model)) %>%
+  ggplot() +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
+  scale_y_log10() +
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 grepl("ssf", model) & 
+                                 id == 2005) %>%
+  ggplot() +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = t_, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  # scale_y_continuous() +
+  scale_y_log10() +
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
 
 validation_all_long %>% filter(probability == "move") %>%
   ggplot() +
-  geom_point(aes(x = t_,
-                 y = value,
-                 colour = model,
-                 group = interaction(id, model)),
-             alpha = 0.01) +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
   geom_smooth(aes(x = t_, 
                   y = value, 
                   colour = model, 
@@ -244,13 +323,19 @@ validation_all_long %>% filter(probability == "move") %>%
   # scale_colour_viridis_d() +
   theme_bw()
 
+```
+
+
+
+```{r}
+
 validation_all_long %>% filter(probability == "next_step") %>%
   ggplot() +
-  geom_point(aes(x = t_,
-                 y = value,
-                 colour = model,
-                 group = interaction(id, model)),
-             alpha = 0.01) +
+  # geom_point(aes(x = t_,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
   geom_smooth(aes(x = t_, 
                   y = value, 
                   colour = model, 
@@ -288,11 +373,11 @@ validation_ssf_long %>% filter(probability == "habitat" &
 
 validation_all_long %>% filter(probability == "habitat") %>%
   ggplot() +
-  geom_jitter(aes(x = hour_t2,
-                 y = value,
-                 colour = model,
-                 group = interaction(id, model)),
-             alpha = 0.01) +
+  # geom_jitter(aes(x = hour_t2,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
   geom_smooth(aes(x = hour_t2, 
                   y = value, 
                   colour = model, 
@@ -300,9 +385,115 @@ validation_all_long %>% filter(probability == "habitat") %>%
               alpha = 0.25) +
   geom_hline(yintercept = uniform_prob, linetype = "dashed") +
   scale_y_continuous() +
-  scale_y_log10(limits = c(1e-6, 1e-2)) +
+  scale_y_log10() + # limits = c(1e-6, 1e-2)
   # scale_colour_viridis_d() +
   theme_bw()
+
+```
+
+
+
+```{r}
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 id == 2005) %>%
+  ggplot() +
+  # geom_jitter(aes(x = hour_t2,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  scale_y_continuous() +
+  scale_y_log10() + # limits = c(1e-6, 1e-2)
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 grepl("ssf", model)) %>%
+  ggplot() +
+  # geom_jitter(aes(x = hour_t2,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  scale_y_continuous() +
+  scale_y_log10() + # limits = c(1e-6, 1e-2)
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+validation_all_long %>% filter(probability == "habitat" & 
+                                 grepl("ssf", model) & 
+                                 id == 2005) %>%
+  ggplot() +
+  # geom_jitter(aes(x = hour_t2,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  scale_y_continuous() +
+  scale_y_log10() + # limits = c(1e-6, 1e-2)
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+validation_all_long %>% filter(probability == "habitat") %>%
+  ggplot() +
+  # geom_jitter(aes(x = hour_t2,
+  #                y = value,
+  #                colour = model,
+  #                group = interaction(id, model)),
+  #            alpha = 0.01) +
+  geom_smooth(aes(x = hour_t2, 
+                  y = value, 
+                  colour = model, 
+                  group = interaction(id, model)), 
+              alpha = 0.25) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
+  scale_y_continuous() +
+  scale_y_log10() + # limits = c(1e-6, 1e-2)
+  # scale_colour_viridis_d() +
+  theme_bw()
+
+```
+
+
+
+```{r}
 
 validation_all_long %>% filter(probability == "move") %>%
   ggplot() +
@@ -321,6 +512,12 @@ validation_all_long %>% filter(probability == "move") %>%
   scale_y_log10() +
   # scale_colour_viridis_d() +
   theme_bw()
+
+```
+
+
+
+```{r}
 
 validation_all_long %>% filter(probability == "next_step") %>%
   ggplot() +
