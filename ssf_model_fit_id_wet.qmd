@@ -419,6 +419,7 @@ buffalo_data_scaled_3p <- data.frame(id = buffalo_data$id,
 As we have already precomputed and scaled the covariates, quadratic terms and interactions with the harmonics, we just include each parameter as a linear predictor.
 
 ::: {.panel-tabset group="model"}
+
 ## 0p
 
 ```{r}

@@ -238,8 +238,8 @@ Then, when we do our step selection simulations, we can just subset these maps b
 ```{r}
 
 # season <- "" # for models fitted to both seasons
-season <- "_dry" # for models fitted to dry season
-# season <- "_wet" # for models fitted to wet season
+# season <- "_dry" # for models fitted to dry season
+season <- "_wet" # for models fitted to wet season
 
 model_date <- "2025-01-03"
 
@@ -349,11 +349,15 @@ for(k in 1:length(buffalo_id_list)) {
     
     tic()
     
-    for (i in 2:n) {
+    # for (i in 2:n) {
+    for (i in 7003:n) {
     
     sample_tm1 <- test_data[i-1, ] # get the step at t - 1 for the bearing of the approaching step
     sample <- test_data[i, ]
     sample_extent <- ext(sample$x_min, sample$x_max, sample$y_min, sample$y_max)
+    
+    print(paste0("yday_t2 ", sample$yday_t2_2018_base))
+    print(paste0("hour_t2 ", sample$hour_t2))
     
     # get the local covariate layers for the sample
     ndvi_index <- which.min(abs(difftime(sample$t_, terra::time(ndvi_projected_cropped))))
@@ -380,25 +384,18 @@ for(k in 1:length(buffalo_id_list)) {
     
     # ndvi
     ndvi_linear <- ndvi_sample * ssf_coefs$ndvi[[coef_hour]]
-    # ndvi_quad <- ndvi_sample^2 * ssf_coefs$ndvi_2[[coef_hour]]
     ndvi_quad <- ndvi_sq_sample * ssf_coefs$ndvi_2[[coef_hour]]
     
     # canopy cover
     canopy_linear <- canopy_sample * ssf_coefs$canopy[[coef_hour]]
-    # canopy_quad <- (canopy_sample)^2 * ssf_coefs$canopy_2[[coef_hour]] 
     canopy_quad <- canopy_sq_sample * ssf_coefs$canopy_2[[coef_hour]]
     # veg_herby
     veg_herby_pred <- veg_herby_sample * ssf_coefs$herby[[coef_hour]]
     # veg_herby
     slope_pred <- slope_sample * ssf_coefs$slope[[coef_hour]]
     
-    
-    # rsf_noNDVI_pred <- rsf_noNDVI_pred_stack[[ifelse(coef_hour == 0, 24, coef_hour)]]
-    # rsf_noNDVI_sample <- crop(rsf_noNDVI_pred, sample_extent)
-    
     # combining all covariates (on the log-scale)
     habitat_log <- ndvi_linear + ndvi_quad + canopy_linear + canopy_quad + slope_pred + veg_herby_pred
-    # habitat_log <- ndvi_linear + ndvi_quad + rsf_noNDVI_sample
     # plot(habitat_log)
     
     # create template raster
@@ -411,8 +408,9 @@ for(k in 1:length(buffalo_id_list)) {
     
     # habitat probability value at the next step
     prob_habitat <- as.numeric(terra::extract(habitat_pred, next_step_vect)[2])
-    # print(prob_habitat)
+    print(paste0("Habitat probability: ", prob_habitat))
     
+    plot(terra::mask(habitat_pred, next_step_vect, inverse = T))
     
     # movement probability
     
@@ -484,7 +482,7 @@ for(k in 1:length(buffalo_id_list)) {
     test_data[i, paste0("prob_movement_ssf_", model_harmonics[j])] <- prob_movement
     test_data[i, paste0("prob_next_step_ssf_", model_harmonics[j])] <- prob_next_step
     
-    pb$tick()  # Update progress bar
+    # pb$tick()  # Update progress bar
      
     }
     
