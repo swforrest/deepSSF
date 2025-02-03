@@ -43,7 +43,7 @@ yday <- 225
 
 habitat_predictions <- read_csv(paste0("Python/outputs/id2005_hourly_habitat_suitability_landscape_subset_yday", yday, ".csv"))
 # filter out the edge cells that were masked
-habitat_predictions <- habitat_predictions %>% filter(!NDVI %in% c(Inf, -Inf))
+habitat_predictions <- habitat_predictions %>% filter(!Predictions %in% c(Inf, -Inf))
 head(habitat_predictions)
 
 ```
