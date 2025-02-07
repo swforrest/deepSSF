@@ -1,0 +1,1624 @@
+---
+title: "Assessing deepSSF trajectories"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: references.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+abstract: |
+  Now that we have generated trajectories using the `deepSSF_simulations.ipynb` script, we can check how well they capture different aspects of the observed data. This includes looking at the distribution of step lengths and turning angles, as well as comparing the observed and simulated trajectories in terms of the environmental covariates. We could also further summarise the trajectories using path-level summaries following a similar approach. 
+---
+
+
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+options(scipen = 999)
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "beepr", "tictoc", "viridis", "scales", "ggpubr", "patchwork", "zoo")
+walk(packages, require, character.only = T)
+
+```
+
+# Reading in the environmental covariates
+
+```{r}
+
+ndvi <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+
+# change the names (these will become the column names when extracting 
+# covariate values at the used and random steps)
+names(ndvi) <- rep("ndvi", terra::nlyr(ndvi))
+names(slope) <- "slope"
+names(veg_herby) <- "veg_herby"
+names(canopy_cover) <- "canopy_cover"
+
+# for ggplot (and arbitrary index)
+ndvi_df <- as.data.frame(ndvi[[1]], xy = TRUE)
+# create discrete breaks for the NDVI for plotting
+ndvi_quantiles <- quantile(ndvi_df$ndvi, probs = c(0.01, 0.99))
+ndvi_breaks <- seq(ndvi_quantiles[1], ndvi_quantiles[2], length.out = 9)
+ndvi_df$ndvi_discrete <- cut(ndvi_df$ndvi, breaks=ndvi_breaks, dig.lab = 2)
+
+```
+
+# Import observed buffalo data
+
+```{r}
+
+buffalo <- read_csv("data/buffalo_clean.csv")
+attr(buffalo$t_, "tzone") <- "Australia/Queensland"
+
+# plot the data of the buffalo that the deepSSF model was trained with
+ggplot() +
+  geom_point(data = buffalo |> filter(id == 2005),
+            aes(x = x_, y = y_, colour = id)) +
+  scale_colour_viridis_d() +
+  coord_equal() +
+  theme_bw()
+
+```
+
+## Calculate step info
+
+```{r}
+
+hourly_lag <- 1
+
+buffalo <- buffalo %>% mutate(
+  x1 = x_,
+  y1 = y_,
+  x2 = lead(x1, n = hourly_lag, default = NA),
+  y2 = lead(y1, n = hourly_lag, default = NA),
+  hour_t1 = lubridate::hour(t_),
+  hour_t2 = lead(hour_t1, n = hourly_lag, default = NA),
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA), # step lengths
+  log_sl = log(sl),
+  bearing = c(atan2(diff(y_), diff(x_)), NA),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))), # turning angles
+  cos_ta = cos(ta)
+)
+
+```
+
+### To compare the observed buffalo data to the simulated data, select a subset of the buffalo data
+
+```{r}
+
+no_subset_locations <- 1000 # to compare to the simulated data
+
+buffalo_id_subset <- buffalo %>% 
+  filter(id == 2005) %>% 
+  arrange(t_) |>  
+  slice(1:no_subset_locations)
+
+```
+
+## Import multiple deep learning trajectories
+
+```{r}
+
+# read in multiple csv files with similar filenames and bind them together
+sim_data_full_list <- 
+  list.files("Python/outputs/deepSSF_trajectories/2005", pattern = "*.csv", full.names = T)
+
+# to filter filenames with any string matching conditions
+sim_data_filenames <- grep("", sim_data_full_list, value = T) %>% 
+  grep("1000steps", x = ., value = T) 
+
+# read dataframes as a single dataframe with id identifier
+sim_data_all <- sim_data_filenames %>%
+  map_dfr(read_csv, .id = "id") %>% 
+  mutate(
+    step = ...1,
+    .keep = "unused",
+    .after = "id"
+    )
+
+head(sim_data_all)
+
+```
+
+### Prepare trajectories for plotting
+
+```{r}
+
+# set the extent of the plot
+plot_extent <- sim_data_all %>%
+  summarise(min_x = min(x), min_y = min(y), max_x = max(x), max_y = max(y))
+
+# set a buffer around the minimum and maximum x and y values
+buffer <- 2500
+
+```
+
+### Plot the trajectories
+
+```{r}
+
+ggplot() +
+  geom_raster(data = ndvi_df, 
+                      aes(x = x, y = y, fill = ndvi_discrete), 
+                      alpha = 0.75) +
+  scale_fill_brewer("ndvi", palette = "Greys", 
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_path(data = sim_data_all %>% filter(id %in% 1:10),
+            aes(x = x, y = y, colour = id), 
+            alpha = 0.75, linewidth = 0.25) +
+  geom_point(data = sim_data_all |> slice(1),
+            aes(x = x, y = y), colour = "red") +
+  scale_colour_viridis_d() +
+  scale_x_continuous("Easting (m)", 
+                     limits = c(min(plot_extent[[1]])-buffer, 
+                                max(plot_extent[[3]])+buffer)) + 
+  scale_y_continuous("Northing (m)", 
+                     limits = c(min(plot_extent[[2]])-buffer, 
+                                max(plot_extent[[4]])+buffer)) + 
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+```
+
+## Combine the datasets
+
+```{r}
+
+# combine the observed and simulated data
+all_data <- bind_rows(buffalo_id_subset, sim_data_all)
+
+# ggplot() +
+#   geom_path(data = sim_data_all,
+#             aes(x = x, y = y, colour = id)) +
+#   scale_colour_viridis_d() +
+#   geom_path(data = buffalo_id_subset,
+#             aes(x = x_, y = y_), colour = "red") +
+#   coord_equal() +
+#   theme_bw() +
+#   theme(legend.position = "right")
+
+ggplot() +
+  geom_raster(data = ndvi_late_dry_df, 
+                      aes(x = x, y = y, fill = ndvi_dry_discrete), 
+                      alpha = 0.75) +
+  scale_fill_brewer("ndvi", palette = "Greys", 
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_path(data = sim_data_all,
+            aes(x = x, y = y, colour = id), 
+            alpha = 0.75, linewidth = 0.25) +
+  scale_colour_viridis_d() +
+  geom_path(data = buffalo_id_subset,
+            aes(x = x_, y = y_), 
+            alpha = 0.75, linewidth = 0.25, colour = "red") +
+  geom_point(data = sim_data_all |> slice(1),
+            aes(x = x, y = y), fill = "blue", shape = 23) +
+  scale_x_continuous("Easting (m)", 
+                     limits = c(min(plot_extent[[1]])-buffer, 
+                                max(plot_extent[[3]])+buffer)) + 
+  scale_y_continuous("Northing (m)", 
+                     limits = c(min(plot_extent[[2]])-buffer, 
+                                max(plot_extent[[4]])+buffer)) + 
+  coord_equal() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# ggsave("outputs/sim_data_all_buffalo_ndvi.png", width = 150, height = 150, units = "mm", dpi = 600)
+
+```
+
+## moveVis
+
+```{r}
+
+# install.packages("moveVis")
+# library(moveVis)
+
+```
+
+
+
+## Calculate step lengths and turning angles etc
+
+```{r}
+
+# to select a subset of the list of filenames
+# sim_data_all <- sim_data_filenames %>% 
+#   map_dfr(read_csv, .id = "id")
+
+dl_trajectory <- sim_data_all
+# dl_trajectory <- buffalo_id_subset
+
+hourly_lag <- 1
+
+dl_trajectory <- dl_trajectory %>% mutate(
+  
+  x1 = x,
+  y1 = y,
+  x2 = lead(x1, n = hourly_lag, default = NA),
+  y2 = lead(y1, n = hourly_lag, default = NA),
+  date = as.Date(yday - 1, origin = "2018-01-01"),
+  t1 = as.POSIXct(paste(date, hour), format = "%Y-%m-%d %H"),
+  yday = lubridate::yday(t1),
+  # t2_ = lead(t_, n = hourly_lag, default = NA),
+  # t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  # hour_t1 = lubridate::hour(t_),
+  # yday_t1 = lubridate::yday(t_),
+  # hour_t2 = lubridate::hour(t2_),
+  # yday_t2 = lubridate::yday(t2_),
+  # hour = lubridate::hour(t),
+  
+  sl = c(sqrt(diff(y)^2 + diff(x)^2), NA),
+  log_sl = log(sl),
+  bearing1 = c(NA, atan2(diff(y), diff(x))),
+  # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  ta1 = c(NA, diff(bearing1)),
+  ta_corr1 = c(ifelse(ta1 > pi, ta1-(2*pi), 
+                     ifelse(ta1 < -pi, ta1+(2*pi),
+                            ta1))),
+  cos_ta = cos(ta1)
+)
+
+dl_trajectory <- dl_trajectory %>% filter(sl < 5000)
+hist(dl_trajectory$sl)
+max(dl_trajectory$sl, na.rm = T)
+
+# dl_trajectory <- dl_trajectory %>% filter(sl < 1250)
+head(dl_trajectory)
+
+dl_trajectory %>% filter(id == 1)
+hist(dl_trajectory$yday)
+
+# dl_trajectory$date
+
+```
+
+## Checking the turning angles using amt
+
+```{r}
+
+dl_track <- dl_trajectory %>% amt::mk_track(id = id, x, y, t1, all_cols = T, crs = 3112) %>% arrange(id, t_)
+# dl_track <- dl_trajectory %>% amt::mk_track(x, y, t1, all_cols = T, crs = 3112)
+dl_steps <- dl_track %>% filter(id == 1) %>% amt::steps(keep_cols = "both")# %>% arrange(id, t_)
+dl_steps
+
+```
+
+## Plot step lengths etc
+
+```{r}
+
+mean(dl_trajectory$sl, na.rm = T)
+median(dl_trajectory$sl, na.rm = T)
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = sl),
+                 binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  # scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = sl),
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_log10("log Step length (m)") +
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+# ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = bearing1),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = ta1),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+
+ggplot() +
+  geom_histogram(data = dl_trajectory,
+                 aes(x = ta_corr1),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+ggplot() +
+  geom_histogram(data = dl_steps,
+                 aes(x = ta_),
+                 bins = 100,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+  scale_x_continuous("Turning angle (radians)") + #, limits = c(-pi, pi)
+  scale_y_continuous("Frequency") +
+  theme_bw()
+
+# ggsave("outputs/turning_angle.png", width = 150, height = 75, units = "mm", dpi = 600)
+
+```
+
+For each hour of the day
+
+```{r}
+
+for(i in 0:23) {
+print(ggplot() +
+  geom_histogram(data = dl_trajectory |> filter(hour == i),
+                 aes(x = sl),
+                 binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+    scale_x_continuous(limits = c(0, 1500)) +
+    ggtitle(paste0("Hour: ", i)) +
+  theme_bw())
+}
+
+```
+
+Turning angles
+
+```{r}
+
+for(i in 0:23) {
+print(ggplot() +
+  geom_histogram(data = dl_trajectory |> filter(hour == i),
+                 aes(x = ta_corr1),
+                 bins = 50,
+                 # binwidth = 25,
+                 fill = "orange",
+                 colour = "black") +
+    ggtitle(paste0("Hour: ", i)) +
+  theme_bw())
+}
+
+```
+
+## Plot step lengths etc against observed data
+
+```{r}
+
+mean(dl_trajectory$sl, na.rm = T)
+median(dl_trajectory$sl, na.rm = T)
+
+buffalo_id_subset_covs <- buffalo %>% 
+  filter(id == 2005) %>% 
+  arrange(t_) |>  
+  slice(1:no_subset_locations)
+
+ggplot() +
+  geom_density(data = buffalo_id_subset_covs,
+                 aes(x = sl),
+                 fill = "skyblue", colour = "skyblue", alpha = 0.5) +
+  geom_density(data = dl_trajectory,
+                 aes(x = sl),
+                 fill = "orange", colour = "orange", alpha = 0.5) +
+  scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+  scale_y_continuous("Density") +
+  theme_bw()
+
+ggsave("outputs/step_length.png", width = 90, height = 75, units = "mm", dpi = 600)
+
+
+ggplot() +
+  geom_density(data = buffalo_id_subset_covs,
+                 aes(x = sl),
+                 fill = "skyblue", colour = "skyblue", alpha = 0.5) +
+  geom_density(data = dl_trajectory,
+                 aes(x = sl),
+                 fill = "orange", colour = "orange", alpha = 0.5) +
+  scale_x_log10("log Step length (m)") +
+  scale_y_continuous("Density") +
+  theme_bw()
+
+ggsave("outputs/step_length_log.png", width = 90, height = 75, units = "mm", dpi = 600)
+
+ggplot() +
+  geom_density(data = buffalo_id_subset_covs,
+                 aes(x = ta),
+                 fill = "skyblue", colour = "skyblue", alpha = 0.5) +
+  geom_density(data = dl_trajectory,
+                 aes(x = ta_corr1),
+                 fill = "orange", colour = "orange", alpha = 0.5) +
+  scale_x_continuous("Turning angle (radians)") +
+  scale_y_continuous("Density") +
+  theme_bw()
+
+ggsave("outputs/turning_angles.png", width = 90, height = 75, units = "mm", dpi = 600)
+
+# x <- seq(-12.5, 12.5, 0.1)
+# plot(x, y = dnorm(x, mean = 0, sd = 6.5), type = "l")
+# qnorm(c(0.025, 0.5, 0.975), mean = 0, sd = 6.5)
+
+# ggsave("outputs/step_length.png", width = 150, height = 75, units = "mm", dpi = 600)
+
+```
+
+## Density of step lengths for each hour
+
+```{r}
+
+for(i in 0:23) {
+  print(ggplot() +
+    geom_density(data = buffalo_id_subset_covs |> filter(hour == i),
+           aes(x = sl),
+           fill = "skyblue", colour = "black", alpha = 0.5) +
+    geom_density(data = dl_trajectory |> filter(hour == i),
+                   aes(x = sl),
+                   binwidth = 25,
+                   fill = "orange", colour = "black", alpha = 0.5) +
+      scale_x_continuous("Step length (m)", limits = c(0, 1500)) +
+      ggtitle(paste0("Hour: ", i)) +
+    theme_bw())
+}
+
+```
+
+## Density of turning angles for each hour
+
+```{r}
+
+for(i in 0:23) {
+  print(ggplot() +
+    geom_density(data = buffalo_id_subset_covs |> filter(hour == i),
+           aes(x = ta),
+           fill = "skyblue", colour = "black", alpha = 0.5) +
+    geom_density(data = dl_trajectory |> filter(hour == i),
+                   aes(x = ta_corr1),
+                   binwidth = 25,
+                 fill = "orange", colour = "black", alpha = 0.5) +
+      scale_x_continuous("Turning angle (radians)") +
+      ggtitle(paste0("Hour: ", i)) +
+    theme_bw())
+}
+
+```
+
+## Extract covariate values at simulated locations
+
+```{r}
+
+# for the simulated data
+dl_trajectory_xy <- data.frame("x" = dl_trajectory$x, "y" = dl_trajectory$y)
+
+# Calculate ndvi_index for all rows at once using vectorized operation
+dl_trajectory <- dl_trajectory %>%
+  mutate(
+    ndvi_index = vapply(t1, function(t) which.min(abs(difftime(t, terra::time(ndvi)))), integer(1))
+  )
+
+# vapply(dl_trajectory$t1, function(t) which.min(abs(difftime(t, terra::time(ndvi)))), integer(1))
+# quantile(dl_trajectory$t1)
+
+hist(dl_trajectory$ndvi_index)
+
+ndvi_values_sim <- terra::extract(ndvi[[ndvi_index]], dl_trajectory_xy)[,2]
+
+# Extract raster data based on calculated ndvi_index
+dl_trajectory <- dl_trajectory %>%
+  mutate(
+    ndvi = ndvi_values_sim,
+    ndvi_late_dry = terra::extract(ndvi_late_dry, dl_trajectory_xy)[,2],
+    slope = terra::extract(slope, dl_trajectory_xy)[,2],
+    veg_herby = terra::extract(veg_herby, dl_trajectory_xy)[,2],
+    canopy_cover = terra::extract(canopy_cover, dl_trajectory_xy)[,2]
+  )
+
+
+# for the observed data
+buffalo_id_subset_xy <- data.frame("x" = buffalo_id_subset$x_, "y" = buffalo_id_subset$y_)
+
+# Calculate ndvi_index for all rows at once using vectorized operation
+buffalo_id_subset <- buffalo_id_subset %>%
+  mutate(
+    ndvi_index = vapply(t_, function(t) which.min(abs(difftime(t, terra::time(ndvi)))), integer(1))
+  )
+
+hist(buffalo_id_subset$ndvi_index)
+
+ndvi_values_buffalo <- terra::extract(ndvi[[ndvi_index]], buffalo_id_subset_xy)[,2]
+
+buffalo_id_subset <- buffalo_id_subset %>% mutate(
+  ndvi = ndvi_values_buffalo,
+  ndvi_late_dry = terra::extract(ndvi_late_dry, buffalo_id_subset_xy)[,2],
+  slope = terra::extract(slope, buffalo_id_subset_xy)[,2],
+  veg_herby = terra::extract(veg_herby, buffalo_id_subset_xy)[,2],
+  canopy_cover = terra::extract(canopy_cover, buffalo_id_subset_xy)[,2]
+)
+
+```
+
+## Assess the background parameters
+
+```{r}
+
+
+
+```
+
+
+## Add the season to the dataframe
+
+
+
+
+# Hourly movement behaviour and selection of covariates
+
+Here we bin the trajectories into the hours of the day, and calculate the mean, median (where appropriate) and sd values for the step lengths and four habitat covariates.
+
+We also save the results as a csv to compare between all of the models.
+
+```{r}
+
+buffalo_hourly_habitat <-
+  buffalo_id_subset %>% 
+  dplyr::group_by(hour, id) %>%
+    summarise(n = n(),
+              step_length_mean = mean(sl, na.rm = TRUE),
+              step_length_median = median(sl, na.rm = TRUE),
+              step_length_sd = sd(sl, na.rm = TRUE),
+              ndvi_mean = mean(ndvi, na.rm = TRUE),
+              ndvi_median = median(ndvi, na.rm = TRUE),
+              ndvi_sd = sd(ndvi, na.rm = TRUE),
+              ndvi_min = min(ndvi, na.rm = TRUE),
+              ndvi_max = max(ndvi, na.rm = TRUE),
+              ndvi_late_dry_mean = mean(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_median = median(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_sd = sd(ndvi_late_dry, na.rm = TRUE),
+              herby_mean = mean(veg_herby, na.rm = TRUE),
+              herby_sd = sd(veg_herby, na.rm = TRUE),
+              canopy_mean = mean(canopy_cover/100, na.rm = TRUE),
+              canopy_sd = sd(canopy_cover/100, na.rm = TRUE),
+              canopy_min = min(canopy_cover/100, na.rm = TRUE),
+              canopy_max = max(canopy_cover/100, na.rm = TRUE),
+              slope_mean = mean(slope, na.rm = TRUE),
+              slope_median = median(slope, na.rm = TRUE),
+              slope_sd = sd(slope, na.rm = TRUE),
+              slope_min = min(slope, na.rm = TRUE),
+              slope_max = max(slope, na.rm = TRUE)
+              ) %>% ungroup()
+
+buffalo_hourly_habitat <- data.frame("Data" = "Buffalo", buffalo_hourly_habitat) %>%
+  mutate(id = as.factor(id))
+
+# write.csv(buffalo_hourly_habitat,
+#           paste0("outputs/buffalo_summaries_hourly_habitat_", Sys.Date(), ".csv"))
+
+buffalo_hourly_habitat_long <- buffalo_hourly_habitat %>%
+  pivot_longer(cols = !c(Data, hour, id), names_to = "variable", values_to = "value")
+
+
+dl_hourly_habitat <- 
+  dl_trajectory %>% dplyr::group_by(hour, id) %>% 
+    summarise(n = n(),
+              step_length_mean = mean(sl, na.rm = TRUE),
+              step_length_median = median(sl, na.rm = TRUE),
+              step_length_sd = sd(sl, na.rm = TRUE),
+              ndvi_mean = mean(ndvi, na.rm = TRUE),
+              ndvi_median = median(ndvi, na.rm = TRUE),
+              ndvi_sd = sd(ndvi, na.rm = TRUE),
+              ndvi_min = min(ndvi, na.rm = TRUE),
+              ndvi_max = max(ndvi, na.rm = TRUE),
+              ndvi_late_dry_mean = mean(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_median = median(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_sd = sd(ndvi_late_dry, na.rm = TRUE),
+              herby_mean = mean(veg_herby, na.rm = TRUE),
+              herby_sd = sd(veg_herby, na.rm = TRUE),
+              canopy_mean = mean(canopy_cover/100, na.rm = TRUE),
+              canopy_sd = sd(canopy_cover/100, na.rm = TRUE),
+              canopy_min = min(canopy_cover/100, na.rm = TRUE),
+              canopy_max = max(canopy_cover/100, na.rm = TRUE),
+              slope_mean = mean(slope, na.rm = TRUE),
+              slope_median = median(slope, na.rm = TRUE),
+              slope_sd = sd(slope, na.rm = TRUE),
+              slope_min = min(slope, na.rm = TRUE),
+              slope_max = max(slope, na.rm = TRUE)
+              ) %>% ungroup()
+
+dl_hourly_habitat <- data.frame("Data" = "deepSSF", dl_hourly_habitat) %>% 
+  mutate(id = as.factor(id)) %>% arrange(id)
+
+# write.csv(dl_hourly_habitat,
+#           paste0("outputs/dl_summaries_hourly_habitat_", Sys.Date(), ".csv"))
+
+dl_hourly_habitat_long <- dl_hourly_habitat %>%
+  pivot_longer(cols = !c(Data, hour, id), names_to = "variable", values_to = "value")
+
+# combine the dataframes
+hourly_habitat_long <- bind_rows(buffalo_hourly_habitat_long, dl_hourly_habitat_long)
+
+```
+
+Plotting the hourly habitat selection
+
+```{r}
+
+for(i in 1:length(unique(hourly_habitat_long$variable))) {
+
+  print(ggplot(data = hourly_habitat_long %>%
+                 filter(variable == unique(variable)[i]),
+               aes(x = factor(hour), y = value, colour = Data)) +
+          geom_point(alpha = 0.5) +
+          ggtitle(unique(hourly_habitat_long$variable)[i]) +
+          theme_classic())
+
+}
+
+```
+
+### A quantile ribbon approach
+
+To express the stochasticity of the simulations, here we show the 25th to 50th quantiles and the 2.5th to 97.5th quantiles of the data. Remember that the `data' are the means for each hour for each trajectory, so the quantiles are calculated across the means for each hour.
+
+This is the plotting approach that we used in the paper.
+
+Here we create a ribbon from the 25th to 50th quantiles and from the 2.5th to 97.5th quantiles of the data
+
+```{r}
+
+hourly_summary_quantiles <- hourly_habitat_long %>% 
+  dplyr::group_by(Data, hour, variable) %>% 
+  summarise(n = n(), 
+            mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            q025 = quantile(value, probs = 0.025, na.rm = TRUE), 
+            q25 = quantile(value, probs = 0.25, na.rm = TRUE),
+            q50 = quantile(value, probs = 0.5, na.rm = TRUE), 
+            q75 = quantile(value, probs = 0.75, na.rm = TRUE),
+            q975 = quantile(value, probs = 0.975, na.rm = TRUE))
+
+```
+
+Here we show the hourly step length and selection of three of the habitat covariates. We use a dashed-line ribbon for the 95% interval and a solid-line ribbon for the 50% interval. We show the mean as a solid line.
+
+It's quite a long plotting script...
+
+```{r}
+
+# set plotting parameters here that will change in each plot
+buff_path_alpha <- 0.1
+ribbon_95_alpha <- 0.5
+ribbon_50_alpha <- 0.25
+path_95_alpha <- 1
+
+# set path alpha
+buff_path_alpha <- 0.25
+
+# linewidth
+buff_path_linewidth <- 0.5
+
+# Create color mapping
+unique_groups <- unique(hourly_habitat_long$Data)
+colors <- viridis(length(unique_groups))
+names(colors) <- unique_groups
+colors["Buffalo"] <- "skyblue"
+colors["deepSSF"] <- "orange"
+
+hourly_path_sl_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "step_length_mean"),
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value") + 
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("Step length (m)") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+hourly_path_sl_plot
+
+ggsave("outputs/hourly_sl_legend.png", width = 90, height = 75, units = "mm", dpi = 600)
+  
+  
+hourly_path_ndvi_late_dry_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) +
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value", 
+                     limits = c(min(buffalo_hourly_habitat$ndvi_min), 
+                                max(buffalo_hourly_habitat$ndvi_max))) +
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("ndvi") +
+  theme_bw()
+
+hourly_path_ndvi_late_dry_plot
+
+
+hourly_path_ndvi_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_mean"),
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) +
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value", 
+                     limits = c(min(buffalo_hourly_habitat$ndvi_min), 
+                                max(buffalo_hourly_habitat$ndvi_max))) +
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("ndvi") +
+  theme_bw()
+
+hourly_path_ndvi_plot
+    
+    
+hourly_path_herby_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "herby_mean"), 
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)), 
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value") +
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("Herbaceous vegetation") +
+  theme_bw()
+
+hourly_path_herby_plot
+    
+    
+hourly_path_canopy_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "canopy_mean"), 
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)), 
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value", 
+                     limits = c(min(buffalo_hourly_habitat$canopy_min), 
+                                max(buffalo_hourly_habitat$canopy_max))) +
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("Canopy cover") +
+  theme_bw()
+
+hourly_path_canopy_plot
+
+
+hourly_path_slope_plot <- ggplot() +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = hourly_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% 
+              filter(Data == "Buffalo" & variable == "slope_mean"), 
+                 aes(x = hour, y = value, colour = Data, group = interaction(id, Data)), 
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = hourly_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+  
+  geom_path(data = hourly_summary_quantiles %>%
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = hour, y = mean, colour = Data),
+              linewidth = 1) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value", 
+                     limits = c(min(buffalo_hourly_habitat$slope_min), 
+                                max(buffalo_hourly_habitat$slope_max))) +
+  scale_x_continuous("Hour", breaks = seq(0,24,3)) +
+  ggtitle("Slope") +
+  theme_bw()
+
+hourly_path_slope_plot
+
+```
+
+Combining the hourly plots
+
+```{r}
+
+# # step lengths instead of slope
+# ggarrange(hourly_path_sl_plot + 
+#             theme(axis.title.x = element_blank(),
+#                   axis.text.x = element_blank(),
+#                   legend.title = element_blank()), 
+#           
+#           hourly_path_ndvi_plot + 
+#             theme(axis.title.x = element_blank(),
+#                   axis.text.x = element_blank(),
+#                   axis.title.y = element_blank()), 
+#           
+#           hourly_path_herby_plot, 
+#           
+#           hourly_path_canopy_plot +
+#             theme(axis.title.y = element_blank()),
+#           
+#           labels = c("A", "B", "C", "D"),
+#           ncol = 2, nrow = 2,
+#           legend = "bottom",
+#           common.legend = TRUE)
+
+# slope instead of step lengths
+ggarrange(hourly_path_ndvi_plot + 
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_blank(),
+                  legend.title = element_blank()), 
+          
+          hourly_path_canopy_plot + 
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.title.y = element_blank()), 
+          
+          hourly_path_herby_plot, 
+          
+          hourly_path_slope_plot +
+            theme(axis.title.y = element_blank()),
+          
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2,
+          legend = "bottom",
+          common.legend = TRUE)
+
+ggsave(paste0("outputs/hourly_summaries.png"), width=180, height=150, units="mm", dpi = 1000)
+
+```
+
+# Seasonal movement behaviour and selection of covariates
+
+Here we bin the trajectories into the hours of the day, and calculate the mean, median (where appropriate) and sd values for the step lengths and four habitat covariates.
+
+We also save the results as a csv to compare between all of the models.
+
+```{r}
+
+buffalo_daily_habitat <- buffalo_id_subset %>% 
+  mutate(yday = yday(t_)) %>% 
+  dplyr::group_by(yday, id) %>%
+    summarise(n = n(),
+              time = mean(t_),
+              step_length_mean = mean(sl, na.rm = TRUE),
+              step_length_median = median(sl, na.rm = TRUE),
+              step_length_sd = sd(sl, na.rm = TRUE),
+              ndvi_mean = mean(ndvi, na.rm = TRUE),
+              ndvi_median = median(ndvi, na.rm = TRUE),
+              ndvi_sd = sd(ndvi, na.rm = TRUE),
+              ndvi_late_dry_mean = mean(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_median = median(ndvi_late_dry, na.rm = TRUE),
+              ndvi_late_dry_sd = sd(ndvi_late_dry, na.rm = TRUE),
+              herby_mean = mean(veg_herby, na.rm = TRUE),
+              herby_sd = sd(veg_herby, na.rm = TRUE),
+              canopy_mean = mean(canopy_cover/100, na.rm = TRUE),
+              canopy_sd = sd(canopy_cover/100, na.rm = TRUE),
+              slope_mean = mean(slope, na.rm = TRUE),
+              slope_median = median(slope, na.rm = TRUE),
+              slope_sd = sd(slope)
+              ) %>% ungroup()
+
+buffalo_daily_habitat <- data.frame("Data" = "Buffalo", buffalo_daily_habitat) %>%
+  mutate(id = as.factor(id))
+
+# write.csv(buffalo_daily_habitat,
+#           paste0("outputs/buffalo_summaries_daily_habitat_", Sys.Date(), ".csv"))
+
+buffalo_daily_habitat_long <- buffalo_daily_habitat %>%
+  pivot_longer(cols = !c(Data, time, yday, id), names_to = "variable", values_to = "value")
+
+hist(dl_trajectory$yday)
+
+dl_daily_habitat <- dl_trajectory %>% 
+  dplyr::group_by(yday, id) %>% 
+  summarise(n = n(),
+            time = mean(t1, na.rm = TRUE),
+            step_length_mean = mean(sl, na.rm = TRUE),
+            step_length_median = median(sl, na.rm = TRUE),
+            step_length_sd = sd(sl, na.rm = TRUE),
+            ndvi_mean = mean(ndvi, na.rm = TRUE),
+            ndvi_median = median(ndvi, na.rm = TRUE),
+            ndvi_sd = sd(ndvi, na.rm = TRUE),
+            ndvi_late_dry_mean = mean(ndvi_late_dry, na.rm = TRUE),
+            ndvi_late_dry_median = median(ndvi_late_dry, na.rm = TRUE),
+            ndvi_late_dry_sd = sd(ndvi_late_dry, na.rm = TRUE),
+            herby_mean = mean(veg_herby, na.rm = TRUE),
+            herby_sd = sd(veg_herby, na.rm = TRUE),
+            canopy_mean = mean(canopy_cover/100, na.rm = TRUE),
+            canopy_sd = sd(canopy_cover/100, na.rm = TRUE),
+            slope_mean = mean(slope, na.rm = TRUE),
+            slope_median = median(slope, na.rm = TRUE),
+            slope_sd = sd(slope)
+            ) %>% ungroup()
+
+dl_daily_habitat <- data.frame("Data" = "deepSSF", dl_daily_habitat) %>% 
+  mutate(id = as.factor(id)) %>% arrange(id)
+
+# write.csv(dl_daily_habitat,
+#           paste0("outputs/dl_summaries_daily_habitat_", Sys.Date(), ".csv"))
+
+dl_daily_habitat_long <- dl_daily_habitat %>%
+  pivot_longer(cols = !c(Data, time, yday, id), names_to = "variable", values_to = "value")
+
+# combine the dataframes
+daily_habitat_long <- bind_rows(buffalo_daily_habitat_long, dl_daily_habitat_long)
+
+```
+
+Plotting the daily habitat selection
+
+```{r}
+
+for(i in 1:length(unique(daily_habitat_long$variable))) {
+
+  print(ggplot(data = daily_habitat_long %>%
+                 filter(variable == unique(variable)[i]),
+               aes(x = time, y = value, colour = Data)) +
+          geom_point(alpha = 0.05) +
+          geom_smooth(method = "gam", se = TRUE) +
+          ggtitle(unique(daily_habitat_long$variable)[i]) +
+          theme_classic())
+
+}
+
+```
+
+### A quantile ribbon approach
+
+To express the stochasticity of the simulations, here we show the 25th to 50th quantiles and the 2.5th to 97.5th quantiles of the data. Remember that the `data' are the means for each yday for each trajectory, so the quantiles are calculated across the means for each yday.
+
+This is the plotting approach that we used in the paper.
+
+Here we create a ribbon from the 25th to 50th quantiles and from the 2.5th to 97.5th quantiles of the data
+
+```{r}
+
+# daily_summary_quantiles <- daily_habitat_long %>% 
+#   dplyr::group_by(Data, yday, variable) %>% 
+#   summarise(n = n(), 
+#             mean = mean(value, na.rm = TRUE),
+#             sd = sd(value, na.rm = TRUE),
+#             q025 = quantile(value, probs = 0.025, na.rm = TRUE), 
+#             q25 = quantile(value, probs = 0.25, na.rm = TRUE),
+#             q50 = quantile(value, probs = 0.5, na.rm = TRUE), 
+#             q75 = quantile(value, probs = 0.75, na.rm = TRUE),
+#             q975 = quantile(value, probs = 0.975, na.rm = TRUE))
+
+# use a larger grouping window of ydays
+daily_summary_quantiles <- daily_habitat_long %>% 
+  mutate(yday_group = ceiling(yday / 5)) %>%  # Groups of 5 days
+  group_by(Data, yday_group, variable) %>% 
+  summarise(
+    n = n(), 
+    time = mean(time, na.rm = TRUE),
+    yday = mean(yday, na.rm = TRUE),
+    mean = mean(value, na.rm = TRUE),
+    sd = sd(value, na.rm = TRUE),
+    q025 = quantile(value, probs = 0.025, na.rm = TRUE), 
+    q25 = quantile(value, probs = 0.25, na.rm = TRUE),
+    q50 = quantile(value, probs = 0.5, na.rm = TRUE), 
+    q75 = quantile(value, probs = 0.75, na.rm = TRUE),
+    q975 = quantile(value, probs = 0.975, na.rm = TRUE)
+  )
+
+# # use a moving window
+# daily_summary_quantiles <- daily_habitat_long %>%
+#   group_by(Data, variable) %>%
+#   arrange(yday) %>%
+#   mutate(mean = rollapply(value, width = 5, FUN = mean, na.rm = TRUE, align = "right", fill = NA),
+#          sd = rollapply(value, width = 5, FUN = sd, na.rm = TRUE, align = "right", fill = NA),
+#          q025 = rollapply(value, width = 5, FUN = function(x) quantile(x, probs = 0.025, na.rm = TRUE), align = "right", fill = NA),
+#          q25 = rollapply(value, width = 5, FUN = function(x) quantile(x, probs = 0.25, na.rm = TRUE), align = "right", fill = NA),
+#          q50 = rollapply(value, width = 5, FUN = function(x) quantile(x, probs = 0.5, na.rm = TRUE), align = "right", fill = NA),
+#          q75 = rollapply(value, width = 5, FUN = function(x) quantile(x, probs = 0.75, na.rm = TRUE), align = "right", fill = NA),
+#          q975 = rollapply(value, width = 5, FUN = function(x) quantile(x, probs = 0.975, na.rm = TRUE), align = "right", fill = NA)) %>%
+#   ungroup()
+
+daily_summary_quantiles <- daily_summary_quantiles %>% arrange(Data, time)
+
+```
+
+Here we show the daily step length and selection of three of the habitat covariates. We use a dashed-line ribbon for the 95% interval and a solid-line ribbon for the 50% interval. We show the mean as a solid line.
+
+It's quite a long plotting script...
+
+```{r}
+
+# set plotting parameters here that will change in each plot
+buff_path_alpha <- 0.1
+ribbon_95_alpha <- 0.5
+ribbon_50_alpha <- 0.25
+path_95_alpha <- 1
+
+# set path alpha
+buff_path_alpha <- 0.25
+
+# linewidth
+buff_path_linewidth <- 0.5
+
+# Create color mapping
+unique_groups <- unique(daily_habitat_long$Data)
+colors <- viridis(length(unique_groups))
+names(colors) <- unique_groups
+colors["Buffalo"] <- "skyblue"
+colors["deepSSF"] <- "orange"
+
+daily_path_sl_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "step_length_mean"),
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)),
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_y_continuous("Mean value") +
+  scale_x_datetime("Date") +
+  ggtitle("Step length (m)") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_sl_plot
+
+ggsave("outputs/daily_sl_legend.png", width = 90, height = 75, units = "mm", dpi = 600)
+  
+  
+daily_path_ndvi_late_dry_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)),
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_late_dry_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) +
+  scale_colour_manual(values = colors) +
+  scale_x_datetime("Date") +
+  scale_y_continuous("Mean value") +
+  ggtitle("ndvi late dry season") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_ndvi_late_dry_plot
+
+
+daily_path_ndvi_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "ndvi_mean"),
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)),
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) +
+  scale_colour_manual(values = colors) +
+  scale_x_datetime("Date") +
+  scale_y_continuous("Mean value") +
+  ggtitle("ndvi") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_ndvi_plot
+    
+    
+daily_path_herby_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "herby_mean"), 
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)), 
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_x_datetime("Date") +
+  scale_y_continuous("Mean value") +
+  ggtitle("Herbaceous vegetation") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_herby_plot
+    
+    
+daily_path_canopy_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "canopy_mean"), 
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)), 
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_x_datetime("Date") +
+  scale_y_continuous("Mean value") +
+  ggtitle("Canopy cover") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_canopy_plot
+
+
+daily_path_slope_plot <- ggplot() +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+
+  geom_ribbon(data = daily_summary_quantiles %>% 
+                filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, ymin = q25, ymax = q75, fill = Data),
+              alpha = ribbon_50_alpha) +
+  
+  # geom_path(data = daily_habitat_long %>% 
+  #             filter(Data == "Buffalo" & variable == "slope_mean"), 
+  #                aes(x = time, y = value, colour = Data, group = interaction(id, Data)), 
+  #                alpha = buff_path_alpha,
+  #             linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "slope_mean"), 
+                 aes(x = time, y = mean, colour = Data), #, group = interaction(id, Data)), 
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, y = q025, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, y = q975, colour = Data),
+            linetype = "dashed",
+              alpha = path_95_alpha) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+  
+  geom_path(data = daily_summary_quantiles %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+              aes(x = time, y = mean, colour = Data),
+              linewidth = buff_path_linewidth) +
+    
+  scale_fill_manual(values = colors) + 
+  scale_colour_manual(values = colors) +
+  scale_x_datetime("Date") +
+  scale_y_continuous("Mean value") +
+  ggtitle("Slope") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+daily_path_slope_plot
+
+```
+
+Combining the daily plots
+
+```{r}
+
+ggarrange(daily_path_sl_plot + 
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_blank(),
+                  legend.title = element_blank()), 
+          
+          daily_path_ndvi_plot + 
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.title.y = element_blank()), 
+          
+          daily_path_herby_plot, 
+          
+          daily_path_canopy_plot +
+            theme(axis.title.y = element_blank()),
+          
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2,
+          legend = "bottom",
+          common.legend = TRUE)
+
+ggsave(paste0("outputs/daily_summaries.png"), width=180, height=150, units="mm", dpi = 1000)
+
+```
