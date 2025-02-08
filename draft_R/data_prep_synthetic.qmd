@@ -1,0 +1,440 @@
+---
+title: "data_prep"
+author: "Scott Forrest"
+format: html
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "beepr", "tictoc")
+walk(packages, require, character.only = T)
+
+```
+
+## Import data and clean
+
+```{r}
+
+synthetic_data <- read_csv("synthetic_trajectories/synthetic_trajectories_ndvi_beta_5_100sims_100steps.csv")
+sim_ids <- unique(synthetic_data$sim)
+
+```
+
+## Setup trajectory
+
+Use the `amt` package to create a trajectory object from the cleaned data. 
+
+```{r}
+
+# synthetic_all <- synthetic_clean %>% mk_track(id = id,
+#                                            lon,
+#                                            lat, 
+#                                            time, 
+#                                            all_cols = T,
+#                                            crs = 4326) %>% 
+#   transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# # Geoscience Australia Lambert (https://epsg.io/3112)
+
+```
+
+Plot the data coloured by time
+
+```{r}
+
+# synthetic_all %>%
+#   ggplot(aes(x = x_, y = y_, colour = t_)) +
+#   geom_point(alpha = 0.25, size = 1) + # colour = "black",
+#   coord_fixed() +
+#   scale_colour_viridis_c() +
+#   theme_classic()
+
+```
+
+### Reading in the environmental covariates
+
+```{r}
+
+ndvi_stack <- rast("mapping/ndvi_20kmx20km_cropped.tif")
+# canopy <- rast("mapping/canopy_cover_20kmx20km_cropped.tif")
+# herby <- rast("mapping/veg_herby_20kmx20km_cropped.tif")
+# slope <- rast("mapping/slope_20kmx20km_cropped.tif")
+
+ndvi_2018_dry <- ndvi_stack[[8:10]]
+ndvi_2019_dry <- ndvi_stack[[19:21]]
+ndvi_dry <- terra::mean(c(ndvi_2018_dry, ndvi_2019_dry))
+names(ndvi_dry) <- "ndvi_dry"
+# set the origin to 0,0
+ext(ndvi_dry) <- c(0, 2e4, 0, 2e4)
+plot(ndvi_dry)
+
+```
+
+Load saved objects
+
+```{r}
+
+# readRDS(paste0("synthetic2005_covs_2024-03-21.rds"))
+
+```
+
+
+```{r}
+
+# synthetic_all <- synthetic_all %>% arrange(id)
+# # nest the data by individual
+# synthetic_all_nested <- synthetic_all %>% arrange(id) %>% nest(data = -"id")
+
+```
+
+Generating the data to fit the ML models
+
+```{r}
+
+res <- terra::res(ndvi_dry)[1]
+
+# how much to trim on either side of the location
+buffer <- 1250 + (res/2)
+nxn_cells <- buffer*2/res
+
+# hourly lag
+hourly_lag <- 1
+
+# subset the data
+n_samples <- 10000
+# n_samples <- nrow(synthetic_data)
+
+# synthetic_data <- synthetic_data %>% filter(id == "2005") %>% slice(1:n_samples)
+synthetic_data <- synthetic_data %>% slice(1:n_samples)
+
+tic()
+
+synthetic_data_covs <- synthetic_data %>% mutate(
+  
+  x_ = x,
+  y_ = y,
+  t_ = t,
+  x1_ = x_,
+  y1_ = y_,
+  x2_ = lead(x1_, n = hourly_lag, default = NA),
+  y2_ = lead(y1_, n = hourly_lag, default = NA),
+  x2_cent = x2_ - x1_,
+  y2_cent = y2_ - y1_,
+  t2_ = lead(t_, n = hourly_lag, default = NA),
+  t_diff = round(difftime(t2_, t_, units = "hours"),0),
+  hour_t1 = lubridate::hour(t_),
+  yday_t1 = lubridate::yday(t_),
+  hour_t2 = lubridate::hour(t2_),
+  yday_t2 = lubridate::yday(t2_),
+  
+  sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
+  log_sl = log(sl),
+  bearing = c(atan2(diff(y_), diff(x_)), NA),
+  # ta = c(NA, ifelse(diff(bearing) > pi, diff(bearing) - 2 * pi, diff(bearing))),
+  ta = c(NA, ifelse(
+    diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
+      diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
+  cos_ta = cos(ta),
+    
+  # extent for cropping the spatial covariates
+  x_min = x_ - buffer,
+  x_max = x_ + buffer,
+  y_min = y_ - buffer,
+  y_max = y_ + buffer,
+  
+# )
+) %>% rowwise() %>% mutate(
+
+  extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
+
+  # NDVI
+  ndvi_local = list(crop(ndvi_dry, ext(x_min, x_max, y_min, y_max))),
+  ndvi_cent = list({
+    ndvi_cent <- rep(ndvi_local)
+    ext(ndvi_cent) <- extent_00centre
+    ndvi_cent
+    }),
+
+  # # herbaceous vegetation
+  # veg_herby_local = list(crop(veg_herby, ext(x_min, x_max, y_min, y_max))),
+  # veg_herby_cent = list({
+  #   veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
+  #   # veg_herby_cent <- rep(veg_herby_local)
+  #   ext(veg_herby_cent) <- extent_00centre
+  #   veg_herby_cent
+  #   }),
+  # 
+  # # canopy cover
+  # canopy_cover_local = list(crop(canopy_cover, ext(x_min, x_max, y_min, y_max))),
+  # canopy_cover_cent = list({
+  #   canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
+  #   # canopy_cover_cent <- rep(canopy_cover_local)
+  #   ext(canopy_cover_cent) <- extent_00centre
+  #   canopy_cover_cent
+  #   }),
+  # 
+  # # slope
+  # slope_local = list(crop(slope, ext(x_min, x_max, y_min, y_max))),
+  # slope_cent = list({
+  #   slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
+  #   # slope_cent <- rep(slope_local)
+  #   ext(slope_cent) <- extent_00centre
+  #   slope_cent
+  #   }),
+
+  # rasterised location of the next step
+  points_vect_local = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
+  pres_local = list(rasterize(points_vect_local, ndvi_local, background=0)),
+
+  # rasterised location of the next step - centred on (0,0)
+  points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+  pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0))
+
+) %>% ungroup() # to remove the 'rowwise' class
+
+toc()
+beep(sound = 2)
+
+# to remove steps greater than the map extent?
+# synthetic_data_covs %>% filter(sl < buffer)
+synthetic_data_covs
+
+# synthetic2005_covs$extent_00centre[[1]]
+# difftime(synthetic2005$t_[1], terra::time(ndvi_projected))
+# which.min(abs(difftime(synthetic2005$t_[1], terra::time(ndvi_projected))))
+
+which(is.na(synthetic_data_covs$ta))
+
+```
+
+Plot the covariates
+
+```{r}
+
+# walk(synthetic2005_covs$points_vect, plot)
+
+n_plots <- 5
+
+walk(synthetic_data_covs$ndvi_local[1:n_plots], plot)
+# walk(synthetic_data_covs$veg_herby_local[1:n_plots], terra::plot)
+# walk(synthetic_data_covs$canopy_cover_local[1:n_plots], terra::plot)
+# walk(synthetic_data_covs$slope_local[1:n_plots], terra::plot)
+walk(synthetic_data_covs$pres_local[1:n_plots], terra::plot)
+
+walk(synthetic_data_covs$ndvi_cent[1:n_plots], plot)
+# walk(synthetic_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+# walk(synthetic_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
+# walk(synthetic_data_covs$slope_cent[1:n_plots], terra::plot)
+walk(synthetic_data_covs$pres_cent[1:n_plots], terra::plot)
+
+# to check problematic indices
+# walk(synthetic_data_covs$pres[695:699], terra::plot)
+
+# saveRDS(synthetic_data_covs, paste0("synthetic_data_covs_", Sys.Date(), ".rds"))
+
+```
+
+Filter when the next step is outside the extent and drop NAs from the turning angle column
+
+```{r}
+
+# filter out locations that are closer than 'buffer' to the edge
+synthetic_data_covs <- synthetic_data_covs %>% filter(x2_ > 0 + buffer & x2_ < 2e4 - buffer & y2_ > 0 + buffer & y2_ < 2e4 - buffer) %>% drop_na(ta)
+# filter out locations that are outside of the local extent
+synthetic_data_covs <- synthetic_data_covs %>% filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>% drop_na(ta)
+
+# synthetic_data_covs
+
+```
+
+Export objects
+
+```{r}
+
+# raster_size <- "100x100"
+nxn_cells
+beta_value <- 5 # from the 'synthetic_trajectories' - defines the strength of association to habitat
+
+synthetic_data_df <- synthetic_data_covs %>%
+  dplyr::select(-extent_00centre, 
+                -ndvi_local, -ndvi_cent, 
+                # -veg_herby_local, -veg_herby_cent, 
+                # -canopy_cover_local, -canopy_cover_cent,
+                # -slope_local, -slope_cent,
+                -points_vect_local, -points_vect_cent, 
+                -pres_local, -pres_cent)
+
+write_csv(synthetic_data_df, paste0("synthetic_data_df_ndvi_beta_", beta_value, "_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+
+# rast(synthetic_data_covs$ndvi_local) %>% 
+#   writeRaster(paste0("synthetic_ndvi_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$veg_herby_local) %>% 
+#   writeRaster(paste0("synthetic_herby_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$canopy_cover_local) %>% 
+#   writeRaster(paste0("synthetic_canopy_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$slope_local) %>% 
+#   writeRaster(paste0("synthetic_slope_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$pres_local) %>% 
+#   writeRaster(paste0("synthetic_pres_local", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+
+rast(synthetic_data_covs$ndvi_cent) %>% 
+  writeRaster(paste0("synthetic_ndvi_beta_", beta_value, "_ndvi_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$veg_herby_cent) %>% 
+#   writeRaster(paste0("synthetic_herby_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$canopy_cover_cent) %>% 
+#   writeRaster(paste0("synthetic_canopy_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+# rast(synthetic_data_covs$slope_cent) %>% 
+#   writeRaster(paste0("synthetic_slope_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+rast(synthetic_data_covs$pres_cent) %>% 
+  writeRaster(paste0("synthetic_ndvi_beta_", beta_value, "_pres_cent", nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"), overwrite = T)
+
+```
+
+Plot the step lengths and turning angles
+
+```{r}
+
+hist(synthetic_data_covs$sl, breaks = max(synthetic_data_covs$sl, na.rm = T)/25) # , xlim = c(0,1000)
+quantile(synthetic_data_covs$sl, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(synthetic_data_covs$log_sl, breaks = 100)
+
+synthetic_data_covs %>% ggplot() +
+  geom_histogram(aes(x = sl), colour = "black", binwidth = 25, alpha = 0.25) +
+  scale_x_continuous() + #limits = c(0, 1250)
+  theme_classic()
+
+mean(synthetic_data_covs$sl)
+
+hist(synthetic_data_covs$ta, breaks = 100)
+quantile(synthetic_data_covs$ta, probs = c(0.5, 0.9, 0.95, 0.99, 0.999, 1), na.rm = T)
+hist(synthetic_data_covs$cos_ta, breaks = 100)
+
+mean(synthetic_data_covs$ta)
+
+```
+
+Plot the spatial distribution of steps
+
+```{r}
+
+# sum(synthetic_data_covs$sl < 200)/nrow(synthetic_data_covs)
+
+# for(i in 1:24) {
+# print(synthetic_data_covs %>% filter(hour_t2 == i) %>% ggplot() +
+#   geom_histogram(aes(x = sl), binwidth = res) +
+#     theme_classic())
+# }
+
+# plot step lengths
+ggplot() +
+  geom_histogram(data = synthetic_data_covs,
+                 aes(x = sl),
+                 binwidth = res) +
+  scale_x_continuous(limits = c(0, buffer)) +
+  theme_bw()
+
+ggplot() +
+  geom_point(data = synthetic_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             size = 0.5,
+             alpha = 0.15) +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = synthetic_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = res) +
+  scale_fill_viridis_c() +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = synthetic_data_covs,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = res) +
+  # change the colour to log_scale
+  scale_fill_viridis_c(trans = "log") +
+  coord_equal() +
+  theme_bw()
+
+```
+
+Plotting at different times of the day
+
+```{r}
+
+synthetic_temporal_subset <- synthetic_data_covs %>% filter(hour_t1 == 6 | hour_t1 == 18)
+
+ggplot() +
+  geom_histogram(data = synthetic_temporal_subset,
+                 aes(x = sl),
+                 binwidth = res) +
+  scale_x_continuous(limits = c(0, 1250)) +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = synthetic_temporal_subset,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = res) +
+  # change the colour to log_scale
+  scale_fill_viridis_c() +
+  coord_equal() +
+  theme_bw()
+
+ggplot() +
+  geom_bin2d(data = synthetic_temporal_subset,
+             aes(x = x2_cent,
+                 y = y2_cent),
+             binwidth = res) +
+  # change the colour to log_scale
+  scale_fill_viridis_c(trans = "log") +
+  coord_equal() +
+  theme_bw()
+
+```
+
+Verify the step lengths and turning angles against `amt`
+
+```{r}
+
+synthetic_all_nested_steps <- synthetic_all_nested %>% 
+  mutate(steps = map(data, function(x)
+    x %>% 
+      # track_resample(rate = hours(1), tolerance = minutes(10)) %>%
+      # to filter out bursts with less than 3 locations
+      # amt::filter_min_n_burst(min_n = 3) %>% 
+      steps()))
+
+# unnest the data after creating 'steps' objects
+synthetic_all_steps <- synthetic_all_nested_steps %>% 
+  amt::select(id, steps) %>% 
+  amt::unnest(cols = steps)
+
+# plot the step lengths and turning angles
+synthetic_all_steps %>% ggplot() +
+  geom_histogram(aes(x = sl_), bins = 1000, alpha = 1) +
+  scale_x_continuous(limits = c(0, 125)) +
+  theme_classic()
+
+synthetic_amt_2005 <- synthetic_all_steps %>% filter(id == "2005")
+quantile(synthetic_amt_2005$sl_, probs = c(0.5, 0.9, 0.95, 0.977, 0.99, 0.999, 1), na.rm = T)
+
+synthetic_all_steps %>% ggplot() +
+  geom_histogram(aes(x = ta_), bins = 100, alpha = 1) +
+  theme_classic()
+
+quantile(synthetic_amt_2005$ta_, probs = c(0.5, 0.9, 0.95, 0.97, 0.99, 0.999, 1), na.rm = T)
+
+```
+
+

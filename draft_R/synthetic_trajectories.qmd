@@ -1,0 +1,307 @@
+---
+title: "Synthetic example of temporal selection"
+author: "Scott Forrest"
+format: 
+  html:
+    embed-resources: true
+---
+
+## Load packages
+
+```{r}
+#| warning: false
+
+library(tidyverse)
+packages <- c("amt", "raster", "terra", "geoR", "tictoc", "beepr", "ecospat")
+walk(packages, require, character.only = T)
+
+```
+
+## Generate a synthetic spatial layer
+
+```{r}
+
+set.seed(12321)
+# env1 <- grf(ncell(r), grid="reg", nx=50, ny=50, xlims=c(0,50), ylims=c(0,50), cov.pars=c(1, 10))
+
+```
+
+## Convert to a raster and plot
+
+```{r}
+
+# env1_raster <- rast(raster(env1))
+# plot(env1_raster)
+# names(env1_raster) <- "env1"
+# 
+# hist(values(env1_raster), breaks = 30)
+
+```
+
+## Use an existing layer
+
+```{r}
+
+ndvi_stack <- rast("mapping/ndvi_20kmx20km_cropped.tif")
+# canopy <- rast("mapping/canopy_cover_20kmx20km_cropped.tif")
+# herby <- rast("mapping/veg_herby_20kmx20km_cropped.tif")
+# slope <- rast("mapping/slope_20kmx20km_cropped.tif")
+
+ndvi_2018_dry <- ndvi_stack[[8:10]]
+ndvi_2019_dry <- ndvi_stack[[19:21]]
+ndvi_dry <- terra::mean(c(ndvi_2018_dry, ndvi_2019_dry))
+names(ndvi_dry) <- "ndvi_dry"
+# set the origin to 0,0
+ext(ndvi_dry) <- c(0, 2e4, 0, 2e4)
+plot(ndvi_dry)
+
+```
+
+## Construct a temporally dynamic response to the covariate
+
+```{r}
+
+# create a sequence of hours
+t <- seq(1,24,1)
+T <- 24
+
+# create the harmonic terms
+sin1 <- sin(2 * pi * t / T)
+cos1 <- cos(2 * pi * t / T)
+
+# plot the harmonic terms
+plot(t, sin1, type = "l", col = "red", 
+     xlab = "Hour of the day", ylab = "Value", 
+     main = "Harmonic terms")
+lines(t, cos1, col = "blue")
+lines(t, rep(0,T), lty = "dashed")
+
+# create a single function
+f_harmonic <- 0.5 + 1 * (sin1 + cos1)
+
+# plot the function
+plot(t, f_harmonic, type = "l", col = "black", 
+     xlab = "Hour of the day", ylab = "Value", 
+     main = "Harmonic function")
+lines(t, rep(0,T), lty = "dashed")
+
+ssf_coef <- data.frame(hour = t, beta = f_harmonic)
+
+```
+
+## Construct a temporally static response to the covariate
+
+```{r}
+
+beta_value = 5
+
+# create a sequence of hours
+t <- seq(1,24,1)
+T <- 24
+
+# create a single function
+f_response <- rep(beta_value, T)
+
+# plot the function
+plot(t, f_response, type = "l", col = "black", 
+     xlab = "Hour of the day", ylab = "Value", 
+     main = "Response function")
+lines(t, rep(0,T), lty = "dashed")
+
+ssf_coef <- data.frame(hour = t, beta = f_response)
+
+```
+
+## Construct some movement parameters for the synthetic individual
+
+We will use a gamma distribution for the step lengths and uniform turning angles, which is constant throughout the day.
+
+```{r}
+
+# gamma distribution parameters
+gamma_shape <- 2
+gamma_scale <- 100
+
+plot(seq(0, 1000, 0.1), dgamma(seq(0, 1000, 0.1), shape = gamma_shape, scale = gamma_scale), type = "l", 
+     xlab = "Step length", ylab = "Density", 
+     main = "Gamma distribution for step lengths")
+
+```
+
+# Simulation model
+
+```{r}
+
+simulate_ssf <- function(
+    n_steps, # final number of steps in the trajectory
+    n_ch, # number of proposed steps
+    gamma_shape, # shape parameter of the gamma distribution
+    gamma_scale, # scale parameter of the gamma distribution
+    coef, # table of temporally varying coefficient values
+    resc, # resources
+    xy0 # starting location
+    ) { 
+  
+  # tic()
+  
+  # vectorisation of the random sampling leads to iterating over hourly coef values
+  sl <- rgamma(n_steps * n_ch, 
+               shape = rep(gamma_shape, each = n_ch), 
+               scale = rep(gamma_scale, each = n_ch))
+  
+  # create a vector of the turning angle coefficients (over the full trajectory)
+  ta <- runif(n_steps * n_ch, min = -pi, max = pi)
+
+  # setup the simulation 
+  steps <- rep(1:n_steps, each = n_ch)
+  hours <- rep(1:24, each = n_ch, length.out = n_steps * n_ch)
+  
+  # set the starting location and (random) angle
+  x_0 <- xy0[[1]]
+  y_0 <- xy0[[2]]
+  angle_0 <- runif(1, min = -pi, max = pi)
+  
+  # create vectors to store the results
+  x <- rep(NA, n_steps)
+  y <- rep(NA, n_steps)
+  hour <- rep(NA, n_steps)
+  step_length <- rep(NA, n_steps)
+  angle <- rep(NA, n_steps)
+  bearing <- rep(NA, n_steps)
+  hab_p <- rep(NA, n_steps)
+  
+  # set initial values
+  x[1] <- x_0
+  y[1] <- y_0
+  hour[1] <- 1
+  step_length[1] <- 0
+  angle[1] <- angle_0
+  bearing[1] <- 0
+  hab_p[1] <- 0
+  
+  max_x <- ext(resc)[2]
+  max_y <- ext(resc)[4]
+  
+  for (i in 2:n_steps) {
+      
+    # wrapped boundary
+    # adding the modulo operator %% ensures a wrapped/toroid landscape, 
+    # but the origin must be at (0,0)
+    
+    # proposed step in the x-direction
+    x_prop <- (x[i - 1] + sl[steps == i] * cos(bearing[i - 1] + ta[steps == i])) # %% max_x
+    # proposed step in the y-direction
+    y_prop <- (y[i - 1] + sl[steps == i] * sin(bearing[i - 1] + ta[steps == i])) # %% max_y
+    # proposed step length
+    sl_prop <- sl[steps == i]
+    # proposed turning angle
+    angle_prop <- ta[steps == i]
+    # proposed bearing (required for imposing correlated movement, 
+    # as the turning angle of the following step is relative to the bearing)
+    bearing_prop <- atan2(y_prop - y[i - 1], x_prop - x[i - 1])
+    # hour of the proposed step, which could be day, month, etc for other time scales
+    hour_prop <- hours[steps == i][1]
+    
+    p <- terra::extract(resc, cbind(x_prop, y_prop))[,1] * coef[hour_prop, "beta"]
+    
+    # if there are NAs in the probability, set them to a very low value
+    p[is.na(p)] <- -50
+    
+    # calculate the total probability of the proposed step and 
+    # sample one of the locations based on this probability
+    w <- sample(n_ch, 1, prob = exp(p))
+    
+    # store all the information for the proposed step
+    x[i] <- x_prop[w]
+    y[i] <- y_prop[w]
+    hour[i] <- hour_prop
+    step_length[i] <- sl_prop[w]
+    angle[i] <- angle_prop[w]
+    bearing[i] <- bearing_prop[w]
+    hab_p[i] <- p[w]
+  
+  }
+  
+  # (toc())
+  return(data.frame(step = 1:n_steps,
+                    x = x, 
+                    y = y, 
+                    hour = hour,
+                    sl = step_length, 
+                    angle = angle, 
+                    bearing = bearing, 
+                    hab_p = hab_p))
+}
+
+```
+
+# Simulate from the SSF
+
+```{r}
+
+# single trajectory
+# simulated_locs_fit <- simulate_ssf(n_steps = 1000,
+#                                    n_ch = 50,
+#                                    gamma_shape = gamma_shape,
+#                                    gamma_scale = gamma_scale,
+#                                    coef = ssf_coef,
+#                                    resc = ndvi_dry,
+#                                    xy0 = c(1e4,1e4))
+# 
+# beep(sound = 2)
+
+
+# multiple trajectories
+n_sims <- 100
+n_steps <- 100
+
+simulated_locs_test_list <- lapply(1:n_sims, function(i) {
+  simulate_ssf(n_steps = n_steps,
+               n_ch = 50,
+               gamma_shape = gamma_shape,
+               gamma_scale = gamma_scale,
+               coef = ssf_coef,
+               resc = ndvi_dry,
+               # starting locations from normal distribution centred on centre point
+               # xy0 = c(rnorm(1, mean = 1e4, 1000), rnorm(1, mean = 1e4, 1000)))
+               # starting locations from uniform distribution within 10km of centre point
+               xy0 = c(runif(1, min = 5e3, max = 15e3), runif(1, min = 5e3, max = 15e3)))
+})
+
+# add a column for time
+simulated_locs_test_list_t <- lapply(simulated_locs_test_list, function(df) {
+  df$t = ymd_hm("2019-01-01 00:00") + hours(1:nrow(df))
+  return(df)
+  })
+
+simulated_locs_test <- bind_rows(simulated_locs_test_list_t, .id = "sim")
+
+beep(sound = 2)
+
+```
+
+Plot the simulated locations
+
+```{r}
+
+ndvi_dry_df <- as.data.frame(ndvi_dry, xy = TRUE)
+
+ggplot() +
+  geom_raster(data = ndvi_dry_df, aes(x = x, y = y, fill = ndvi_dry)) +
+  geom_point(data = simulated_locs_test, aes(x = x, y = y, col = sim), size = 0.5, alpha = 0.25) +
+  geom_path(data = simulated_locs_test, aes(x = x, y = y, col = sim), linewidth = 0.5, alpha = 0.25) +
+  scale_fill_viridis_c() +
+  scale_colour_viridis_d(option = "C") +
+  coord_equal() +
+  theme_classic() +
+  theme(legend.position = "none")
+
+```
+
+## Write the simulated locations to a file
+
+```{r}
+
+write_csv(simulated_locs_test, paste0("synthetic_trajectories/synthetic_trajectories_ndvi_beta_", beta_value, "_", n_sims, "sims_", n_steps, "steps.csv"))
+
+```
