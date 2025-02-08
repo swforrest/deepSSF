@@ -1,0 +1,23 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "deepSSF"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+    right:
+    - icon: github
+      href: https://github.com/swforrest/deepSSF
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+execute:
+  freeze: auto
