@@ -21,9 +21,9 @@ format:
       - left=30mm
 editor:
   source
+abstract: |
+  Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.
 ---
-
-Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.
 
 # Loading packages
 
