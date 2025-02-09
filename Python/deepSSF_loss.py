@@ -1,5 +1,31 @@
+"""
+deepSSF_loss.py
+==============
+
+Description:
+    This script contains the deepSSF model loss function.
+
+Authors:
+    Scott Forrest (scottwforrest@gmail.com)
+    Dan Pagendam  (dan.pagendam@data61.csiro.au)
+
+Date:
+    2025-02-02
+    
+Usage:
+    Run the script as a module, such as in a Jupyter notebook or Python console:
+        >>> import deepSSF_model
+        >>> deepSSF_model.ConvJointModel(args)
+    
+    Or execute from the command line:
+        $ python deepSSF_model.py [optional arguments]
+"""
+
+# Standard library imports
 import torch
-import torch.nn as nn
+
+# Third-party imports
+from torch import nn
 
 class negativeLogLikeLoss(nn.Module):
     """

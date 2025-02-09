@@ -6,8 +6,9 @@ Description:
     This script contains the deepSSF model classes and the dictionaries 
     used in the deepSSF_train script.
 
-Author:
+Authors:
     Scott Forrest (scottwforrest@gmail.com)
+    Dan Pagendam  (dan.pagendam@data61.csiro.au)
 
 Date:
     2025-02-02
@@ -23,9 +24,9 @@ Usage:
 
 # Standard library imports
 import torch
+import numpy as np
 
 # Third-party imports
-import numpy as np
 from torch import nn
 
 # Set the device to be used (GPU or CPU)
