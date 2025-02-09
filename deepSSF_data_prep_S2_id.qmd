@@ -588,32 +588,37 @@ which(is.na(buffalo_data_covs$ta))
 
 n_plots <- 5
 
-# Blue layer
-walk(buffalo_data_covs$s2_b2_cent[1:n_plots], terra::plot)
-# Red layer
-walk(buffalo_data_covs$s2_b3_cent[1:n_plots], terra::plot)
-# Green layer
-walk(buffalo_data_covs$s2_b4_cent[1:n_plots], terra::plot)
-
-# Plot as RGB image
-rgb_image <- c(buffalo_data_covs$s2_b4_cent[[5]]*1e4, buffalo_data_covs$s2_b3_cent[[5]]*1e4, buffalo_data_covs$s2_b2_cent[[5]]*1e4)
-
-# Save plot as a PNG image
-png("outputs/rgb_local_env.png", width = 120, height = 120, units = "mm", res = 600)  # Adjust width, height, and resolution as needed
-terra::plotRGB(rgb_image, r = 1, g = 2, b = 3, 
-               smooth = FALSE, mar = 1.5, axes = TRUE)  # adjust 'scale' if needed
-dev.off()  # Close the graphic device to save the file
-
-# find which coordinates the 1 is
-buffalo_data_covs$pres_cent[1]
-which(buffalo_data_covs$pres_cent[1] == 1)
-
-# Find the cell index of the first occurrence of 1
-cell_index <- which(values(buffalo_data_covs$pres_cent[[5]]) == 1)[1]  # First occurrence
-
-# Get the coordinates of this cell
-coordinates <- terra::xyFromCell(buffalo_data_covs$pres_cent[[5]], cell_index)
-buffalo_data_covs$s2_b2_cent[1]
+for(i in 1:n_plots){
+  
+  # Blue layer
+  terra::plot(buffalo_data_covs$s2_b2_cent[[i]])
+  # Red layer
+  terra::plot(buffalo_data_covs$s2_b3_cent[[i]])
+  # Green layer
+  terra::plot(buffalo_data_covs$s2_b4_cent[[i]])
+  
+  # Plot as RGB image
+  rgb_image <- c(buffalo_data_covs$s2_b4_cent[[i]]*1e4, 
+                 buffalo_data_covs$s2_b3_cent[[i]]*1e4, 
+                 buffalo_data_covs$s2_b2_cent[[i]]*1e4)
+  
+  terra::plotRGB(rgb_image, r = 1, g = 2, b = 3,
+                 smooth = FALSE, mar = 1.5, axes = TRUE)  # adjust 'scale' if needed
+  
+  
+  # Save plot as a PNG image
+  # Create the graphic device
+  png(paste0("outputs/rgb_local_env_", i, ".png"), 
+      width = 120, height = 120, units = "mm", res = 600)  
+  
+  # Plot the RGB image
+  terra::plotRGB(rgb_image, r = 1, g = 2, b = 3, 
+                 smooth = FALSE, mar = 1.5, axes = TRUE)  
+  
+  # Close the graphic device to save the file
+  dev.off()  
+  
+}
 
 ```
 
