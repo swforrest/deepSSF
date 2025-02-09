@@ -1,5 +1,6 @@
 ---
-title: "Preparing data for DL model fitting"
+title: "Preparing data for deepSSF model fitting"
+subtitle: "Using Sentinel-2 layers"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
