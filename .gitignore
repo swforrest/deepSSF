@@ -27,6 +27,8 @@ sql_info*
 lossFunctions.py
 dansModel.py
 
+index.html
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
