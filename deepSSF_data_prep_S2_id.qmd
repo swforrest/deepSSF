@@ -25,7 +25,8 @@ format:
 editor:
   source
 abstract: |
-  This document outlines the steps taken to prepare the data for the deepSSF model fitting.
+  This document outlines the steps taken to prepare the data for the deepSSF model fitting, using Sentinel-2 data directly 
+  (instead of derived covariates such as NDVI).
 ---
 
 ## Loading packages
@@ -102,24 +103,9 @@ buffalo_all %>%
 
 ```{r}
 
-ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
-terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
 slope <- rast("mapping/cropped rasters/slope_raster.tif")
-veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
-canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
-
-# change the names (these will become the column names when extracting 
-# covariate values at the used and random steps)
-names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
 names(slope) <- "slope"
-names(veg_herby) <- "veg_herby"
-names(canopy_cover) <- "canopy_cover"
-
-# to plot the rasters
-plot(ndvi_projected)
 plot(slope)
-plot(veg_herby)
-plot(canopy_cover)
 
 ```
 
@@ -134,6 +120,8 @@ dates <- as.POSIXct(lubridate::ymd("2019-01-15")) + months(0:11)
 ```
 
 ### Import the layers and add times
+
+Each of these stacks are the 
 
 ```{r}
 
@@ -238,7 +226,7 @@ buffalo_all <- buffalo_all %>%
 buffalo_ids <- unique(buffalo_all$id)
 
 # get the resolution from the covariates
-res <- terra::res(ndvi_projected)[1]
+res <- terra::res(slope)[1]
 
 # how much to trim on either side of the location, 
 # this will determine the extent of the spatial inputs to the deepSSF model
