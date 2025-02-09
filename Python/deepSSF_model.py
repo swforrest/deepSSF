@@ -562,30 +562,32 @@ class ModelParams():
         self.device = dict_params["device"]
 
 
-"""
-## Define the parameters for the model
+### These are defined in each of the scripts that use the model
 
-Here we enter the specific parameter values and hyperparameters for the model. 
-These are the values that will be used to instantiate the model.
+# """
+# ## Define the parameters for the model
 
-"""
-# Define the parameters for the model
-params_dict = {"batch_size": 32, #number of samples in each batch
-               "image_dim": 101, #number of pixels along the edge of each local patch/image
-               "pixel_size": 25, #number of metres along the edge of a pixel
-               "dim_in_nonspatial_to_grid": 4, #the number of scalar predictors that are converted to a grid and appended to the spatial features
-               "dense_dim_in_nonspatial": 4, #change this to however many other scalar predictors you have (bearing, velocity etc)
-               "dense_dim_hidden": 128, #number of nodes in the hidden layers
-               "dense_dim_out": 128, #number of nodes in the output of the fully connected block (FCN)
-               "dense_dim_in_all": 2500,# + 128, #number of inputs entering the fully connected block once the nonspatial features have been concatenated to the spatial features
-               "input_channels": 4 + 4, #number of spatial layers in each image + number of scalar layers that are converted to a grid
-               "output_channels": 4, #number of filters to learn
-               "kernel_size": 3, #the size of the 2D moving windows / kernels that are being learned
-               "stride": 1, #the stride used when applying the kernel.  This reduces the dimension of the output if set to greater than 1
-               "kernel_size_mp": 2, #the size of the kernel that is used in max pooling operations
-               "stride_mp": 2, #the stride that is used in max pooling operations
-               "padding": 1, #the amount of padding to apply to images prior to applying the 2D convolution
-               "num_movement_params": 12, #number of parameters used to parameterise the movement kernel
-               "dropout": 0.1, #the proportion of nodes that are dropped out in the dropout layers
-               "device": device
-               }
+# Here we enter the specific parameter values and hyperparameters for the model. 
+# These are the values that will be used to instantiate the model.
+
+# """
+# # Define the parameters for the model
+# params_dict = {"batch_size": 32, #number of samples in each batch
+#                "image_dim": 101, #number of pixels along the edge of each local patch/image
+#                "pixel_size": 25, #number of metres along the edge of a pixel
+#                "dim_in_nonspatial_to_grid": 4, #the number of scalar predictors that are converted to a grid and appended to the spatial features
+#                "dense_dim_in_nonspatial": 4, #change this to however many other scalar predictors you have (bearing, velocity etc)
+#                "dense_dim_hidden": 128, #number of nodes in the hidden layers
+#                "dense_dim_out": 128, #number of nodes in the output of the fully connected block (FCN)
+#                "dense_dim_in_all": 2500,# + 128, #number of inputs entering the fully connected block once the nonspatial features have been concatenated to the spatial features
+#                "input_channels": 4 + 4, #number of spatial layers in each image + number of scalar layers that are converted to a grid
+#                "output_channels": 4, #number of filters to learn
+#                "kernel_size": 3, #the size of the 2D moving windows / kernels that are being learned
+#                "stride": 1, #the stride used when applying the kernel.  This reduces the dimension of the output if set to greater than 1
+#                "kernel_size_mp": 2, #the size of the kernel that is used in max pooling operations
+#                "stride_mp": 2, #the stride that is used in max pooling operations
+#                "padding": 1, #the amount of padding to apply to images prior to applying the 2D convolution
+#                "num_movement_params": 12, #number of parameters used to parameterise the movement kernel
+#                "dropout": 0.1, #the proportion of nodes that are dropped out in the dropout layers
+#                "device": device
+#                }
