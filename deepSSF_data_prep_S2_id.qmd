@@ -123,80 +123,144 @@ dates <- as.POSIXct(lubridate::ymd("2019-01-15")) + months(0:11)
 
 Each of these stacks are one month of the 12 bands of Sentinel-2 data. Initially they are at 10m resolution, but we resample them to 25m to match the resolution of the slope layer.
 
+We save each of the scaled rasters such that we can import them when we simulate from the deepSSF model using the Sentinel-2 data.
+
+As the resampling takes some time, we have commented this code out and read in the resampled and scaled layers direclty in the next code chunk.
+
 ```{r}
 
-### January 2019
-s2_10m_2019_01 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_01.tif")
-terra::time(s2_10m_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_01))
-s2_25m_2019_01 <- terra::resample(s2_10m_2019_01, slope, method = "bilinear")
-s2_25m_2019_01 <- s2_25m_2019_01 / 10000
+# ### January 2019
+# s2_10m_2019_01 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_01.tif")
+# terra::time(s2_10m_2019_01) <- rep(as.POSIXct(lubridate::ymd("2019-01-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_01))
+# s2_25m_2019_01 <- terra::resample(s2_10m_2019_01, slope, method = "bilinear")
+# s2_25m_2019_01 <- s2_25m_2019_01 / 10000
+# # to save the scaled raster to file for reading when simulating from the deepSSF model
+# # writeRaster(s2_25m_2019_01, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif", overwrite = T)
+# 
+# 
+# ### February 2019
+# s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_02.tif")
+# terra::time(s2_10m_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_02))
+# s2_25m_2019_02 <- terra::resample(s2_10m_2019_02, slope, method = "bilinear")
+# s2_25m_2019_02 <- s2_25m_2019_02 / 10000
+# # writeRaster(s2_25m_2019_02, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif", overwrite = T)
+# 
+# ### March 2019
+# s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_03.tif")
+# terra::time(s2_10m_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_03))
+# s2_25m_2019_03 <- terra::resample(s2_10m_2019_03, slope, method = "bilinear")
+# s2_25m_2019_03 <- s2_25m_2019_03 / 10000
+# # writeRaster(s2_25m_2019_03, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif", overwrite = T)
+# 
+# ### April 2019
+# s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_04.tif")
+# terra::time(s2_10m_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_04))
+# s2_25m_2019_04 <- terra::resample(s2_10m_2019_04, slope, method = "bilinear")
+# s2_25m_2019_04 <- s2_25m_2019_04 / 10000
+# # writeRaster(s2_25m_2019_04, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif", overwrite = T)
+# 
+# 
+# ### May 2019
+# s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_05.tif")
+# terra::time(s2_10m_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_05))
+# s2_25m_2019_05 <- terra::resample(s2_10m_2019_05, slope, method = "bilinear")
+# s2_25m_2019_05 <- s2_25m_2019_05 / 10000
+# # writeRaster(s2_25m_2019_05, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif", overwrite = T)
+# 
+# ### June 2019
+# s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_06.tif")
+# # plot(s2_10m_2019_06[[2]])
+# terra::time(s2_10m_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_06))
+# s2_25m_2019_06 <- terra::resample(s2_10m_2019_06, slope, method = "bilinear")
+# s2_25m_2019_06 <- s2_25m_2019_06 / 10000
+# # writeRaster(s2_25m_2019_06, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif", overwrite = T)
+# 
+# ### July 2019
+# s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_07.tif")
+# terra::time(s2_10m_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_07))
+# s2_25m_2019_07 <- terra::resample(s2_10m_2019_07, slope, method = "bilinear")
+# s2_25m_2019_07 <- s2_25m_2019_07 / 10000
+# # writeRaster(s2_25m_2019_07, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif", overwrite = T)
+# 
+# ### August 2019
+# s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_08.tif")
+# terra::time(s2_10m_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_08))
+# s2_25m_2019_08 <- terra::resample(s2_10m_2019_08, slope, method = "bilinear")
+# s2_25m_2019_08 <- s2_25m_2019_08 / 10000
+# # writeRaster(s2_25m_2019_08, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif", overwrite = T)
+# 
+# ### September 2019
+# s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_09.tif")
+# terra::time(s2_10m_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_09))
+# s2_25m_2019_09 <- terra::resample(s2_10m_2019_09, slope, method = "bilinear")
+# s2_25m_2019_09 <- s2_25m_2019_09 / 10000
+# # writeRaster(s2_25m_2019_09, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif", overwrite = T)
+# 
+# ### October 2019
+# s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_10.tif")
+# terra::time(s2_10m_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_10))
+# s2_25m_2019_10 <- terra::resample(s2_10m_2019_10, slope, method = "bilinear")
+# s2_25m_2019_10 <- s2_25m_2019_10 / 10000
+# # writeRaster(s2_25m_2019_10, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif", overwrite = T)
+# 
+# ### November 2019
+# s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_11.tif")
+# terra::time(s2_10m_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_11))
+# s2_25m_2019_11 <- terra::resample(s2_10m_2019_11, slope, method = "bilinear")
+# s2_25m_2019_11 <- s2_25m_2019_11 / 10000
+# # writeRaster(s2_25m_2019_11, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif", overwrite = T)
+# 
+# ### December 2019
+# s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_12.tif")
+# terra::time(s2_10m_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), 
+#                                               tz = "Australia/Queensland"), 
+#                                    nlyr(s2_10m_2019_12))
+# s2_25m_2019_12 <- terra::resample(s2_10m_2019_12, slope, method = "bilinear")
+# s2_25m_2019_12 <- s2_25m_2019_12 / 10000
+# # writeRaster(s2_25m_2019_12, "mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif", overwrite = T)
 
-### February 2019
-s2_10m_2019_02 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_02.tif")
-terra::time(s2_10m_2019_02) <- rep(as.POSIXct(lubridate::ymd("2019-02-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_02))
-s2_25m_2019_02 <- terra::resample(s2_10m_2019_02, slope, method = "bilinear")
-s2_25m_2019_02 <- s2_25m_2019_02 / 10000
+```
 
-### March 2019
-s2_10m_2019_03 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_03.tif")
-terra::time(s2_10m_2019_03) <- rep(as.POSIXct(lubridate::ymd("2019-03-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_03))
-s2_25m_2019_03 <- terra::resample(s2_10m_2019_03, slope, method = "bilinear")
-s2_25m_2019_03 <- s2_25m_2019_03 / 10000
+Each raster stack contains the Sentinel 2 bands for a given month in 2019, and have been scaled by 10,000 from what was downloaded from GEE.
 
-### April 2019
-s2_10m_2019_04 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_04.tif")
-terra::time(s2_10m_2019_04) <- rep(as.POSIXct(lubridate::ymd("2019-04-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_04))
-s2_25m_2019_04 <- terra::resample(s2_10m_2019_04, slope, method = "bilinear")
-s2_25m_2019_04 <- s2_25m_2019_04 / 10000
+```{r}
 
-### May 2019
-s2_10m_2019_05 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_05.tif")
-terra::time(s2_10m_2019_05) <- rep(as.POSIXct(lubridate::ymd("2019-05-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_05))
-s2_25m_2019_05 <- terra::resample(s2_10m_2019_05, slope, method = "bilinear")
-s2_25m_2019_05 <- s2_25m_2019_05 / 10000
+s2_25m_2019_01 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_01.tif")
+s2_25m_2019_02 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_02.tif")
+s2_25m_2019_03 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_03.tif")
+s2_25m_2019_04 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_04.tif")
+s2_25m_2019_05 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_05.tif")
+s2_25m_2019_06 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_06.tif")
+s2_25m_2019_07 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_07.tif")
+s2_25m_2019_08 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_08.tif")
+s2_25m_2019_09 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_09.tif")
+s2_25m_2019_10 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_10.tif")
+s2_25m_2019_11 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_11.tif")
+s2_25m_2019_12 <- rast("mapping/cropped rasters/sentinel2/25m/S2_SR_masked_scaled_25m_2019_12.tif")
 
-### June 2019
-s2_10m_2019_06 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_06.tif")
-# plot(s2_10m_2019_06[[2]])
-terra::time(s2_10m_2019_06) <- rep(as.POSIXct(lubridate::ymd("2019-06-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_06))
-s2_25m_2019_06 <- terra::resample(s2_10m_2019_06, slope, method = "bilinear")
-s2_25m_2019_06 <- s2_25m_2019_06 / 10000
-
-### July 2019
-s2_10m_2019_07 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_07.tif")
-terra::time(s2_10m_2019_07) <- rep(as.POSIXct(lubridate::ymd("2019-07-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_07))
-s2_25m_2019_07 <- terra::resample(s2_10m_2019_07, slope, method = "bilinear")
-s2_25m_2019_07 <- s2_25m_2019_07 / 10000
-
-### August 2019
-s2_10m_2019_08 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_08.tif")
-terra::time(s2_10m_2019_08) <- rep(as.POSIXct(lubridate::ymd("2019-08-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_08))
-s2_25m_2019_08 <- terra::resample(s2_10m_2019_08, slope, method = "bilinear")
-s2_25m_2019_08 <- s2_25m_2019_08 / 10000
-
-### September 2019
-s2_10m_2019_09 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_09.tif")
-terra::time(s2_10m_2019_09) <- rep(as.POSIXct(lubridate::ymd("2019-09-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_09))
-s2_25m_2019_09 <- terra::resample(s2_10m_2019_09, slope, method = "bilinear")
-s2_25m_2019_09 <- s2_25m_2019_09 / 10000
-
-### October 2019
-s2_10m_2019_10 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_10.tif")
-terra::time(s2_10m_2019_10) <- rep(as.POSIXct(lubridate::ymd("2019-10-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_10))
-s2_25m_2019_10 <- terra::resample(s2_10m_2019_10, slope, method = "bilinear")
-s2_25m_2019_10 <- s2_25m_2019_10 / 10000
-
-### November 2019
-s2_10m_2019_11 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_11.tif")
-terra::time(s2_10m_2019_11) <- rep(as.POSIXct(lubridate::ymd("2019-11-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_11))
-s2_25m_2019_11 <- terra::resample(s2_10m_2019_11, slope, method = "bilinear")
-s2_25m_2019_11 <- s2_25m_2019_11 / 10000
-
-### December 2019
-s2_10m_2019_12 <- rast("mapping/cropped rasters/sentinel2/10m/S2_SR_masked_2019_12.tif")
-terra::time(s2_10m_2019_12) <- rep(as.POSIXct(lubridate::ymd("2019-12-15"), tz = "Australia/Queensland"), nlyr(s2_10m_2019_12))
-s2_25m_2019_12 <- terra::resample(s2_10m_2019_12, slope, method = "bilinear")
-s2_25m_2019_12 <- s2_25m_2019_12 / 10000
+s2_25m_2019_01
 
 ```
 
