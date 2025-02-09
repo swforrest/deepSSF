@@ -20,6 +20,8 @@ Usage:
         $ python deepSSF_functions.py [optional arguments]
 """
 
+# Import required libraries
+import torch
 
 def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform):
     """
