@@ -3,7 +3,7 @@ deepSSF_functions.py
 ==============
 
 Description:
-    A number of helper functions that are used in other scripts.
+    Helper functions that are used in other scripts.
 
 Authors:
     Scott Forrest (scottwforrest@gmail.com)
@@ -22,6 +22,7 @@ Usage:
 
 # Import required libraries
 import torch
+import numpy as np
 
 def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform):
     """
@@ -77,3 +78,41 @@ def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform
     
     # Return the subset along with the starting column and row indices of the window.
     return subset, col_start, row_start
+
+
+
+def recover_hour(sin_term, cos_term):
+    """
+    Recovers the hour of the day from its sine and cosine encoding.
+
+    Parameters:
+        sin_term (float or np.array): Sine-transformed hour value.
+        cos_term (float or np.array): Cosine-transformed hour value.
+
+    Returns:
+        float or np.array: Recovered hour in the range [0, 24).
+    """
+    # Calculate the angle theta
+    theta = np.arctan2(sin_term, cos_term)
+    # Convert to hour
+    hour = (24 * theta) / (2 * np.pi) % 24
+    return hour
+
+
+
+def recover_yday(sin_term, cos_term):
+    """
+    Recovers the day of the year from its sine and cosine encoding.
+
+    Parameters:
+        sin_term (float or np.array): Sine-transformed day value.
+        cos_term (float or np.array): Cosine-transformed day value.
+
+    Returns:
+        float or np.array: Recovered day of the year in the range [0, 365).
+    """
+    # Calculate the angle theta
+    theta = np.arctan2(sin_term, cos_term)
+    # Convert to day of year
+    yday = (365 * theta) / (2 * np.pi) % 365
+    return yday
