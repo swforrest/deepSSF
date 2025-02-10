@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="quarto-1.6.40" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+<meta name="author" content="Scott Forrest" />
+<meta name="dcterms.date" content="2025-02-09" />
+
+<title>Assessing deepSSF habitat selection predictions – deepSSF</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<!-- htmldependencies:E3FAD763 -->
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="/index.html">
+    <span class="navbar-title">deepSSF</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+  aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation"
+  onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="/index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="/about.html"> 
+<span class="menu-text">about</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/swforrest/deepSSF"> <i 
+  class="bi bi-github" 
+  role="img" 
+>
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <div id="quarto-toc-target"></div>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Assessing deepSSF habitat selection predictions</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Scott Forrest </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 9, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.</p>
+  </div>
+</div>
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#loading-packages" id="toc-loading-packages">Loading packages</a></li>
+  <li><a href="#load-the-habitat-selection-selection" id="toc-load-the-habitat-selection-selection">Load the habitat selection selection</a>
+  <ul>
+  <li><a href="#tidy-the-data-frame" id="toc-tidy-the-data-frame">Tidy the data frame</a>
+  <ul>
+  <li><a href="#check-the-distributions-of-the-covariates" id="toc-check-the-distributions-of-the-covariates">Check the distributions of the covariates</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#plot-the-covariate-vs-prediction-values" id="toc-plot-the-covariate-vs-prediction-values">Plot the covariate vs prediction values</a>
+  <ul>
+  <li><a href="#note-the-tabs-below-for-the-different-covariates" id="toc-note-the-tabs-below-for-the-different-covariates"><em>Note the tabs below for the different covariates</em></a></li>
+  </ul></li>
+  </ul>
+</nav>
+<section id="loading-packages" class="level1">
+<h1>Loading packages</h1>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;terra&quot;</span>, <span class="st">&quot;beepr&quot;</span>, <span class="st">&quot;tictoc&quot;</span>, <span class="st">&quot;viridis&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span></code></pre></div>
+</details>
+</div>
+</section>
+<section id="load-the-habitat-selection-selection" class="level1">
+<h1>Load the habitat selection selection</h1>
+<p>The habitat selection probability values are from the <code>deepSSF_landscape_preds.ipynb</code> script. The predictions are stored in a CSV file that contains the NDVI, canopy cover, herbaceous vegetation, and slope values for each cell in the landscape. The predictions are stored as columns, one for each hour of the day.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># yday 45</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>habitat_selection_yday45 <span class="ot">&lt;-</span> </span>
+<span id="cb2-3"><a href="#cb2-3"></a>  <span class="fu">read_csv</span>(<span class="st">&quot;Python/outputs/landscape_predictions/2005/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 707350 Columns: 28
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+dbl (28): NDVI, Canopy_cover, Herbaceous_vegetation, Slope, 1, 2, 3, 4, 5, 6...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># yday 225</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>habitat_selection_yday225 <span class="ot">&lt;-</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">read_csv</span>(<span class="st">&quot;Python/outputs/landscape_predictions/2005/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 707350 Columns: 28
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+dbl (28): NDVI, Canopy_cover, Herbaceous_vegetation, Slope, 1, 2, 3, 4, 5, 6...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># filter out the edge cells that were masked</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>habitat_selection_yday45 <span class="ot">&lt;-</span> habitat_selection_yday45 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>NDVI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>))</span>
+<span id="cb6-3"><a href="#cb6-3"></a>habitat_selection_yday225 <span class="ot">&lt;-</span> habitat_selection_yday225 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>NDVI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>))</span></code></pre></div>
+</details>
+</div>
+<section id="tidy-the-data-frame" class="level2">
+<h2>Tidy the data frame</h2>
+<p>Rescale the covariates to their original values and select a subset of the data to speed up the plotting process. As we’re taking a subset there will be some random variation in the plots each time the script is run, although there are many cells so the results should be robust.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># from the stack of local layers (Python script)</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>ndvi_max <span class="ot">=</span> <span class="fl">0.8220</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>ndvi_min <span class="ot">=</span> <span class="sc">-</span><span class="fl">0.2772</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>canopy_max <span class="ot">=</span> <span class="fl">82.5000</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>canopy_min <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>herby_max <span class="ot">=</span> <span class="fl">1.0</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>herby_min <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>slope_max <span class="ot">=</span> <span class="fl">12.2981</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>slope_min <span class="ot">=</span> <span class="fl">0.0006</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a>habitat_selection_yday45_long <span class="ot">&lt;-</span> habitat_selection_yday45 <span class="sc">%&gt;%</span> </span>
+<span id="cb7-12"><a href="#cb7-12"></a>  </span>
+<span id="cb7-13"><a href="#cb7-13"></a>  <span class="co"># take a random sample of the data</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a>  </span>
+<span id="cb7-16"><a href="#cb7-16"></a>  <span class="co"># rescale the covariates to their original scale</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a>  <span class="fu">mutate</span>(<span class="at">NDVI =</span> (NDVI<span class="sc">*</span>(ndvi_max <span class="sc">-</span> ndvi_min) <span class="sc">+</span> ndvi_min),</span>
+<span id="cb7-18"><a href="#cb7-18"></a>         <span class="at">Canopy_cover =</span> <span class="fu">round</span>((Canopy_cover<span class="sc">*</span>(canopy_max <span class="sc">-</span> canopy_min) <span class="sc">+</span> canopy_min), <span class="at">digits =</span> <span class="dv">1</span>),</span>
+<span id="cb7-19"><a href="#cb7-19"></a>         <span class="at">Herbaceous_vegetation =</span> (Herbaceous_vegetation<span class="sc">*</span>(herby_max <span class="sc">-</span> herby_min) <span class="sc">+</span> herby_min),</span>
+<span id="cb7-20"><a href="#cb7-20"></a>         <span class="at">Slope =</span> (Slope<span class="sc">*</span>(slope_max <span class="sc">-</span> slope_min) <span class="sc">+</span> slope_min)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-21"><a href="#cb7-21"></a>  </span>
+<span id="cb7-22"><a href="#cb7-22"></a>  <span class="co"># pivot the data frame to long format for plotting with ggplot</span></span>
+<span id="cb7-23"><a href="#cb7-23"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), </span>
+<span id="cb7-24"><a href="#cb7-24"></a>               <span class="at">names_to =</span> <span class="st">&quot;Hour&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Values&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-25"><a href="#cb7-25"></a>  </span>
+<span id="cb7-26"><a href="#cb7-26"></a>  <span class="co"># convert the hour column to numeric</span></span>
+<span id="cb7-27"><a href="#cb7-27"></a>  <span class="fu">mutate</span>(<span class="at">Hour =</span> <span class="fu">as.numeric</span>(Hour))</span>
+<span id="cb7-28"><a href="#cb7-28"></a></span>
+<span id="cb7-29"><a href="#cb7-29"></a><span class="fu">head</span>(habitat_selection_yday45_long)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["NDVI"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Canopy_cover"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Herbaceous_vegetation"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Slope"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Hour"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Values"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"1","6":"4.277168e-07"},{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"2","6":"4.109239e-07"},{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"3","6":"3.762598e-07"},{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"4","6":"3.430230e-07"},{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"5","6":"3.367629e-07"},{"1":"0.407232","2":"57.5","3":"1","4":"0.1799147","5":"6","6":"6.834218e-07"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Do the same for the yday 225 predictions.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>habitat_selection_yday225_long <span class="ot">&lt;-</span> habitat_selection_yday225 <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  </span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="co"># take a random sample of the data</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="fl">0.01</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>  </span>
+<span id="cb8-6"><a href="#cb8-6"></a>  <span class="co"># rescale the covariates to their original scale</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>  <span class="fu">mutate</span>(<span class="at">NDVI =</span> (NDVI<span class="sc">*</span>(ndvi_max <span class="sc">-</span> ndvi_min) <span class="sc">+</span> ndvi_min),</span>
+<span id="cb8-8"><a href="#cb8-8"></a>         <span class="at">Canopy_cover =</span> <span class="fu">round</span>((Canopy_cover<span class="sc">*</span>(canopy_max <span class="sc">-</span> canopy_min) <span class="sc">+</span> canopy_min), <span class="at">digits =</span> <span class="dv">1</span>),</span>
+<span id="cb8-9"><a href="#cb8-9"></a>         <span class="at">Herbaceous_vegetation =</span> (Herbaceous_vegetation<span class="sc">*</span>(herby_max <span class="sc">-</span> herby_min) <span class="sc">+</span> herby_min),</span>
+<span id="cb8-10"><a href="#cb8-10"></a>         <span class="at">Slope =</span> (Slope<span class="sc">*</span>(slope_max <span class="sc">-</span> slope_min) <span class="sc">+</span> slope_min)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-11"><a href="#cb8-11"></a>  </span>
+<span id="cb8-12"><a href="#cb8-12"></a>  <span class="co"># pivot the data frame to long format for plotting with ggplot</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), </span>
+<span id="cb8-14"><a href="#cb8-14"></a>               <span class="at">names_to =</span> <span class="st">&quot;Hour&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Values&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-15"><a href="#cb8-15"></a>  </span>
+<span id="cb8-16"><a href="#cb8-16"></a>  <span class="co"># convert the hour column to numeric</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a>  <span class="fu">mutate</span>(<span class="at">Hour =</span> <span class="fu">as.numeric</span>(Hour))</span></code></pre></div>
+</details>
+</div>
+<section id="check-the-distributions-of-the-covariates" class="level3">
+<h3>Check the distributions of the covariates</h3>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">hist</span>(habitat_selection_yday45_long<span class="sc">$</span>NDVI, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">main =</span> <span class="st">&quot;NDVI distribution&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">hist</span>(habitat_selection_yday45_long<span class="sc">$</span>Slope, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">main =</span> <span class="st">&quot;Slope distribution&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>There are some extreme values in the NDVI and slope covariates. We will remove these values to get a better idea of the relationship between the covariates and the habitat selection predictions.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># NDVI quantiles</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>NDVI_yday45_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday45_long<span class="sc">$</span>NDVI, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb11-3"><a href="#cb11-3"></a>NDVI_yday225_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday225_long<span class="sc">$</span>NDVI, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="co"># Slope quantiles (same throughout the year)</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>slope_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday45_long<span class="sc">$</span>Slope, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb11-7"><a href="#cb11-7"></a></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="co"># filter out the extreme values for yday 45</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>habitat_selection_yday45_long <span class="ot">&lt;-</span> habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>  <span class="fu">filter</span>(NDVI <span class="sc">&gt;=</span> NDVI_yday45_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> NDVI <span class="sc">&lt;=</span> NDVI_yday45_quantiles[<span class="dv">2</span>] <span class="sc">&amp;</span> Slope <span class="sc">&gt;=</span> slope_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> Slope <span class="sc">&lt;=</span> slope_quantiles[<span class="dv">2</span>])</span>
+<span id="cb11-11"><a href="#cb11-11"></a></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co"># filter out the extreme values for yday 225</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a>habitat_selection_yday225_long <span class="ot">&lt;-</span> habitat_selection_yday225_long <span class="sc">%&gt;%</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a>  <span class="fu">filter</span>(NDVI <span class="sc">&gt;=</span> NDVI_yday225_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> NDVI <span class="sc">&lt;=</span> NDVI_yday225_quantiles[<span class="dv">2</span>] <span class="sc">&amp;</span> Slope <span class="sc">&gt;=</span> slope_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> Slope <span class="sc">&lt;=</span> slope_quantiles[<span class="dv">2</span>])</span></code></pre></div>
+</details>
+</div>
+</section>
+</section>
+</section>
+<section id="plot-the-covariate-vs-prediction-values" class="level1">
+<h1>Plot the covariate vs prediction values</h1>
+<p>To try and understand the influence of certain covariates on the habitat selection predictions, we can plot the habitat selection predictions against the covariate values. We will plot the NDVI, canopy cover, herbaceous vegetation and slope covariates against the habitat selection predictions for the yday 45 and yday 225 predictions.</p>
+<section id="note-the-tabs-below-for-the-different-covariates" class="level2">
+<h2><em>Note the tabs below for the different covariates</em></h2>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">NDVI</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Canopy cover</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Herbaceous vegetation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Slope</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<p>First we can look at scatterplots for a couple different hours of the day. We can see that the prediction values change quite a bit across the day, indicating that the model has created a dynamic representation of buffalo habitat selection behaviour.</p>
+<ul>
+<li>At hour 1, there are higher selection probabilities associated with higher NDVI values.</li>
+<li>At hour 7, there is a more even distribution of selection probabilities across the NDVI values.</li>
+<li>At hour 12, there are higher selection probabilities associated with lower NDVI values.</li>
+</ul>
+<p>To highlight the relationship we will fit a smoother to the data.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb12-8"><a href="#cb12-8"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb12-9"><a href="#cb12-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-8"><a href="#cb15-8"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb18-8"><a href="#cb18-8"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb18-9"><a href="#cb18-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb18-10"><a href="#cb18-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="all-hours" class="level3">
+<h3>All hours</h3>
+<p>We can also plot all the hours of the day on the same plot to see how the relationship between NDVI and habitat selection changes throughout the day.</p>
+<p>We see there is a rhythmic pattern, with selection for lower values during the middle hours of the day.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb21-4"><a href="#cb21-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-8"><a href="#cb21-8"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-9"><a href="#cb21-9"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb21-10"><a href="#cb21-10"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb21-11"><a href="#cb21-11"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="selection-surface" class="level3">
+<h3>Selection surface</h3>
+<p>However, the plot above is fairly messy, so instead we will use the <code>stat_summary_2d</code> function to create a 2D histogram of the data. This will allow us to see the average habitat selection values for different NDVI values at different times of the day.</p>
+<p>What we are seeing is the <em>mean habitat selection probability value</em> for different NDVI values at different times of the day. Higher values indicate a higher mean probability of selecting NDVI values in that range.</p>
+<p>This selection surface reflects the plots above, with a pattern of selection for lower NDVI values during the middle hours of the day, and high values in the early morning and evening. This suggests that buffalo are selecting for less vegetated areas during the middle of the day.</p>
+<p>These selection surfaces are also similar to those presented by <span class="citation" data-cites="Forrest2024-xe">Forrest et al. (<a href="#ref-Forrest2024-xe" role="doc-biblioref">2024</a>)</span>, which was acheived by fitting temporal dynamics and quadratic terms to the NDVI covariate. However, this was only fitted to one season of data at a time, whereas the deepSSF model can be fitted with multiscale temporal dynamics.</p>
+<p>Day of the year = 45 (mid-February)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb24-2"><a href="#cb24-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> NDVI)) <span class="sc">+</span>  </span>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb24-5"><a href="#cb24-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb24-6"><a href="#cb24-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;NDVI value&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb24-7"><a href="#cb24-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/ndvi_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb26-2"><a href="#cb26-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+<p>We can illustrate the multitemporal dynamics of the NDVI covariate by plotting the selection surface for different days of the year.</p>
+<p>Day of the year = 225 (mid-August)</p>
+<p>Here we see quite a different response, where there is some bimodal selection during the day, with higher selection probabilities for both low and high NDVI values. This may indicate that there are some features described by low or high values of NDVI that are important for buffalo habitat selection during this time of year, or may just indicate that the selection is more variable in the dry season.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb28-2"><a href="#cb28-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> NDVI)) <span class="sc">+</span>  </span>
+<span id="cb28-3"><a href="#cb28-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb28-4"><a href="#cb28-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb28-5"><a href="#cb28-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb28-6"><a href="#cb28-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;NDVI value&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb28-7"><a href="#cb28-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb28-8"><a href="#cb28-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb28-9"><a href="#cb28-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/ndvi_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb30-2"><a href="#cb30-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+</section>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p>We can do the same for canopy cover.</p>
+<p>Here we show these as boxplots (keep in mind that the canopy cover covariate is continuous, and the canopy classifications are not equally spaced, but we are treating it as a categorical variable for the purposes of this plot).</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb32-8"><a href="#cb32-8"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb32-9"><a href="#cb32-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb32-10"><a href="#cb32-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb34-6"><a href="#cb34-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb34-8"><a href="#cb34-8"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb34-9"><a href="#cb34-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb34-10"><a href="#cb34-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb36-5"><a href="#cb36-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb36-6"><a href="#cb36-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb36-7"><a href="#cb36-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb36-8"><a href="#cb36-8"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb36-9"><a href="#cb36-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb36-10"><a href="#cb36-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="all-hours-1" class="level3">
+<h3>All hours</h3>
+<p>Again, this is a slightly confusing plot, but it shows how the habitat selection probabilities for each canopy cover ‘category’ change across the day.</p>
+<p>Looking at 32.5% canopy cover for instance, there is lower selection probability in the early morning and evening, and higher selection probability in the middle of the day. This suggests that buffalo are selecting for areas with 32.5% canopy cover during the middle of the day.</p>
+<p>For open canopy (0%), selection is highest around dawn and dusk, which correlates with the high movement periods of buffalo.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb38-4"><a href="#cb38-4"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb38-5"><a href="#cb38-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb38-6"><a href="#cb38-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb38-7"><a href="#cb38-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb38-8"><a href="#cb38-8"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb38-9"><a href="#cb38-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb38-10"><a href="#cb38-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="selection-surface-1" class="level3">
+<h3>Selection surface</h3>
+<p>Day of the year = 45 (mid-February)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb40-2"><a href="#cb40-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Canopy_cover)) <span class="sc">+</span>  </span>
+<span id="cb40-3"><a href="#cb40-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">15</span>)) <span class="sc">+</span> </span>
+<span id="cb40-4"><a href="#cb40-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb40-5"><a href="#cb40-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb40-6"><a href="#cb40-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Canopy cover (%)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb40-7"><a href="#cb40-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb40-8"><a href="#cb40-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb40-9"><a href="#cb40-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/canopy_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb42-2"><a href="#cb42-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+<p>Day of the year = 225 (mid-August)</p>
+<p>There is clearly high selection for open canopy in the middle of the day during the dry season.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb44"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb44-2"><a href="#cb44-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Canopy_cover)) <span class="sc">+</span>  </span>
+<span id="cb44-3"><a href="#cb44-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">15</span>)) <span class="sc">+</span> </span>
+<span id="cb44-4"><a href="#cb44-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb44-5"><a href="#cb44-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb44-6"><a href="#cb44-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Canopy cover (%)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb44-7"><a href="#cb44-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb44-8"><a href="#cb44-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb46"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/canopy_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb46-2"><a href="#cb46-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+</section>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<p>As herbaceous vegetation is binary, the plotting is a bit different to interpret, but the plots do show a relationship between habitat selection and herbaceous vegetation.</p>
+<p>Recall that 0 is ‘woody vegetation’ and 1 is ‘herbaceous vegetation’.</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb48"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb48-2"><a href="#cb48-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb48-3"><a href="#cb48-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb48-6"><a href="#cb48-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb48-7"><a href="#cb48-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb48-8"><a href="#cb48-8"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb48-9"><a href="#cb48-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb48-10"><a href="#cb48-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb50"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb50-3"><a href="#cb50-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb50-4"><a href="#cb50-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb50-5"><a href="#cb50-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb50-6"><a href="#cb50-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb50-7"><a href="#cb50-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb50-8"><a href="#cb50-8"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb50-9"><a href="#cb50-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb50-10"><a href="#cb50-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb52"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb52-2"><a href="#cb52-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb52-3"><a href="#cb52-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb52-4"><a href="#cb52-4"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb52-5"><a href="#cb52-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb52-6"><a href="#cb52-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb52-7"><a href="#cb52-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb52-8"><a href="#cb52-8"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb52-9"><a href="#cb52-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb52-10"><a href="#cb52-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-15-3.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="all-hours-2" class="level3">
+<h3>All hours</h3>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb54"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb54-2"><a href="#cb54-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb54-3"><a href="#cb54-3"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb54-4"><a href="#cb54-4"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb54-5"><a href="#cb54-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb54-6"><a href="#cb54-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb54-7"><a href="#cb54-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb54-8"><a href="#cb54-8"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb54-9"><a href="#cb54-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb54-10"><a href="#cb54-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="selection-surface-2" class="level3">
+<h3>Selection surface</h3>
+<p>Day of the year = 45 (mid-February)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb56"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb56-2"><a href="#cb56-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Herbaceous_vegetation)) <span class="sc">+</span>  </span>
+<span id="cb56-3"><a href="#cb56-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>, <span class="dv">2</span>)) <span class="sc">+</span> </span>
+<span id="cb56-4"><a href="#cb56-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb56-5"><a href="#cb56-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb56-6"><a href="#cb56-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Herbaceous vegetation&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb56-7"><a href="#cb56-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb56-8"><a href="#cb56-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb56-9"><a href="#cb56-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb58"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/herby_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb58-2"><a href="#cb58-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+<p>Again there are seemingly opposing selection patterns between the wet and dry seasons.</p>
+<p>Day of the year = 225 (mid-August)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb60"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb60-2"><a href="#cb60-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Herbaceous_vegetation)) <span class="sc">+</span>  </span>
+<span id="cb60-3"><a href="#cb60-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>, <span class="dv">2</span>)) <span class="sc">+</span> </span>
+<span id="cb60-4"><a href="#cb60-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb60-5"><a href="#cb60-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb60-6"><a href="#cb60-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Herbaceous vegetation&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb60-7"><a href="#cb60-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb60-8"><a href="#cb60-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb60-9"><a href="#cb60-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb62"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/herby_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb62-2"><a href="#cb62-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+</section>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb64"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb64-2"><a href="#cb64-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb64-3"><a href="#cb64-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb64-4"><a href="#cb64-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb64-5"><a href="#cb64-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb64-6"><a href="#cb64-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb64-7"><a href="#cb64-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb64-8"><a href="#cb64-8"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb64-9"><a href="#cb64-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb64-10"><a href="#cb64-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb67"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb67-2"><a href="#cb67-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb67-3"><a href="#cb67-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb67-4"><a href="#cb67-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb67-5"><a href="#cb67-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb67-6"><a href="#cb67-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb67-7"><a href="#cb67-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb67-8"><a href="#cb67-8"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb67-9"><a href="#cb67-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb67-10"><a href="#cb67-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-19-2.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb70"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb70-2"><a href="#cb70-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb70-3"><a href="#cb70-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb70-4"><a href="#cb70-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb70-5"><a href="#cb70-5"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb70-6"><a href="#cb70-6"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb70-7"><a href="#cb70-7"></a>  <span class="fu">labs</span>(</span>
+<span id="cb70-8"><a href="#cb70-8"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb70-9"><a href="#cb70-9"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb70-10"><a href="#cb70-10"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 989 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-19-3.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="all-hours-3" class="level3">
+<h3>All hours</h3>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb73"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb73-2"><a href="#cb73-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb73-3"><a href="#cb73-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb73-4"><a href="#cb73-4"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb73-5"><a href="#cb73-5"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb73-6"><a href="#cb73-6"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb73-7"><a href="#cb73-7"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb73-8"><a href="#cb73-8"></a>  <span class="fu">labs</span>(</span>
+<span id="cb73-9"><a href="#cb73-9"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb73-10"><a href="#cb73-10"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb73-11"><a href="#cb73-11"></a>    )</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="selection-surface-3" class="level3">
+<h3>Selection surface</h3>
+<p>Day of the year = 45 (mid-February)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb76"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb76-2"><a href="#cb76-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Slope)) <span class="sc">+</span>  </span>
+<span id="cb76-3"><a href="#cb76-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb76-4"><a href="#cb76-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb76-5"><a href="#cb76-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb76-6"><a href="#cb76-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Slope&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb76-7"><a href="#cb76-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb76-8"><a href="#cb76-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb76-9"><a href="#cb76-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb78"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/slope_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb78-2"><a href="#cb78-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23736 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+<p>Day of the year = 225 (mid-August)</p>
+<div class="cell">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb80"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb80-2"><a href="#cb80-2"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Slope)) <span class="sc">+</span>  </span>
+<span id="cb80-3"><a href="#cb80-3"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb80-4"><a href="#cb80-4"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb80-5"><a href="#cb80-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb80-6"><a href="#cb80-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Slope&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb80-7"><a href="#cb80-7"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb80-8"><a href="#cb80-8"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb80-9"><a href="#cb80-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img src="deepSSF_habitat_selection_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672" /></p>
+</figure>
+</div>
+</div>
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb82"><pre class="sourceCode numberSource r cell-code number-lines"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/slope_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb82-2"><a href="#cb82-2"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2664 rows containing non-finite outside the scale range
+(`stat_summary2d()`).</code></pre>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<div id="quarto-navigation-envelope" class="hidden">
+<p><span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1zaWRlYmFyLXRpdGxl">deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXItdGl0bGU=">deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXI6SG9tZQ==">Home</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXI6L2luZGV4Lmh0bWw=">/index.html</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXI6YWJvdXQ=">about</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXI6L2Fib3V0Lmh0bWw=">/about.html</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLWludC1uYXZiYXI6aHR0cHM6Ly9naXRodWIuY29tL3N3Zm9ycmVzdC9kZWVwU1NG">https://github.com/swforrest/deepSSF</span></p>
+</div>
+<div id="quarto-meta-markdown" class="hidden">
+<p><span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLW1ldGF0aXRsZQ==">Assessing deepSSF habitat selection predictions – deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLXR3aXR0ZXJjYXJkdGl0bGU=">Assessing deepSSF habitat selection predictions – deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLW9nY2FyZHRpdGxl">Assessing deepSSF habitat selection predictions – deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLW1ldGFzaXRlbmFtZQ==">deepSSF</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLXR3aXR0ZXJjYXJkZGVzYw==">Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="cXVhcnRvLW9nY2FyZGRkZXNj">Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.</span></p>
+</div>
+<!-- -->
+<div class="quarto-embedded-source-code">
+<div class="sourceCode" id="cb84" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines"><code class="sourceCode markdown"><span id="cb84-1"><a href="#cb84-1"></a><span class="co">---</span></span>
+<span id="cb84-2"><a href="#cb84-2"></a><span class="an">title:</span><span class="co"> &quot;Assessing deepSSF habitat selection predictions&quot;</span></span>
+<span id="cb84-3"><a href="#cb84-3"></a><span class="an">author:</span><span class="co"> &quot;Scott Forrest&quot;</span></span>
+<span id="cb84-4"><a href="#cb84-4"></a><span class="an">date:</span><span class="co"> &quot;`r Sys.Date()`&quot;</span></span>
+<span id="cb84-5"><a href="#cb84-5"></a><span class="an">execute:</span><span class="co"> </span></span>
+<span id="cb84-6"><a href="#cb84-6"></a><span class="co">  cache: false</span></span>
+<span id="cb84-7"><a href="#cb84-7"></a><span class="an">bibliography:</span><span class="co"> references.bib</span></span>
+<span id="cb84-8"><a href="#cb84-8"></a><span class="an">toc:</span><span class="co"> true</span></span>
+<span id="cb84-9"><a href="#cb84-9"></a><span class="an">number-sections:</span><span class="co"> false</span></span>
+<span id="cb84-10"><a href="#cb84-10"></a><span class="an">format:</span><span class="co"> </span></span>
+<span id="cb84-11"><a href="#cb84-11"></a><span class="co">  html:</span></span>
+<span id="cb84-12"><a href="#cb84-12"></a><span class="co">    self-contained: true</span></span>
+<span id="cb84-13"><a href="#cb84-13"></a><span class="co">    code-fold: show</span></span>
+<span id="cb84-14"><a href="#cb84-14"></a><span class="co">    code-tools: true</span></span>
+<span id="cb84-15"><a href="#cb84-15"></a><span class="co">    df-print: paged</span></span>
+<span id="cb84-16"><a href="#cb84-16"></a><span class="co">    code-line-numbers: true</span></span>
+<span id="cb84-17"><a href="#cb84-17"></a><span class="co">    code-overflow: scroll</span></span>
+<span id="cb84-18"><a href="#cb84-18"></a><span class="co">  pdf:</span></span>
+<span id="cb84-19"><a href="#cb84-19"></a><span class="co">    geometry: </span></span>
+<span id="cb84-20"><a href="#cb84-20"></a><span class="co">      - top=30mm</span></span>
+<span id="cb84-21"><a href="#cb84-21"></a><span class="co">      - left=30mm</span></span>
+<span id="cb84-22"><a href="#cb84-22"></a><span class="an">editor:</span></span>
+<span id="cb84-23"><a href="#cb84-23"></a><span class="co">  source</span></span>
+<span id="cb84-24"><a href="#cb84-24"></a><span class="an">abstract:</span><span class="co"> |</span></span>
+<span id="cb84-25"><a href="#cb84-25"></a><span class="co">  Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.</span></span>
+<span id="cb84-26"><a href="#cb84-26"></a><span class="co">---</span></span>
+<span id="cb84-27"><a href="#cb84-27"></a></span>
+<span id="cb84-28"><a href="#cb84-28"></a><span class="fu"># Loading packages</span></span>
+<span id="cb84-29"><a href="#cb84-29"></a></span>
+<span id="cb84-30"><a href="#cb84-30"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-31"><a href="#cb84-31"></a></span>
+<span id="cb84-32"><a href="#cb84-32"></a><span class="in">```r</span></span>
+<span id="cb84-33"><a href="#cb84-33"></a><span class="co">#| warning: false</span></span>
+<span id="cb84-34"><a href="#cb84-34"></a></span>
+<span id="cb84-35"><a href="#cb84-35"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb84-36"><a href="#cb84-36"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;terra&quot;</span>, <span class="st">&quot;beepr&quot;</span>, <span class="st">&quot;tictoc&quot;</span>, <span class="st">&quot;viridis&quot;</span>)</span>
+<span id="cb84-37"><a href="#cb84-37"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span>
+<span id="cb84-38"><a href="#cb84-38"></a></span>
+<span id="cb84-39"><a href="#cb84-39"></a><span class="in">```</span></span>
+<span id="cb84-40"><a href="#cb84-40"></a></span>
+<span id="cb84-41"><a href="#cb84-41"></a><span class="fu"># Load the habitat selection selection</span></span>
+<span id="cb84-42"><a href="#cb84-42"></a></span>
+<span id="cb84-43"><a href="#cb84-43"></a>The habitat selection probability values are from the <span class="in">`deepSSF_landscape_preds.ipynb`</span> script. The predictions are stored in a CSV file that contains the NDVI, canopy cover, herbaceous vegetation, and slope values for each cell in the landscape. The predictions are stored as columns, one for each hour of the day.</span>
+<span id="cb84-44"><a href="#cb84-44"></a></span>
+<span id="cb84-45"><a href="#cb84-45"></a></span>
+<span id="cb84-46"><a href="#cb84-46"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-47"><a href="#cb84-47"></a></span>
+<span id="cb84-48"><a href="#cb84-48"></a><span class="in">```r</span></span>
+<span id="cb84-49"><a href="#cb84-49"></a><span class="co"># yday 45</span></span>
+<span id="cb84-50"><a href="#cb84-50"></a>habitat_selection_yday45 <span class="ot">&lt;-</span> </span>
+<span id="cb84-51"><a href="#cb84-51"></a>  <span class="fu">read_csv</span>(<span class="st">&quot;Python/outputs/landscape_predictions/2005/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv&quot;</span>)</span>
+<span id="cb84-52"><a href="#cb84-52"></a></span>
+<span id="cb84-53"><a href="#cb84-53"></a><span class="co"># yday 225</span></span>
+<span id="cb84-54"><a href="#cb84-54"></a>habitat_selection_yday225 <span class="ot">&lt;-</span> </span>
+<span id="cb84-55"><a href="#cb84-55"></a>  <span class="fu">read_csv</span>(<span class="st">&quot;Python/outputs/landscape_predictions/2005/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv&quot;</span>)</span>
+<span id="cb84-56"><a href="#cb84-56"></a></span>
+<span id="cb84-57"><a href="#cb84-57"></a><span class="co"># filter out the edge cells that were masked</span></span>
+<span id="cb84-58"><a href="#cb84-58"></a>habitat_selection_yday45 <span class="ot">&lt;-</span> habitat_selection_yday45 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>NDVI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>))</span>
+<span id="cb84-59"><a href="#cb84-59"></a>habitat_selection_yday225 <span class="ot">&lt;-</span> habitat_selection_yday225 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>NDVI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>))</span>
+<span id="cb84-60"><a href="#cb84-60"></a></span>
+<span id="cb84-61"><a href="#cb84-61"></a><span class="in">```</span></span>
+<span id="cb84-62"><a href="#cb84-62"></a></span>
+<span id="cb84-63"><a href="#cb84-63"></a><span class="fu">## Tidy the data frame</span></span>
+<span id="cb84-64"><a href="#cb84-64"></a></span>
+<span id="cb84-65"><a href="#cb84-65"></a>Rescale the covariates to their original values and select a subset of the data to speed up the plotting process. As we&#39;re taking a subset there will be some random variation in the plots each time the script is run, although there are many cells so the results should be robust.</span>
+<span id="cb84-66"><a href="#cb84-66"></a></span>
+<span id="cb84-67"><a href="#cb84-67"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-68"><a href="#cb84-68"></a></span>
+<span id="cb84-69"><a href="#cb84-69"></a><span class="in">```r</span></span>
+<span id="cb84-70"><a href="#cb84-70"></a><span class="co"># from the stack of local layers (Python script)</span></span>
+<span id="cb84-71"><a href="#cb84-71"></a>ndvi_max <span class="ot">=</span> <span class="fl">0.8220</span></span>
+<span id="cb84-72"><a href="#cb84-72"></a>ndvi_min <span class="ot">=</span> <span class="sc">-</span><span class="fl">0.2772</span></span>
+<span id="cb84-73"><a href="#cb84-73"></a>canopy_max <span class="ot">=</span> <span class="fl">82.5000</span></span>
+<span id="cb84-74"><a href="#cb84-74"></a>canopy_min <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb84-75"><a href="#cb84-75"></a>herby_max <span class="ot">=</span> <span class="fl">1.0</span></span>
+<span id="cb84-76"><a href="#cb84-76"></a>herby_min <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb84-77"><a href="#cb84-77"></a>slope_max <span class="ot">=</span> <span class="fl">12.2981</span></span>
+<span id="cb84-78"><a href="#cb84-78"></a>slope_min <span class="ot">=</span> <span class="fl">0.0006</span></span>
+<span id="cb84-79"><a href="#cb84-79"></a></span>
+<span id="cb84-80"><a href="#cb84-80"></a>habitat_selection_yday45_long <span class="ot">&lt;-</span> habitat_selection_yday45 <span class="sc">%&gt;%</span> </span>
+<span id="cb84-81"><a href="#cb84-81"></a>  </span>
+<span id="cb84-82"><a href="#cb84-82"></a>  <span class="co"># take a random sample of the data</span></span>
+<span id="cb84-83"><a href="#cb84-83"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-84"><a href="#cb84-84"></a>  </span>
+<span id="cb84-85"><a href="#cb84-85"></a>  <span class="co"># rescale the covariates to their original scale</span></span>
+<span id="cb84-86"><a href="#cb84-86"></a>  <span class="fu">mutate</span>(<span class="at">NDVI =</span> (NDVI<span class="sc">*</span>(ndvi_max <span class="sc">-</span> ndvi_min) <span class="sc">+</span> ndvi_min),</span>
+<span id="cb84-87"><a href="#cb84-87"></a>         <span class="at">Canopy_cover =</span> <span class="fu">round</span>((Canopy_cover<span class="sc">*</span>(canopy_max <span class="sc">-</span> canopy_min) <span class="sc">+</span> canopy_min), <span class="at">digits =</span> <span class="dv">1</span>),</span>
+<span id="cb84-88"><a href="#cb84-88"></a>         <span class="at">Herbaceous_vegetation =</span> (Herbaceous_vegetation<span class="sc">*</span>(herby_max <span class="sc">-</span> herby_min) <span class="sc">+</span> herby_min),</span>
+<span id="cb84-89"><a href="#cb84-89"></a>         <span class="at">Slope =</span> (Slope<span class="sc">*</span>(slope_max <span class="sc">-</span> slope_min) <span class="sc">+</span> slope_min)) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-90"><a href="#cb84-90"></a>  </span>
+<span id="cb84-91"><a href="#cb84-91"></a>  <span class="co"># pivot the data frame to long format for plotting with ggplot</span></span>
+<span id="cb84-92"><a href="#cb84-92"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), </span>
+<span id="cb84-93"><a href="#cb84-93"></a>               <span class="at">names_to =</span> <span class="st">&quot;Hour&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Values&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-94"><a href="#cb84-94"></a>  </span>
+<span id="cb84-95"><a href="#cb84-95"></a>  <span class="co"># convert the hour column to numeric</span></span>
+<span id="cb84-96"><a href="#cb84-96"></a>  <span class="fu">mutate</span>(<span class="at">Hour =</span> <span class="fu">as.numeric</span>(Hour))</span>
+<span id="cb84-97"><a href="#cb84-97"></a></span>
+<span id="cb84-98"><a href="#cb84-98"></a><span class="fu">head</span>(habitat_selection_yday45_long)</span>
+<span id="cb84-99"><a href="#cb84-99"></a></span>
+<span id="cb84-100"><a href="#cb84-100"></a><span class="in">```</span></span>
+<span id="cb84-101"><a href="#cb84-101"></a></span>
+<span id="cb84-102"><a href="#cb84-102"></a>Do the same for the yday 225 predictions.</span>
+<span id="cb84-103"><a href="#cb84-103"></a></span>
+<span id="cb84-104"><a href="#cb84-104"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-105"><a href="#cb84-105"></a></span>
+<span id="cb84-106"><a href="#cb84-106"></a><span class="in">```r</span></span>
+<span id="cb84-107"><a href="#cb84-107"></a>habitat_selection_yday225_long <span class="ot">&lt;-</span> habitat_selection_yday225 <span class="sc">%&gt;%</span> </span>
+<span id="cb84-108"><a href="#cb84-108"></a>  </span>
+<span id="cb84-109"><a href="#cb84-109"></a>  <span class="co"># take a random sample of the data</span></span>
+<span id="cb84-110"><a href="#cb84-110"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="fl">0.01</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-111"><a href="#cb84-111"></a>  </span>
+<span id="cb84-112"><a href="#cb84-112"></a>  <span class="co"># rescale the covariates to their original scale</span></span>
+<span id="cb84-113"><a href="#cb84-113"></a>  <span class="fu">mutate</span>(<span class="at">NDVI =</span> (NDVI<span class="sc">*</span>(ndvi_max <span class="sc">-</span> ndvi_min) <span class="sc">+</span> ndvi_min),</span>
+<span id="cb84-114"><a href="#cb84-114"></a>         <span class="at">Canopy_cover =</span> <span class="fu">round</span>((Canopy_cover<span class="sc">*</span>(canopy_max <span class="sc">-</span> canopy_min) <span class="sc">+</span> canopy_min), <span class="at">digits =</span> <span class="dv">1</span>),</span>
+<span id="cb84-115"><a href="#cb84-115"></a>         <span class="at">Herbaceous_vegetation =</span> (Herbaceous_vegetation<span class="sc">*</span>(herby_max <span class="sc">-</span> herby_min) <span class="sc">+</span> herby_min),</span>
+<span id="cb84-116"><a href="#cb84-116"></a>         <span class="at">Slope =</span> (Slope<span class="sc">*</span>(slope_max <span class="sc">-</span> slope_min) <span class="sc">+</span> slope_min)) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-117"><a href="#cb84-117"></a>  </span>
+<span id="cb84-118"><a href="#cb84-118"></a>  <span class="co"># pivot the data frame to long format for plotting with ggplot</span></span>
+<span id="cb84-119"><a href="#cb84-119"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), </span>
+<span id="cb84-120"><a href="#cb84-120"></a>               <span class="at">names_to =</span> <span class="st">&quot;Hour&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Values&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-121"><a href="#cb84-121"></a>  </span>
+<span id="cb84-122"><a href="#cb84-122"></a>  <span class="co"># convert the hour column to numeric</span></span>
+<span id="cb84-123"><a href="#cb84-123"></a>  <span class="fu">mutate</span>(<span class="at">Hour =</span> <span class="fu">as.numeric</span>(Hour))</span>
+<span id="cb84-124"><a href="#cb84-124"></a></span>
+<span id="cb84-125"><a href="#cb84-125"></a><span class="in">```</span></span>
+<span id="cb84-126"><a href="#cb84-126"></a></span>
+<span id="cb84-127"><a href="#cb84-127"></a><span class="fu">### Check the distributions of the covariates</span></span>
+<span id="cb84-128"><a href="#cb84-128"></a></span>
+<span id="cb84-129"><a href="#cb84-129"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-130"><a href="#cb84-130"></a></span>
+<span id="cb84-131"><a href="#cb84-131"></a><span class="in">```r</span></span>
+<span id="cb84-132"><a href="#cb84-132"></a><span class="fu">hist</span>(habitat_selection_yday45_long<span class="sc">$</span>NDVI, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">main =</span> <span class="st">&quot;NDVI distribution&quot;</span>)</span>
+<span id="cb84-133"><a href="#cb84-133"></a><span class="fu">hist</span>(habitat_selection_yday45_long<span class="sc">$</span>Slope, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">main =</span> <span class="st">&quot;Slope distribution&quot;</span>)</span>
+<span id="cb84-134"><a href="#cb84-134"></a></span>
+<span id="cb84-135"><a href="#cb84-135"></a><span class="in">```</span></span>
+<span id="cb84-136"><a href="#cb84-136"></a></span>
+<span id="cb84-137"><a href="#cb84-137"></a>There are some extreme values in the NDVI and slope covariates. We will remove these values to get a better idea of the relationship between the covariates and the habitat selection predictions.</span>
+<span id="cb84-138"><a href="#cb84-138"></a></span>
+<span id="cb84-139"><a href="#cb84-139"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-140"><a href="#cb84-140"></a></span>
+<span id="cb84-141"><a href="#cb84-141"></a><span class="in">```r</span></span>
+<span id="cb84-142"><a href="#cb84-142"></a><span class="co"># NDVI quantiles</span></span>
+<span id="cb84-143"><a href="#cb84-143"></a>NDVI_yday45_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday45_long<span class="sc">$</span>NDVI, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb84-144"><a href="#cb84-144"></a>NDVI_yday225_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday225_long<span class="sc">$</span>NDVI, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb84-145"><a href="#cb84-145"></a></span>
+<span id="cb84-146"><a href="#cb84-146"></a><span class="co"># Slope quantiles (same throughout the year)</span></span>
+<span id="cb84-147"><a href="#cb84-147"></a>slope_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(habitat_selection_yday45_long<span class="sc">$</span>Slope, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb84-148"><a href="#cb84-148"></a></span>
+<span id="cb84-149"><a href="#cb84-149"></a><span class="co"># filter out the extreme values for yday 45</span></span>
+<span id="cb84-150"><a href="#cb84-150"></a>habitat_selection_yday45_long <span class="ot">&lt;-</span> habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-151"><a href="#cb84-151"></a>  <span class="fu">filter</span>(NDVI <span class="sc">&gt;=</span> NDVI_yday45_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> NDVI <span class="sc">&lt;=</span> NDVI_yday45_quantiles[<span class="dv">2</span>] <span class="sc">&amp;</span> Slope <span class="sc">&gt;=</span> slope_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> Slope <span class="sc">&lt;=</span> slope_quantiles[<span class="dv">2</span>])</span>
+<span id="cb84-152"><a href="#cb84-152"></a></span>
+<span id="cb84-153"><a href="#cb84-153"></a><span class="co"># filter out the extreme values for yday 225</span></span>
+<span id="cb84-154"><a href="#cb84-154"></a>habitat_selection_yday225_long <span class="ot">&lt;-</span> habitat_selection_yday225_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-155"><a href="#cb84-155"></a>  <span class="fu">filter</span>(NDVI <span class="sc">&gt;=</span> NDVI_yday225_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> NDVI <span class="sc">&lt;=</span> NDVI_yday225_quantiles[<span class="dv">2</span>] <span class="sc">&amp;</span> Slope <span class="sc">&gt;=</span> slope_quantiles[<span class="dv">1</span>] <span class="sc">&amp;</span> Slope <span class="sc">&lt;=</span> slope_quantiles[<span class="dv">2</span>])</span>
+<span id="cb84-156"><a href="#cb84-156"></a></span>
+<span id="cb84-157"><a href="#cb84-157"></a><span class="in">```</span></span>
+<span id="cb84-158"><a href="#cb84-158"></a></span>
+<span id="cb84-159"><a href="#cb84-159"></a><span class="fu"># Plot the covariate vs prediction values</span></span>
+<span id="cb84-160"><a href="#cb84-160"></a></span>
+<span id="cb84-161"><a href="#cb84-161"></a>To try and understand the influence of certain covariates on the habitat selection predictions, we can plot the habitat selection predictions against the covariate values. We will plot the NDVI, canopy cover, herbaceous vegetation and slope covariates against the habitat selection predictions for the yday 45 and yday 225 predictions.</span>
+<span id="cb84-162"><a href="#cb84-162"></a></span>
+<span id="cb84-163"><a href="#cb84-163"></a><span class="fu">## *Note the tabs below for the different covariates*</span></span>
+<span id="cb84-164"><a href="#cb84-164"></a></span>
+<span id="cb84-165"><a href="#cb84-165"></a>::: {.panel-tabset}</span>
+<span id="cb84-166"><a href="#cb84-166"></a></span>
+<span id="cb84-167"><a href="#cb84-167"></a><span class="fu">## NDVI</span></span>
+<span id="cb84-168"><a href="#cb84-168"></a></span>
+<span id="cb84-169"><a href="#cb84-169"></a>First we can look at scatterplots for a couple different hours of the day. We can see that the prediction values change quite a bit across the day, indicating that the model has created a dynamic representation of buffalo habitat selection behaviour.</span>
+<span id="cb84-170"><a href="#cb84-170"></a></span>
+<span id="cb84-171"><a href="#cb84-171"></a><span class="ss">- </span>At hour 1, there are higher selection probabilities associated with higher NDVI values.</span>
+<span id="cb84-172"><a href="#cb84-172"></a><span class="ss">- </span>At hour 7, there is a more even distribution of selection probabilities across the NDVI values.</span>
+<span id="cb84-173"><a href="#cb84-173"></a><span class="ss">- </span>At hour 12, there are higher selection probabilities associated with lower NDVI values.</span>
+<span id="cb84-174"><a href="#cb84-174"></a></span>
+<span id="cb84-175"><a href="#cb84-175"></a>To highlight the relationship we will fit a smoother to the data.</span>
+<span id="cb84-176"><a href="#cb84-176"></a></span>
+<span id="cb84-177"><a href="#cb84-177"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-178"><a href="#cb84-178"></a></span>
+<span id="cb84-179"><a href="#cb84-179"></a><span class="in">```r</span></span>
+<span id="cb84-180"><a href="#cb84-180"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-181"><a href="#cb84-181"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-182"><a href="#cb84-182"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-183"><a href="#cb84-183"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-184"><a href="#cb84-184"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-185"><a href="#cb84-185"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-186"><a href="#cb84-186"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-187"><a href="#cb84-187"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb84-188"><a href="#cb84-188"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-189"><a href="#cb84-189"></a>    )</span>
+<span id="cb84-190"><a href="#cb84-190"></a></span>
+<span id="cb84-191"><a href="#cb84-191"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-192"><a href="#cb84-192"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-193"><a href="#cb84-193"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-194"><a href="#cb84-194"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-195"><a href="#cb84-195"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-196"><a href="#cb84-196"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-197"><a href="#cb84-197"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-198"><a href="#cb84-198"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb84-199"><a href="#cb84-199"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-200"><a href="#cb84-200"></a>    )</span>
+<span id="cb84-201"><a href="#cb84-201"></a></span>
+<span id="cb84-202"><a href="#cb84-202"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-203"><a href="#cb84-203"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-204"><a href="#cb84-204"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-205"><a href="#cb84-205"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-206"><a href="#cb84-206"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-207"><a href="#cb84-207"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-208"><a href="#cb84-208"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-209"><a href="#cb84-209"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb84-210"><a href="#cb84-210"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-211"><a href="#cb84-211"></a>    )</span>
+<span id="cb84-212"><a href="#cb84-212"></a></span>
+<span id="cb84-213"><a href="#cb84-213"></a><span class="in">```</span></span>
+<span id="cb84-214"><a href="#cb84-214"></a></span>
+<span id="cb84-215"><a href="#cb84-215"></a><span class="fu">### All hours</span></span>
+<span id="cb84-216"><a href="#cb84-216"></a></span>
+<span id="cb84-217"><a href="#cb84-217"></a>We can also plot all the hours of the day on the same plot to see how the relationship between NDVI and habitat selection changes throughout the day. </span>
+<span id="cb84-218"><a href="#cb84-218"></a></span>
+<span id="cb84-219"><a href="#cb84-219"></a>We see there is a rhythmic pattern, with selection for lower values during the middle hours of the day.</span>
+<span id="cb84-220"><a href="#cb84-220"></a></span>
+<span id="cb84-221"><a href="#cb84-221"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-222"><a href="#cb84-222"></a></span>
+<span id="cb84-223"><a href="#cb84-223"></a><span class="in">```r</span></span>
+<span id="cb84-224"><a href="#cb84-224"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-225"><a href="#cb84-225"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> NDVI, <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb84-226"><a href="#cb84-226"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-227"><a href="#cb84-227"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-228"><a href="#cb84-228"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb84-229"><a href="#cb84-229"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-230"><a href="#cb84-230"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-231"><a href="#cb84-231"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-232"><a href="#cb84-232"></a>    <span class="at">x =</span> <span class="st">&quot;NDVI values&quot;</span>,</span>
+<span id="cb84-233"><a href="#cb84-233"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-234"><a href="#cb84-234"></a>    )</span>
+<span id="cb84-235"><a href="#cb84-235"></a></span>
+<span id="cb84-236"><a href="#cb84-236"></a><span class="in">```</span></span>
+<span id="cb84-237"><a href="#cb84-237"></a></span>
+<span id="cb84-238"><a href="#cb84-238"></a><span class="fu">### Selection surface</span></span>
+<span id="cb84-239"><a href="#cb84-239"></a></span>
+<span id="cb84-240"><a href="#cb84-240"></a>However, the plot above is fairly messy, so instead we will use the <span class="in">`stat_summary_2d`</span> function to create a 2D histogram of the data. This will allow us to see the average habitat selection values for different NDVI values at different times of the day.</span>
+<span id="cb84-241"><a href="#cb84-241"></a></span>
+<span id="cb84-242"><a href="#cb84-242"></a>What we are seeing is the *mean habitat selection probability value* for different NDVI values at different times of the day. Higher values indicate a higher mean probability of selecting NDVI values in that range.</span>
+<span id="cb84-243"><a href="#cb84-243"></a></span>
+<span id="cb84-244"><a href="#cb84-244"></a>This selection surface reflects the plots above, with a pattern of selection for lower NDVI values during the middle hours of the day, and high values in the early morning and evening. This suggests that buffalo are selecting for less vegetated areas during the middle of the day.</span>
+<span id="cb84-245"><a href="#cb84-245"></a></span>
+<span id="cb84-246"><a href="#cb84-246"></a>These selection surfaces are also similar to those presented by @Forrest2024-xe, which was acheived by fitting temporal dynamics and quadratic terms to the NDVI covariate. However, this was only fitted to one season of data at a time, whereas the deepSSF model can be fitted with multiscale temporal dynamics.</span>
+<span id="cb84-247"><a href="#cb84-247"></a></span>
+<span id="cb84-248"><a href="#cb84-248"></a>Day of the year = 45 (mid-February)</span>
+<span id="cb84-249"><a href="#cb84-249"></a></span>
+<span id="cb84-250"><a href="#cb84-250"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-251"><a href="#cb84-251"></a></span>
+<span id="cb84-252"><a href="#cb84-252"></a><span class="in">```r</span></span>
+<span id="cb84-253"><a href="#cb84-253"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb84-254"><a href="#cb84-254"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> NDVI)) <span class="sc">+</span>  </span>
+<span id="cb84-255"><a href="#cb84-255"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb84-256"><a href="#cb84-256"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-257"><a href="#cb84-257"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-258"><a href="#cb84-258"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;NDVI value&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-259"><a href="#cb84-259"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-260"><a href="#cb84-260"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-261"><a href="#cb84-261"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-262"><a href="#cb84-262"></a></span>
+<span id="cb84-263"><a href="#cb84-263"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/ndvi_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-264"><a href="#cb84-264"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-265"><a href="#cb84-265"></a></span>
+<span id="cb84-266"><a href="#cb84-266"></a><span class="in">```</span></span>
+<span id="cb84-267"><a href="#cb84-267"></a></span>
+<span id="cb84-268"><a href="#cb84-268"></a>We can illustrate the multitemporal dynamics of the NDVI covariate by plotting the selection surface for different days of the year.</span>
+<span id="cb84-269"><a href="#cb84-269"></a></span>
+<span id="cb84-270"><a href="#cb84-270"></a>Day of the year = 225 (mid-August)</span>
+<span id="cb84-271"><a href="#cb84-271"></a></span>
+<span id="cb84-272"><a href="#cb84-272"></a>Here we see quite a different response, where there is some bimodal selection during the day, with higher selection probabilities for both low and high NDVI values. This may indicate that there are some features described by low or high values of NDVI that are important for buffalo habitat selection during this time of year, or may just indicate that the selection is more variable in the dry season.</span>
+<span id="cb84-273"><a href="#cb84-273"></a></span>
+<span id="cb84-274"><a href="#cb84-274"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-275"><a href="#cb84-275"></a></span>
+<span id="cb84-276"><a href="#cb84-276"></a><span class="in">```r</span></span>
+<span id="cb84-277"><a href="#cb84-277"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb84-278"><a href="#cb84-278"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> NDVI)) <span class="sc">+</span>  </span>
+<span id="cb84-279"><a href="#cb84-279"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb84-280"><a href="#cb84-280"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-281"><a href="#cb84-281"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-282"><a href="#cb84-282"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;NDVI value&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-283"><a href="#cb84-283"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-284"><a href="#cb84-284"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-285"><a href="#cb84-285"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-286"><a href="#cb84-286"></a></span>
+<span id="cb84-287"><a href="#cb84-287"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/ndvi_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-288"><a href="#cb84-288"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-289"><a href="#cb84-289"></a></span>
+<span id="cb84-290"><a href="#cb84-290"></a><span class="in">```</span></span>
+<span id="cb84-291"><a href="#cb84-291"></a></span>
+<span id="cb84-292"><a href="#cb84-292"></a><span class="fu">## Canopy cover</span></span>
+<span id="cb84-293"><a href="#cb84-293"></a></span>
+<span id="cb84-294"><a href="#cb84-294"></a>We can do the same for canopy cover.</span>
+<span id="cb84-295"><a href="#cb84-295"></a></span>
+<span id="cb84-296"><a href="#cb84-296"></a>Here we show these as boxplots (keep in mind that the canopy cover covariate is continuous, and the canopy classifications are not equally spaced, but we are treating it as a categorical variable for the purposes of this plot).</span>
+<span id="cb84-297"><a href="#cb84-297"></a></span>
+<span id="cb84-298"><a href="#cb84-298"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-299"><a href="#cb84-299"></a></span>
+<span id="cb84-300"><a href="#cb84-300"></a><span class="in">```r</span></span>
+<span id="cb84-301"><a href="#cb84-301"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-302"><a href="#cb84-302"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-303"><a href="#cb84-303"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-304"><a href="#cb84-304"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-305"><a href="#cb84-305"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-306"><a href="#cb84-306"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-307"><a href="#cb84-307"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-308"><a href="#cb84-308"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb84-309"><a href="#cb84-309"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-310"><a href="#cb84-310"></a>    )</span>
+<span id="cb84-311"><a href="#cb84-311"></a></span>
+<span id="cb84-312"><a href="#cb84-312"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-313"><a href="#cb84-313"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-314"><a href="#cb84-314"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-315"><a href="#cb84-315"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-316"><a href="#cb84-316"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-317"><a href="#cb84-317"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-318"><a href="#cb84-318"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-319"><a href="#cb84-319"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb84-320"><a href="#cb84-320"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-321"><a href="#cb84-321"></a>    )</span>
+<span id="cb84-322"><a href="#cb84-322"></a></span>
+<span id="cb84-323"><a href="#cb84-323"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-324"><a href="#cb84-324"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-325"><a href="#cb84-325"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-326"><a href="#cb84-326"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-327"><a href="#cb84-327"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-328"><a href="#cb84-328"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-329"><a href="#cb84-329"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-330"><a href="#cb84-330"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb84-331"><a href="#cb84-331"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-332"><a href="#cb84-332"></a>    )</span>
+<span id="cb84-333"><a href="#cb84-333"></a></span>
+<span id="cb84-334"><a href="#cb84-334"></a><span class="in">```</span></span>
+<span id="cb84-335"><a href="#cb84-335"></a></span>
+<span id="cb84-336"><a href="#cb84-336"></a><span class="fu">### All hours</span></span>
+<span id="cb84-337"><a href="#cb84-337"></a></span>
+<span id="cb84-338"><a href="#cb84-338"></a>Again, this is a slightly confusing plot, but it shows how the habitat selection probabilities for each canopy cover &#39;category&#39; change across the day.</span>
+<span id="cb84-339"><a href="#cb84-339"></a></span>
+<span id="cb84-340"><a href="#cb84-340"></a>Looking at 32.5% canopy cover for instance, there is lower selection probability in the early morning and evening, and higher selection probability in the middle of the day. This suggests that buffalo are selecting for areas with 32.5% canopy cover during the middle of the day.</span>
+<span id="cb84-341"><a href="#cb84-341"></a></span>
+<span id="cb84-342"><a href="#cb84-342"></a>For open canopy (0%), selection is highest around dawn and dusk, which correlates with the high movement periods of buffalo.</span>
+<span id="cb84-343"><a href="#cb84-343"></a></span>
+<span id="cb84-344"><a href="#cb84-344"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-345"><a href="#cb84-345"></a></span>
+<span id="cb84-346"><a href="#cb84-346"></a><span class="in">```r</span></span>
+<span id="cb84-347"><a href="#cb84-347"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-348"><a href="#cb84-348"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Canopy_cover), <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb84-349"><a href="#cb84-349"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-350"><a href="#cb84-350"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb84-351"><a href="#cb84-351"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-352"><a href="#cb84-352"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-353"><a href="#cb84-353"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-354"><a href="#cb84-354"></a>    <span class="at">x =</span> <span class="st">&quot;Canopy cover (%)&quot;</span>,</span>
+<span id="cb84-355"><a href="#cb84-355"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-356"><a href="#cb84-356"></a>    )</span>
+<span id="cb84-357"><a href="#cb84-357"></a></span>
+<span id="cb84-358"><a href="#cb84-358"></a><span class="in">```</span></span>
+<span id="cb84-359"><a href="#cb84-359"></a></span>
+<span id="cb84-360"><a href="#cb84-360"></a><span class="fu">### Selection surface</span></span>
+<span id="cb84-361"><a href="#cb84-361"></a></span>
+<span id="cb84-362"><a href="#cb84-362"></a>Day of the year = 45 (mid-February)</span>
+<span id="cb84-363"><a href="#cb84-363"></a></span>
+<span id="cb84-364"><a href="#cb84-364"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-365"><a href="#cb84-365"></a></span>
+<span id="cb84-366"><a href="#cb84-366"></a><span class="in">```r</span></span>
+<span id="cb84-367"><a href="#cb84-367"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb84-368"><a href="#cb84-368"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Canopy_cover)) <span class="sc">+</span>  </span>
+<span id="cb84-369"><a href="#cb84-369"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">15</span>)) <span class="sc">+</span> </span>
+<span id="cb84-370"><a href="#cb84-370"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-371"><a href="#cb84-371"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-372"><a href="#cb84-372"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Canopy cover (%)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-373"><a href="#cb84-373"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-374"><a href="#cb84-374"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-375"><a href="#cb84-375"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-376"><a href="#cb84-376"></a></span>
+<span id="cb84-377"><a href="#cb84-377"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/canopy_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-378"><a href="#cb84-378"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-379"><a href="#cb84-379"></a></span>
+<span id="cb84-380"><a href="#cb84-380"></a><span class="in">```</span></span>
+<span id="cb84-381"><a href="#cb84-381"></a></span>
+<span id="cb84-382"><a href="#cb84-382"></a>Day of the year = 225 (mid-August)</span>
+<span id="cb84-383"><a href="#cb84-383"></a></span>
+<span id="cb84-384"><a href="#cb84-384"></a>There is clearly high selection for open canopy in the middle of the day during the dry season.</span>
+<span id="cb84-385"><a href="#cb84-385"></a></span>
+<span id="cb84-386"><a href="#cb84-386"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-387"><a href="#cb84-387"></a></span>
+<span id="cb84-388"><a href="#cb84-388"></a><span class="in">```r</span></span>
+<span id="cb84-389"><a href="#cb84-389"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb84-390"><a href="#cb84-390"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Canopy_cover)) <span class="sc">+</span>  </span>
+<span id="cb84-391"><a href="#cb84-391"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">15</span>)) <span class="sc">+</span> </span>
+<span id="cb84-392"><a href="#cb84-392"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-393"><a href="#cb84-393"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-394"><a href="#cb84-394"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Canopy cover (%)&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-395"><a href="#cb84-395"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-396"><a href="#cb84-396"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-397"><a href="#cb84-397"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-398"><a href="#cb84-398"></a></span>
+<span id="cb84-399"><a href="#cb84-399"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/canopy_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-400"><a href="#cb84-400"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-401"><a href="#cb84-401"></a></span>
+<span id="cb84-402"><a href="#cb84-402"></a><span class="in">```</span></span>
+<span id="cb84-403"><a href="#cb84-403"></a></span>
+<span id="cb84-404"><a href="#cb84-404"></a><span class="fu">## Herbaceous vegetation</span></span>
+<span id="cb84-405"><a href="#cb84-405"></a></span>
+<span id="cb84-406"><a href="#cb84-406"></a>As herbaceous vegetation is binary, the plotting is a bit different to interpret, but the plots do show a relationship between habitat selection and herbaceous vegetation.</span>
+<span id="cb84-407"><a href="#cb84-407"></a></span>
+<span id="cb84-408"><a href="#cb84-408"></a>Recall that 0 is &#39;woody vegetation&#39; and 1 is &#39;herbaceous vegetation&#39;.</span>
+<span id="cb84-409"><a href="#cb84-409"></a></span>
+<span id="cb84-410"><a href="#cb84-410"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-411"><a href="#cb84-411"></a></span>
+<span id="cb84-412"><a href="#cb84-412"></a><span class="in">```r</span></span>
+<span id="cb84-413"><a href="#cb84-413"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-414"><a href="#cb84-414"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-415"><a href="#cb84-415"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-416"><a href="#cb84-416"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-417"><a href="#cb84-417"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-418"><a href="#cb84-418"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-419"><a href="#cb84-419"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-420"><a href="#cb84-420"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb84-421"><a href="#cb84-421"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-422"><a href="#cb84-422"></a>    )</span>
+<span id="cb84-423"><a href="#cb84-423"></a></span>
+<span id="cb84-424"><a href="#cb84-424"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-425"><a href="#cb84-425"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-426"><a href="#cb84-426"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-427"><a href="#cb84-427"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-428"><a href="#cb84-428"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-429"><a href="#cb84-429"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-430"><a href="#cb84-430"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-431"><a href="#cb84-431"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb84-432"><a href="#cb84-432"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-433"><a href="#cb84-433"></a>    )</span>
+<span id="cb84-434"><a href="#cb84-434"></a></span>
+<span id="cb84-435"><a href="#cb84-435"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-436"><a href="#cb84-436"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-437"><a href="#cb84-437"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-438"><a href="#cb84-438"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb84-439"><a href="#cb84-439"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-440"><a href="#cb84-440"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-441"><a href="#cb84-441"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-442"><a href="#cb84-442"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb84-443"><a href="#cb84-443"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-444"><a href="#cb84-444"></a>    )</span>
+<span id="cb84-445"><a href="#cb84-445"></a></span>
+<span id="cb84-446"><a href="#cb84-446"></a><span class="in">```</span></span>
+<span id="cb84-447"><a href="#cb84-447"></a></span>
+<span id="cb84-448"><a href="#cb84-448"></a><span class="fu">### All hours</span></span>
+<span id="cb84-449"><a href="#cb84-449"></a></span>
+<span id="cb84-450"><a href="#cb84-450"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-451"><a href="#cb84-451"></a></span>
+<span id="cb84-452"><a href="#cb84-452"></a><span class="in">```r</span></span>
+<span id="cb84-453"><a href="#cb84-453"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-454"><a href="#cb84-454"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(Herbaceous_vegetation), <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">as.factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb84-455"><a href="#cb84-455"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-456"><a href="#cb84-456"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb84-457"><a href="#cb84-457"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-458"><a href="#cb84-458"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-459"><a href="#cb84-459"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-460"><a href="#cb84-460"></a>    <span class="at">x =</span> <span class="st">&quot;Herbaceous vegetation&quot;</span>,</span>
+<span id="cb84-461"><a href="#cb84-461"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-462"><a href="#cb84-462"></a>    )</span>
+<span id="cb84-463"><a href="#cb84-463"></a></span>
+<span id="cb84-464"><a href="#cb84-464"></a><span class="in">```</span></span>
+<span id="cb84-465"><a href="#cb84-465"></a></span>
+<span id="cb84-466"><a href="#cb84-466"></a><span class="fu">### Selection surface</span></span>
+<span id="cb84-467"><a href="#cb84-467"></a></span>
+<span id="cb84-468"><a href="#cb84-468"></a>Day of the year = 45 (mid-February)</span>
+<span id="cb84-469"><a href="#cb84-469"></a></span>
+<span id="cb84-470"><a href="#cb84-470"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-471"><a href="#cb84-471"></a></span>
+<span id="cb84-472"><a href="#cb84-472"></a><span class="in">```r</span></span>
+<span id="cb84-473"><a href="#cb84-473"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb84-474"><a href="#cb84-474"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Herbaceous_vegetation)) <span class="sc">+</span>  </span>
+<span id="cb84-475"><a href="#cb84-475"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>, <span class="dv">2</span>)) <span class="sc">+</span> </span>
+<span id="cb84-476"><a href="#cb84-476"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-477"><a href="#cb84-477"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-478"><a href="#cb84-478"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Herbaceous vegetation&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-479"><a href="#cb84-479"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-480"><a href="#cb84-480"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-481"><a href="#cb84-481"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-482"><a href="#cb84-482"></a></span>
+<span id="cb84-483"><a href="#cb84-483"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/herby_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-484"><a href="#cb84-484"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-485"><a href="#cb84-485"></a></span>
+<span id="cb84-486"><a href="#cb84-486"></a><span class="in">```</span></span>
+<span id="cb84-487"><a href="#cb84-487"></a></span>
+<span id="cb84-488"><a href="#cb84-488"></a>Again there are seemingly opposing selection patterns between the wet and dry seasons.</span>
+<span id="cb84-489"><a href="#cb84-489"></a></span>
+<span id="cb84-490"><a href="#cb84-490"></a>Day of the year = 225 (mid-August)</span>
+<span id="cb84-491"><a href="#cb84-491"></a></span>
+<span id="cb84-492"><a href="#cb84-492"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-493"><a href="#cb84-493"></a></span>
+<span id="cb84-494"><a href="#cb84-494"></a><span class="in">```r</span></span>
+<span id="cb84-495"><a href="#cb84-495"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb84-496"><a href="#cb84-496"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Herbaceous_vegetation)) <span class="sc">+</span>  </span>
+<span id="cb84-497"><a href="#cb84-497"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>, <span class="dv">2</span>)) <span class="sc">+</span> </span>
+<span id="cb84-498"><a href="#cb84-498"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-499"><a href="#cb84-499"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-500"><a href="#cb84-500"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Herbaceous vegetation&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-501"><a href="#cb84-501"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-502"><a href="#cb84-502"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-503"><a href="#cb84-503"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-504"><a href="#cb84-504"></a></span>
+<span id="cb84-505"><a href="#cb84-505"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/herby_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-506"><a href="#cb84-506"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-507"><a href="#cb84-507"></a></span>
+<span id="cb84-508"><a href="#cb84-508"></a><span class="in">```</span></span>
+<span id="cb84-509"><a href="#cb84-509"></a></span>
+<span id="cb84-510"><a href="#cb84-510"></a><span class="fu">## Slope</span></span>
+<span id="cb84-511"><a href="#cb84-511"></a></span>
+<span id="cb84-512"><a href="#cb84-512"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-513"><a href="#cb84-513"></a></span>
+<span id="cb84-514"><a href="#cb84-514"></a><span class="in">```r</span></span>
+<span id="cb84-515"><a href="#cb84-515"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-516"><a href="#cb84-516"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-517"><a href="#cb84-517"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-518"><a href="#cb84-518"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-519"><a href="#cb84-519"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-520"><a href="#cb84-520"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-521"><a href="#cb84-521"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-522"><a href="#cb84-522"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb84-523"><a href="#cb84-523"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-524"><a href="#cb84-524"></a>    )</span>
+<span id="cb84-525"><a href="#cb84-525"></a></span>
+<span id="cb84-526"><a href="#cb84-526"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-527"><a href="#cb84-527"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-528"><a href="#cb84-528"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-529"><a href="#cb84-529"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-530"><a href="#cb84-530"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-531"><a href="#cb84-531"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-532"><a href="#cb84-532"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-533"><a href="#cb84-533"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb84-534"><a href="#cb84-534"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-535"><a href="#cb84-535"></a>    )</span>
+<span id="cb84-536"><a href="#cb84-536"></a></span>
+<span id="cb84-537"><a href="#cb84-537"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Hour <span class="sc">==</span> <span class="dv">12</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb84-538"><a href="#cb84-538"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values)) <span class="sc">+</span></span>
+<span id="cb84-539"><a href="#cb84-539"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-540"><a href="#cb84-540"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-541"><a href="#cb84-541"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-542"><a href="#cb84-542"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-543"><a href="#cb84-543"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-544"><a href="#cb84-544"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb84-545"><a href="#cb84-545"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-546"><a href="#cb84-546"></a>    )</span>
+<span id="cb84-547"><a href="#cb84-547"></a></span>
+<span id="cb84-548"><a href="#cb84-548"></a><span class="in">```</span></span>
+<span id="cb84-549"><a href="#cb84-549"></a></span>
+<span id="cb84-550"><a href="#cb84-550"></a><span class="fu">### All hours</span></span>
+<span id="cb84-551"><a href="#cb84-551"></a></span>
+<span id="cb84-552"><a href="#cb84-552"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-553"><a href="#cb84-553"></a></span>
+<span id="cb84-554"><a href="#cb84-554"></a><span class="in">```r</span></span>
+<span id="cb84-555"><a href="#cb84-555"></a>habitat_selection_yday45_long <span class="sc">%&gt;%</span></span>
+<span id="cb84-556"><a href="#cb84-556"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Slope, <span class="at">y =</span> Values, <span class="at">colour =</span> <span class="fu">factor</span>(Hour))) <span class="sc">+</span></span>
+<span id="cb84-557"><a href="#cb84-557"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb84-558"><a href="#cb84-558"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;gam&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-559"><a href="#cb84-559"></a>  <span class="fu">scale_colour_viridis</span>(<span class="at">discrete =</span> T) <span class="sc">+</span></span>
+<span id="cb84-560"><a href="#cb84-560"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-561"><a href="#cb84-561"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb84-562"><a href="#cb84-562"></a>  <span class="fu">labs</span>(</span>
+<span id="cb84-563"><a href="#cb84-563"></a>    <span class="at">x =</span> <span class="st">&quot;Slope&quot;</span>,</span>
+<span id="cb84-564"><a href="#cb84-564"></a>    <span class="at">y =</span> <span class="st">&quot;Habitat selection&quot;</span></span>
+<span id="cb84-565"><a href="#cb84-565"></a>    )</span>
+<span id="cb84-566"><a href="#cb84-566"></a></span>
+<span id="cb84-567"><a href="#cb84-567"></a><span class="in">```</span></span>
+<span id="cb84-568"><a href="#cb84-568"></a></span>
+<span id="cb84-569"><a href="#cb84-569"></a><span class="fu">### Selection surface</span></span>
+<span id="cb84-570"><a href="#cb84-570"></a></span>
+<span id="cb84-571"><a href="#cb84-571"></a>Day of the year = 45 (mid-February)</span>
+<span id="cb84-572"><a href="#cb84-572"></a></span>
+<span id="cb84-573"><a href="#cb84-573"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-574"><a href="#cb84-574"></a></span>
+<span id="cb84-575"><a href="#cb84-575"></a><span class="in">```r</span></span>
+<span id="cb84-576"><a href="#cb84-576"></a><span class="fu">ggplot</span>(habitat_selection_yday45_long, </span>
+<span id="cb84-577"><a href="#cb84-577"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Slope)) <span class="sc">+</span>  </span>
+<span id="cb84-578"><a href="#cb84-578"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb84-579"><a href="#cb84-579"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-580"><a href="#cb84-580"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-581"><a href="#cb84-581"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Slope&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-582"><a href="#cb84-582"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 45&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-583"><a href="#cb84-583"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-584"><a href="#cb84-584"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-585"><a href="#cb84-585"></a></span>
+<span id="cb84-586"><a href="#cb84-586"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/slope_habitat_selection_yday45.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-587"><a href="#cb84-587"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-588"><a href="#cb84-588"></a></span>
+<span id="cb84-589"><a href="#cb84-589"></a><span class="in">```</span></span>
+<span id="cb84-590"><a href="#cb84-590"></a></span>
+<span id="cb84-591"><a href="#cb84-591"></a>Day of the year = 225 (mid-August)</span>
+<span id="cb84-592"><a href="#cb84-592"></a></span>
+<span id="cb84-593"><a href="#cb84-593"></a>quarto-executable-code-5450563D</span>
+<span id="cb84-594"><a href="#cb84-594"></a></span>
+<span id="cb84-595"><a href="#cb84-595"></a><span class="in">```r</span></span>
+<span id="cb84-596"><a href="#cb84-596"></a><span class="fu">ggplot</span>(habitat_selection_yday225_long, </span>
+<span id="cb84-597"><a href="#cb84-597"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Hour, <span class="at">y =</span> Slope)) <span class="sc">+</span>  </span>
+<span id="cb84-598"><a href="#cb84-598"></a>  <span class="fu">stat_summary_2d</span>(<span class="fu">aes</span>(<span class="at">z =</span> Values), <span class="at">fun =</span> mean, <span class="at">bins =</span> <span class="fu">c</span>(<span class="dv">23</span>,<span class="dv">20</span>)) <span class="sc">+</span> </span>
+<span id="cb84-599"><a href="#cb84-599"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="st">&quot;Mean probability&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb84-600"><a href="#cb84-600"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Hour&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">24</span>,<span class="dv">6</span>)) <span class="sc">+</span>  </span>
+<span id="cb84-601"><a href="#cb84-601"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Slope&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb84-602"><a href="#cb84-602"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste0</span>(<span class="st">&quot;Prediction values: Day 225&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb84-603"><a href="#cb84-603"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb84-604"><a href="#cb84-604"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb84-605"><a href="#cb84-605"></a></span>
+<span id="cb84-606"><a href="#cb84-606"></a><span class="fu">ggsave</span>(<span class="st">&quot;outputs/slope_habitat_selection_yday225.png&quot;</span>, <span class="at">width =</span> <span class="dv">90</span>, <span class="at">height =</span> <span class="dv">75</span>, </span>
+<span id="cb84-607"><a href="#cb84-607"></a>       <span class="at">units =</span> <span class="st">&quot;mm&quot;</span>, <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb84-608"><a href="#cb84-608"></a></span>
+<span id="cb84-609"><a href="#cb84-609"></a><span class="in">```</span></span>
+<span id="cb84-610"><a href="#cb84-610"></a></span>
+<span id="cb84-611"><a href="#cb84-611"></a>:::</span></code></pre></div>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Forrest2024-xe" class="csl-entry" role="listitem">
+Forrest, Scott W, Dan Pagendam, Michael Bode, Christopher Drovandi, Jonathan R Potts, Justin Perry, Eric Vanderduys, and Andrew J Hoskins. 2024. <span>“Predicting Fine-Scale Distributions and Emergent Spatiotemporal Patterns from Temporally Dynamic Step Selection Simulations.”</span> <em>bioRxiv</em>, March, 2024.03.19.585696. <a href="https://doi.org/10.1101/2024.03.19.585696">https://doi.org/10.1101/2024.03.19.585696</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id = "quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+</body>
+
+</html>
