@@ -46,7 +46,7 @@ def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform
     px, py = ~transform * (x, y)
     
     # Round the pixel coordinates to the nearest integers.
-    px, py = int(round(px)), int(round(py))
+    px, py = int(np.round(px)), int(np.round(py))
     
     # Compute half the window size to determine the extent around the central pixel.
     half_window = window_size // 2
