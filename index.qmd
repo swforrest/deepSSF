@@ -3,4 +3,4 @@ title: "index"
 format: html
 ---
 
-# This is the index for hte deepSSF website
+# This is the index for the deepSSF website

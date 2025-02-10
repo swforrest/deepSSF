@@ -2,6 +2,7 @@
 
 draft_R
 Python/draft_Python
+index.html
 
 data/
 mapping/
@@ -27,7 +28,7 @@ sql_info*
 lossFunctions.py
 dansModel.py
 
-index.html
+
 
 
 # Byte-compiled / optimized / DLL files
