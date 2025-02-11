@@ -5,17 +5,31 @@ project:
 website:
   title: "deepSSF"
   navbar:
+    background: "FCAB64"
     left:
       - href: index.qmd
         text: Home
+      - href: about.qmd
+        text: About
       - about.qmd
     right:
     - icon: github
       href: https://github.com/swforrest/deepSSF
+    sidebar:
+      style: "floating"
+      search: true
+      contents:
+        - section: "Training"
+          contents:
+            - deepSSF_train.html
+            - deepSSF_train_S2.html
+        - 
 
 format:
   html:
-    theme: cosmo
+    theme: yeti
+    fontcolor: "BF3100"
+    linkcolor: "42CAFD"
     css: styles.css
     toc: true
 

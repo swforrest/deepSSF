@@ -37,7 +37,8 @@ abstract: |
 options(scipen = 999)
 
 library(tidyverse)
-packages <- c("amt", "sf", "terra", "beepr", "tictoc", "viridis", "scales", "ggpubr", "patchwork", "zoo")
+packages <- c("amt", "sf", "terra", "beepr", "tictoc", "viridis", 
+              "scales", "ggpubr", "patchwork", "zoo")
 walk(packages, require, character.only = T)
 
 ```
@@ -133,6 +134,7 @@ buffalo_id_subset <- buffalo %>%
 ## Import multiple deep learning trajectories
 
 ```{r}
+#| message=FALSE
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
@@ -259,8 +261,6 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "none")
 
-# ggsave("outputs/sim_data_all_buffalo_ndvi.png", width = 150, height = 150, units = "mm", dpi = 600)
-
 ```
 
 # Plot movement distributions
@@ -282,8 +282,6 @@ ggplot() +
   scale_y_continuous("Density") +
   theme_bw()
 
-# ggsave("outputs/step_length.png", width = 90, height = 75, units = "mm", dpi = 600)
-
 ```
 
 ## Log step lengths
@@ -301,8 +299,6 @@ ggplot() +
   scale_y_continuous("Density") +
   theme_bw()
 
-# ggsave("outputs/step_length_log.png", width = 90, height = 75, units = "mm", dpi = 600)
-
 ```
 
 ## Turning angles
@@ -319,8 +315,6 @@ ggplot() +
   scale_x_continuous("Turning angle (radians)") +
   scale_y_continuous("Density") +
   theme_bw()
-
-# ggsave("outputs/turning_angles.png", width = 90, height = 75, units = "mm", dpi = 600)
 
 ```
 

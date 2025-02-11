@@ -24,7 +24,7 @@ editor:
 knitr:
   opts_chunk:
     dev: "png"
-    dpi: 150  # Lower DPI for smaller file size
+    dpi: 300  # Lower DPI for smaller file size
 abstract: |
   Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.
 ---
@@ -145,11 +145,17 @@ slope_quantiles <- quantile(habitat_selection_yday45_long$Slope, probs = c(0.01,
 
 # filter out the extreme values for yday 45
 habitat_selection_yday45_long <- habitat_selection_yday45_long %>%
-  filter(NDVI >= NDVI_yday45_quantiles[1] & NDVI <= NDVI_yday45_quantiles[2] & Slope >= slope_quantiles[1] & Slope <= slope_quantiles[2])
+  filter(NDVI >= NDVI_yday45_quantiles[1] & 
+           NDVI <= NDVI_yday45_quantiles[2] & 
+           Slope >= slope_quantiles[1] & 
+           Slope <= slope_quantiles[2])
 
 # filter out the extreme values for yday 225
 habitat_selection_yday225_long <- habitat_selection_yday225_long %>%
-  filter(NDVI >= NDVI_yday225_quantiles[1] & NDVI <= NDVI_yday225_quantiles[2] & Slope >= slope_quantiles[1] & Slope <= slope_quantiles[2])
+  filter(NDVI >= NDVI_yday225_quantiles[1] & 
+           NDVI <= NDVI_yday225_quantiles[2] & 
+           Slope >= slope_quantiles[1] & 
+           Slope <= slope_quantiles[2])
 
 ```
 
@@ -238,7 +244,7 @@ What we are seeing is the *mean habitat selection probability value* for differe
 
 This selection surface reflects the plots above, with a pattern of selection for lower NDVI values during the middle hours of the day, and high values in the early morning and evening. This suggests that buffalo are selecting for less vegetated areas during the middle of the day.
 
-These selection surfaces are also similar to those presented by @Forrest2024-xe, which was acheived by fitting temporal dynamics and quadratic terms to the NDVI covariate. However, this was only fitted to one season of data at a time, whereas the deepSSF model can be fitted with multiscale temporal dynamics.
+These selection surfaces are also similar to those presented by @Forrest2024-gc, which was acheived by fitting temporal dynamics and quadratic terms to the NDVI covariate. However, this was only fitted to one season of data at a time, whereas the deepSSF model can be fitted with multiscale temporal dynamics.
 
 Day of the year = 45 (mid-February)
 

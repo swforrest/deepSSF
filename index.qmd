@@ -4,3 +4,5 @@ format: html
 ---
 
 # This is the home page for the deepSSF website (index.qmd)
+
+I created the colour palette for this website using [Coolors](https://coolors.co/42cafd-ffa9a3-008148-bf3100-fcab64).
