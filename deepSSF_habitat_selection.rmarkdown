@@ -1,0 +1,814 @@
+---
+title: "Assessing deepSSF habitat selection predictions"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: references.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+abstract: |
+  Here we want to associate covariate values with the predicted habitat selection probabilities from the deepSSF model. This helps to understand what the model has learned and can help to infer something about the spatial ecology of the species, particularly in relation to temporal dynamics. We show in the examples below how the selection for covariates such as NDVI changes throughout the day, which also changes through the year. This indicates that the model has represented the multiscale temporal dynamics present in the data, which will come out when simulating from the models.
+---
+
+
+
+
+
+
+# Loading packages
+
+
+
+
+
+
+```{r}
+#| warning: false
+
+library(tidyverse)
+packages <- c("terra", "beepr", "tictoc", "viridis")
+walk(packages, require, character.only = T)
+
+```
+
+
+
+
+
+
+# Load the habitat selection selection
+
+The habitat selection probability values are from the `deepSSF_landscape_preds.ipynb` script. The predictions are stored in a CSV file that contains the NDVI, canopy cover, herbaceous vegetation, and slope values for each cell in the landscape. The predictions are stored as columns, one for each hour of the day.
+
+
+
+
+
+
+
+```{r}
+
+# yday 45
+habitat_selection_yday45 <- 
+  read_csv("Python/outputs/landscape_predictions/2005/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv")
+
+# yday 225
+habitat_selection_yday225 <- 
+  read_csv("Python/outputs/landscape_predictions/2005/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv")
+
+# filter out the edge cells that were masked
+habitat_selection_yday45 <- habitat_selection_yday45 %>% filter(!NDVI %in% c(Inf, -Inf))
+habitat_selection_yday225 <- habitat_selection_yday225 %>% filter(!NDVI %in% c(Inf, -Inf))
+
+```
+
+
+
+
+
+
+## Tidy the data frame
+
+Rescale the covariates to their original values and select a subset of the data to speed up the plotting process. As we're taking a subset there will be some random variation in the plots each time the script is run, although there are many cells so the results should be robust.
+
+
+
+
+
+
+```{r}
+
+# from the stack of local layers (Python script)
+ndvi_max = 0.8220
+ndvi_min = -0.2772
+canopy_max = 82.5000
+canopy_min = 0.0
+herby_max = 1.0
+herby_min = 0.0
+slope_max = 12.2981
+slope_min = 0.0006
+
+habitat_selection_yday45_long <- habitat_selection_yday45 %>% 
+  
+  # take a random sample of the data
+  slice_sample(prop = 0.1) %>%
+  
+  # rescale the covariates to their original scale
+  mutate(NDVI = (NDVI*(ndvi_max - ndvi_min) + ndvi_min),
+         Canopy_cover = round((Canopy_cover*(canopy_max - canopy_min) + canopy_min), digits = 1),
+         Herbaceous_vegetation = (Herbaceous_vegetation*(herby_max - herby_min) + herby_min),
+         Slope = (Slope*(slope_max - slope_min) + slope_min)) %>% 
+  
+  # pivot the data frame to long format for plotting with ggplot
+  pivot_longer(cols = -c(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), 
+               names_to = "Hour", values_to = "Values") %>% 
+  
+  # convert the hour column to numeric
+  mutate(Hour = as.numeric(Hour))
+
+head(habitat_selection_yday45_long)
+
+```
+
+
+
+
+
+
+Do the same for the yday 225 predictions.
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday225_long <- habitat_selection_yday225 %>% 
+  
+  # take a random sample of the data
+  slice_sample(prop = 0.01) %>%
+  
+  # rescale the covariates to their original scale
+  mutate(NDVI = (NDVI*(ndvi_max - ndvi_min) + ndvi_min),
+         Canopy_cover = round((Canopy_cover*(canopy_max - canopy_min) + canopy_min), digits = 1),
+         Herbaceous_vegetation = (Herbaceous_vegetation*(herby_max - herby_min) + herby_min),
+         Slope = (Slope*(slope_max - slope_min) + slope_min)) %>% 
+  
+  # pivot the data frame to long format for plotting with ggplot
+  pivot_longer(cols = -c(NDVI, Canopy_cover, Herbaceous_vegetation, Slope), 
+               names_to = "Hour", values_to = "Values") %>% 
+  
+  # convert the hour column to numeric
+  mutate(Hour = as.numeric(Hour))
+
+```
+
+
+
+
+
+
+### Check the distributions of the covariates
+
+
+
+
+
+
+```{r}
+
+hist(habitat_selection_yday45_long$NDVI, breaks = 100, main = "NDVI distribution")
+hist(habitat_selection_yday45_long$Slope, breaks = 100, main = "Slope distribution")
+
+```
+
+
+
+
+
+
+There are some extreme values in the NDVI and slope covariates. We will remove these values to get a better idea of the relationship between the covariates and the habitat selection predictions.
+
+
+
+
+
+
+```{r}
+
+# NDVI quantiles
+NDVI_yday45_quantiles <- quantile(habitat_selection_yday45_long$NDVI, probs = c(0.01, 0.99))
+NDVI_yday225_quantiles <- quantile(habitat_selection_yday225_long$NDVI, probs = c(0.01, 0.99))
+
+# Slope quantiles (same throughout the year)
+slope_quantiles <- quantile(habitat_selection_yday45_long$Slope, probs = c(0.01, 0.99))
+
+# filter out the extreme values for yday 45
+habitat_selection_yday45_long <- habitat_selection_yday45_long %>%
+  filter(NDVI >= NDVI_yday45_quantiles[1] & NDVI <= NDVI_yday45_quantiles[2] & Slope >= slope_quantiles[1] & Slope <= slope_quantiles[2])
+
+# filter out the extreme values for yday 225
+habitat_selection_yday225_long <- habitat_selection_yday225_long %>%
+  filter(NDVI >= NDVI_yday225_quantiles[1] & NDVI <= NDVI_yday225_quantiles[2] & Slope >= slope_quantiles[1] & Slope <= slope_quantiles[2])
+
+```
+
+
+
+
+
+
+# Plot the covariate vs prediction values
+
+To try and understand the influence of certain covariates on the habitat selection predictions, we can plot the habitat selection predictions against the covariate values. We will plot the NDVI, canopy cover, herbaceous vegetation and slope covariates against the habitat selection predictions for the yday 45 and yday 225 predictions.
+
+## *Note the tabs below for the different covariates*
+
+::: {.panel-tabset}
+
+## NDVI
+
+First we can look at scatterplots for a couple different hours of the day. We can see that the prediction values change quite a bit across the day, indicating that the model has created a dynamic representation of buffalo habitat selection behaviour.
+
+- At hour 1, there are higher selection probabilities associated with higher NDVI values.
+- At hour 7, there is a more even distribution of selection probabilities across the NDVI values.
+- At hour 12, there are higher selection probabilities associated with lower NDVI values.
+
+To highlight the relationship we will fit a smoother to the data.
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>% filter(Hour == 1) %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(size = 0.1, alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "NDVI values",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 7) %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(size = 0.1, alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "NDVI values",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 12) %>%
+  ggplot(aes(x = NDVI, y = Values)) +
+  geom_point(size = 0.1, alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "NDVI values",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### All hours
+
+We can also plot all the hours of the day on the same plot to see how the relationship between NDVI and habitat selection changes throughout the day. 
+
+We see there is a rhythmic pattern, with selection for lower values during the middle hours of the day.
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>%
+  ggplot(aes(x = NDVI, y = Values, colour = as.factor(Hour))) +
+  geom_point(size = 0.1, alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "right") +
+  labs(
+    x = "NDVI values",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### Selection surface
+
+However, the plot above is fairly messy, so instead we will use the `stat_summary_2d` function to create a 2D histogram of the data. This will allow us to see the average habitat selection values for different NDVI values at different times of the day.
+
+What we are seeing is the *mean habitat selection probability value* for different NDVI values at different times of the day. Higher values indicate a higher mean probability of selecting NDVI values in that range.
+
+This selection surface reflects the plots above, with a pattern of selection for lower NDVI values during the middle hours of the day, and high values in the early morning and evening. This suggests that buffalo are selecting for less vegetated areas during the middle of the day.
+
+These selection surfaces are also similar to those presented by @Forrest2024-xe, which was acheived by fitting temporal dynamics and quadratic terms to the NDVI covariate. However, this was only fitted to one season of data at a time, whereas the deepSSF model can be fitted with multiscale temporal dynamics.
+
+Day of the year = 45 (mid-February)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday45_long, 
+       aes(x = Hour, y = NDVI)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,20)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("NDVI value") + 
+  ggtitle(paste0("Prediction values: Day 45")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/ndvi_habitat_selection_yday45.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+We can illustrate the multitemporal dynamics of the NDVI covariate by plotting the selection surface for different days of the year.
+
+Day of the year = 225 (mid-August)
+
+Here we see quite a different response, where there is some bimodal selection during the day, with higher selection probabilities for both low and high NDVI values. This may indicate that there are some features described by low or high values of NDVI that are important for buffalo habitat selection during this time of year, or may just indicate that the selection is more variable in the dry season.
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday225_long, 
+       aes(x = Hour, y = NDVI)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,20)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("NDVI value") + 
+  ggtitle(paste0("Prediction values: Day 225")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/ndvi_habitat_selection_yday225.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+## Canopy cover
+
+We can do the same for canopy cover.
+
+Here we show these as boxplots (keep in mind that the canopy cover covariate is continuous, and the canopy classifications are not equally spaced, but we are treating it as a categorical variable for the purposes of this plot).
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>% filter(Hour == 1) %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Canopy cover (%)",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 7) %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Canopy cover (%)",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 12) %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Canopy cover (%)",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### All hours
+
+Again, this is a slightly confusing plot, but it shows how the habitat selection probabilities for each canopy cover 'category' change across the day.
+
+Looking at 32.5% canopy cover for instance, there is lower selection probability in the early morning and evening, and higher selection probability in the middle of the day. This suggests that buffalo are selecting for areas with 32.5% canopy cover during the middle of the day.
+
+For open canopy (0%), selection is highest around dawn and dusk, which correlates with the high movement periods of buffalo.
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>%
+  ggplot(aes(x = as.factor(Canopy_cover), y = Values, colour = as.factor(Hour))) +
+  geom_boxplot(alpha = 0.05) +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Canopy cover (%)",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### Selection surface
+
+Day of the year = 45 (mid-February)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday45_long, 
+       aes(x = Hour, y = Canopy_cover)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,15)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Canopy cover (%)") + 
+  ggtitle(paste0("Prediction values: Day 45")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/canopy_habitat_selection_yday45.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+Day of the year = 225 (mid-August)
+
+There is clearly high selection for open canopy in the middle of the day during the dry season.
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday225_long, 
+       aes(x = Hour, y = Canopy_cover)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,15)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Canopy cover (%)") + 
+  ggtitle(paste0("Prediction values: Day 225")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/canopy_habitat_selection_yday225.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+## Herbaceous vegetation
+
+As herbaceous vegetation is binary, the plotting is a bit different to interpret, but the plots do show a relationship between habitat selection and herbaceous vegetation.
+
+Recall that 0 is 'woody vegetation' and 1 is 'herbaceous vegetation'.
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>% filter(Hour == 1) %>%
+  ggplot(aes(x = factor(Herbaceous_vegetation), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Herbaceous vegetation",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 7) %>%
+  ggplot(aes(x = factor(Herbaceous_vegetation), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Herbaceous vegetation",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 12) %>%
+  ggplot(aes(x = factor(Herbaceous_vegetation), y = Values)) +
+  geom_jitter(alpha = 0.05) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Herbaceous vegetation",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### All hours
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>%
+  ggplot(aes(x = as.factor(Herbaceous_vegetation), y = Values, colour = as.factor(Hour))) +
+  geom_boxplot(alpha = 0.05) +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Herbaceous vegetation",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### Selection surface
+
+Day of the year = 45 (mid-February)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday45_long, 
+       aes(x = Hour, y = Herbaceous_vegetation)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23, 2)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Herbaceous vegetation") + 
+  ggtitle(paste0("Prediction values: Day 45")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/herby_habitat_selection_yday45.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+Again there are seemingly opposing selection patterns between the wet and dry seasons.
+
+Day of the year = 225 (mid-August)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday225_long, 
+       aes(x = Hour, y = Herbaceous_vegetation)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23, 2)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Herbaceous vegetation") + 
+  ggtitle(paste0("Prediction values: Day 225")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/herby_habitat_selection_yday225.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+## Slope
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>% filter(Hour == 1) %>%
+  ggplot(aes(x = Slope, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Slope",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 7) %>%
+  ggplot(aes(x = Slope, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Slope",
+    y = "Habitat selection"
+    )
+
+habitat_selection_yday45_long %>% filter(Hour == 12) %>%
+  ggplot(aes(x = Slope, y = Values)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "Slope",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### All hours
+
+
+
+
+
+
+```{r}
+
+habitat_selection_yday45_long %>%
+  ggplot(aes(x = Slope, y = Values, colour = factor(Hour))) +
+  geom_jitter(alpha = 0.05) +
+  geom_smooth(method = "gam") +
+  scale_colour_viridis(discrete = T) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Slope",
+    y = "Habitat selection"
+    )
+
+```
+
+
+
+
+
+
+### Selection surface
+
+Day of the year = 45 (mid-February)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday45_long, 
+       aes(x = Hour, y = Slope)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,20)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Slope") + 
+  ggtitle(paste0("Prediction values: Day 45")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/slope_habitat_selection_yday45.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+Day of the year = 225 (mid-August)
+
+
+
+
+
+
+```{r}
+
+ggplot(habitat_selection_yday225_long, 
+       aes(x = Hour, y = Slope)) +  
+  stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,20)) + 
+  scale_fill_viridis_c("Mean probability") +  
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
+  scale_y_continuous("Slope") + 
+  ggtitle(paste0("Prediction values: Day 225")) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggsave("outputs/slope_habitat_selection_yday225.png", width = 90, height = 75, 
+       units = "mm", dpi = 600)
+
+```
+
+
+
+
+
+
+:::
+
