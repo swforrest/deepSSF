@@ -5,31 +5,42 @@ project:
 website:
   title: "deepSSF"
   navbar:
-    background: "FCAB64"
+    background: "#FCAB64"
     left:
       - href: index.qmd
-        text: Home
-      - href: about.qmd
-        text: About
-      - about.qmd
+        text: Model overview
+      # - href: about.qmd
+      #   text: About
     right:
     - icon: github
       href: https://github.com/swforrest/deepSSF
-    sidebar:
-      style: "floating"
-      search: true
-      contents:
-        - section: "Training"
-          contents:
-            - deepSSF_train.html
-            - deepSSF_train_S2.html
-        - 
+  sidebar:
+    style: "floating"
+    search: false
+    contents:
+      - section: "Data prep"
+        contents:
+          # - Python/deepSSF_train.html
+          # - Python/deepSSF_train_S2.html
+      - section: "Training"
+        contents:
+          - Python/deepSSF_train.ipynb
+          - Python/deepSSF_train_S2.ipynb
+      - section: "Generating simulations"
+        contents:
+          - Python/deepSSF_simulations.ipynb
+          - Python/deepSSF_simulations_S2.ipynb
+      - section: "Landscape predictions"
+        contents:
+          - Python/deepSSF_landscape_preds.ipynb
+          - Python/deepSSF_landscape_preds_S2.ipynb
+page-navigation: true
 
 format:
   html:
     theme: yeti
-    fontcolor: "BF3100"
-    linkcolor: "42CAFD"
+    # fontcolor: "#BF3100"
+    linkcolor: "#42CAFD"
     css: styles.css
     toc: true
 
