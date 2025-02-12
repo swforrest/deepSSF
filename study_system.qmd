@@ -1,0 +1,17 @@
+---
+title: "Study System"
+format: html
+bibliography: references.bib
+---
+
+We have data of water buffalo (*Bubalus bubalis*), which were tagged on the Djelk Indigenous Protected Area (IPA) in Arnhem Land, Northern Territory. The distribution of water buffalo in the Northern Territory is shown as the green shading. Water buffalo were introduced to Australia and unfortunately cause significant degradation of the tropical savanna ecosystem, particularly around water bodies. A goal of this project is therefore to understand and quantify their movement and habitat selection behaviour such that we can predict their movements and space use for management.
+
+In the photo the GPS device is an ear tag, but in reality the data that we are modelling (shown in the animation below) is from collars. The ear tag GPS data is from a more recent tracking study (that I was involved with and was able to take photos), and we are still analysing the data - stay tuned for more!
+
+![](figures\study_area_buffalo.png)
+
+
+The GPS data is shown in the animation below, which we are trying to replicate by predicting the next step in the trajectory. The focal individual that we trained the model on (i.e. fitted the model to) is the red one. We selected this individual mostly arbitrarily as it is the first index (numerically), and has a sequence of over 10,000 high quality GPS fixes. In terms of habitat use however, there are other individuals that are more representative.
+
+![](figures\buffalo_subset3_29thApril2022.gif)
+

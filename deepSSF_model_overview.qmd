@@ -1,0 +1,64 @@
+---
+title: "deepSSF Model Overview"
+format: html
+bibliography: references.bib
+---
+
+If you haven't already, I recommend checking out the [Step Selection Intuition](step_selection_intuition.qmd) tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for our model.
+
+As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we used a step selection approach, keeping the general structure of step selection functions (SSFs) [@Fortin2005-zw; @Forester2009-bg, @Signer2019-fi], but replacing the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers. The inputs and outputs are essentially the same (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. As we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.
+
+## Model architecture
+
+## Inputs
+There are two subnetworks: a habitat selection and a movement process subnetwork. Both receive the same inputs, which are spatial layers such as environmental covariates, scalar covariates such as the hour, the day of the year (yday, also called 'ordinal' or 'Julian' day), and the movement process also receives the bearing of the previous step. The periodic components (i.e. hour and yday) are decomposed into sine and cosine components to wrap continuously as a period, before being converted into spatial layers with constant values so they can be processed by the convolutional layer. To ensure that the turning angles are relative to the previous step, the bearing of the previous step is added directly to the predicted mean ($\mu$) parameters of von Mises distributions. 
+
+![](figures/model_diagram_inputs.png)
+
+
+## Habitat selection subnetwork
+The habitat selection subnetwork uses convolutional layers that have parameters set to ensure that the output has the same spatial extent as the input, resulting in spatial, non-linear transformations of the input covariates, where all inputs can interact, to produce a probability surface (on the log-scale) describing the likelihood of moving to any cell based on the surrounding environment. 
+
+![](figures/model_diagram_hab.png){width=50%}
+
+
+## Movement subnetwork
+The movement process subnetwork uses convolutional layers with max pooling to extract features from the input covariates that are salient to movement, and fully connected layers to process the convolutional layer outputs whilst reducing the dimensionality. The predicted output of the movement subnetwork can be any number of parameters that govern a movement distribution. If we wanted a single gamma distribution (described by a shape and scale parameter) and a von Mises distribution (described by a mean, $\mu$, and concentration, $\kappa$ parameter), we could make the neural network output four numbers, a, b, c and d. We could then take a and b to be our shape and scale, and using the gamma density function turn these into a gamma distribution, and the c and d to be a $\mu$ and $\kappa$.
+
+We can then turn these into the two-dimensional movement kernel:
+
+![](figures\params_move_kernel.png)
+
+Because we can make the movement subnetwork output any number of parameters (it doesn't know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a 'weight' parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a $\mu$, $\kappa$ and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.
+
+![](figures/model_diagram_move.png)
+
+
+## Full model
+As we now have a movement surface and a habitat selection surface, we can combine them into the next-step log-probability surface. Conveniently, both the movement and habitat selection surfaces are outputted on the log-scale, so we simply add them together and normalise the next-step probability surface (such that it sums to one after being exponentiated).
+
+![](figures/model_diagram.png)
+*To highlight the directional persistence, the arrow and $\theta$ in the movement and next-step predictions denotes the bearing of the previous step, and the red star to the left of the next-step predictions is the location of the observed next step for those inputs.*
+
+
+## Training the model
+So the model generates these probability surfaces, but how does it know that they are any good? 
+
+This is where the loss function comes in. Our loss function is the probability value at the actual location of the next step. We want to maximise the probability values at the location of the next step, so we take the log of the probability value and make it negative (i.e., the negative-log-likelihood), and then minimise that, thereby maximising the next-step probability. 
+
+Therefore, if the model predicts let's say movement parameter values that result in a low probability value at the location of the next step, the model should update its weights to move towards higher probability values. It therefore needs to know which direction to adjust the weights, and by how much. It does this by using the gradient of the loss function with respect to the weights, through a process called 'backpropagation'. I won't go into detail here but I suggest you check out the [3Blue1Brown video](https://www.youtube.com/watch?v=Ilg3gGewQ5U&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=3)  that covers backpropagation, as well as the rest of the 'Neural networks' series - his videos are fantastic!
+
+We can see what the model looks like during training by taking a single set of input covariates, and generating predictions after every epoch (complete iteration through the training data). 
+
+![](figures\model_training.gif)
+
+As the model learns it starts to pick out certain features of the landscape as where buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
+
+
+## Generating trajectories
+The process of actually generating trajectories is the same as what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) tab. We have some starting location, the local layers for that point are extracted and run through the model which generates the next-step probability surface, and a step is sampled according to these probability values. 
+
+Here's an animation of what that looks like for when the model has been trained on Sentinel-2 data:
+
+![](figures/simulation_S2.gif)
+*The white pixel is the sample of the next step*

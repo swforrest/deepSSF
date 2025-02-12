@@ -1,0 +1,501 @@
+---
+title: "Validating the next step ahead predictions"
+subtitle: "To compare the predictions of the deepSSF model with predictions of typical SSFs"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: references.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+---
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "beepr", "tictoc", "circular", "matrixStats", "progress")
+walk(packages, require, character.only = T)
+
+```
+
+## Import data and clean
+
+```{r}
+
+buffalo <- read_csv("data/buffalo.csv")
+
+# remove individuals that have poor data quality or less than about 3 months of data. 
+# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exlcude it
+buffalo <- buffalo %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           # 2005, 2014, 2018, 2021, 2022, 2024,
+                                           2029, 2043, 2265, 2284, 2346, 2354))
+
+buffalo <- buffalo %>%  
+  group_by(node) %>% 
+  arrange(DateTime, .by_group = T) %>% 
+  distinct(DateTime, .keep_all = T) %>% 
+  arrange(node) %>% 
+  mutate(ID = node)
+
+buffalo_clean <- buffalo[, c(12, 2, 4, 3)]
+colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
+attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+head(buffalo_clean)
+tz(buffalo_clean$time)
+
+buffalo_ids <- unique(buffalo_clean$id)
+
+```
+
+## Setup trajectory
+
+Use the `amt` package to create a trajectory object from the cleaned data. 
+
+```{r}
+
+buffalo_all <- buffalo_clean %>% mk_track(id = id,
+                                           lon,
+                                           lat, 
+                                           time, 
+                                           all_cols = T,
+                                           crs = 4326) %>% 
+  transform_coords(crs_to = 3112, crs_from = 4326) %>% arrange(id) # Transformation to GDA94 / 
+# Geoscience Australia Lambert (https://epsg.io/3112)
+
+
+```
+
+## Plot the data coloured by time
+
+```{r}
+
+# buffalo_all %>%
+#   ggplot(aes(x = x_, y = y_, colour = t_)) +
+#   geom_point(alpha = 0.25, size = 1) + 
+#   coord_fixed() +
+#   scale_colour_viridis_c() +
+#   theme_classic()
+
+```
+
+## Reading in the environmental covariates
+
+```{r}
+
+ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-01") + months(0:23))
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+
+# change the names (these will become the column names when extracting 
+# covariate values at the used and random steps)
+names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+names(slope) <- "slope"
+names(veg_herby) <- "veg_herby"
+names(canopy_cover) <- "canopy_cover"
+
+# to plot the rasters
+plot(ndvi_projected)
+plot(slope)
+plot(veg_herby)
+plot(canopy_cover)
+
+```
+
+# Generating the data to fit a deepSSF model
+
+## Set up the spatial extent of the local covariates
+
+```{r}
+
+# create a vector of ids
+buffalo_ids <- unique(buffalo_all$id)
+
+# get the resolution from the covariates
+res <- terra::res(ndvi_projected)[1]
+
+# how much to trim on either side of the location, 
+# this will determine the extent of the spatial inputs to the deepSSF model
+buffer <- 1250 + (res/2)
+# calculate the number of cells in each axis
+nxn_cells <- buffer*2/res
+
+# hourly lag - to set larger time differences between locations
+hourly_lag <- 1
+
+```
+
+Import the data that was used to train the deepSSF model
+
+```{r}
+
+data_id <- read_csv("buffalo_local_data_id/buffalo_2005_data_df_lag_1hr_n10297.csv")
+attr(data_id$t_, "tzone") <- "Australia/Queensland"
+attr(data_id$t2_, "tzone") <- "Australia/Queensland"
+
+data_id <- data_id %>% mutate(
+  year_t2 = year(t2_),
+  yday_t2_2018_base = ifelse(year_t2 == 2018, yday_t2, 365+yday_t2)
+)
+
+sample_extent <- 1250
+
+# remove steps that fall outside of the local spatial extent
+data_id <- data_id %>%
+  filter(x2_cent > -sample_extent & x2_cent < sample_extent & y2_cent > -sample_extent & y2_cent < sample_extent) %>%
+  drop_na(ta)
+
+max(data_id$yday_t2_2018_base)
+
+write_csv(data_id, "buffalo_local_data_id/validation/validation_buffalo_2005_data_df_lag_1hr_n10297.csv")
+
+```
+
+# Evaluate next-step ahead predictions
+
+## Create distance and bearing layers for the movement probability
+
+```{r}
+
+image_dim <- 101
+pixel_size <- 25
+center <- image_dim %/% 2
+
+# Create matrices of indices
+x <- matrix(rep(0:(image_dim - 1), image_dim), nrow = image_dim, byrow = TRUE)
+y <- matrix(rep(0:(image_dim - 1), each = image_dim), nrow = image_dim, byrow = TRUE)
+
+# Compute the distance layer
+distance_layer <- sqrt((pixel_size * (x - center))^2 + (pixel_size * (y - center))^2)
+
+# Change the center cell to the average distance from the center to the edge of the pixel
+distance_layer[center + 1, center + 1] <- 0.56 * pixel_size
+
+# Compute the bearing layer
+bearing_layer <- atan2(center - y, x - center)
+
+# Convert the distance and bearing matrices to raster layers
+distance_layer <- rast(distance_layer)
+bearing_layer <- rast(bearing_layer)
+
+# Optional: Plot the distance and bearing rasters
+plot(distance_layer, main = "Distance from Center")
+plot(bearing_layer, main = "Bearing from Center")
+
+distance_values <- terra::values(distance_layer)
+bearing_values <- terra::values(bearing_layer)
+
+```
+# Calculating the habitat selection probabilities
+
+The habitat selection term of a step selection function is typically modelled analogously to a resource-selection function (RSF), that assumes an exponential (log-linear) form as
+
+$$
+    \omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha})) = \exp(\beta_{1}(\tau; \boldsymbol{\alpha}_1) X_1(s_t) + \cdots + \beta_{n}(\tau; \boldsymbol{\alpha}_n) X_n(s_t)),
+$$
+
+where $\boldsymbol{\beta}(\tau; \boldsymbol{\alpha}) = (\beta_{1}(\tau; \boldsymbol{\alpha}_1), \ldots, \beta_{n}(\tau; \boldsymbol{\alpha}_n))$ in our case, 
+
+$$
+\beta_i(\tau; \boldsymbol{\alpha}_i) = \alpha_{i,0} + \sum_{j = 1}^P \alpha_{i,j} \sin \left(\frac{2j \pi \tau}{T} \right) + \sum_{j = 1}^P \alpha_{i,j + P} \cos \left(\frac{2j \pi \tau}{T} \right),
+$$
+
+and $\boldsymbol{\alpha}_i = (\alpha_{i, 0}, \dots, \alpha_{i, 2P})$, where $P$ is the number of pairs of harmonics, e.g. for $P = 2$, for each covariate there would be two sine terms and two cosine terms, as well as the linear term denoted by $\alpha_{i, 0}$. The $+ P$ term in the $\alpha$ index of the cosine term ensures that each $\alpha_i$ coefficient in $\boldsymbol{\alpha}_i$ is unique.
+
+To aid the computation of the simulations, we can precompute $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for each hour prior to running the simulations.
+
+In the dataframe of temporally varying coefficients, for each covariate we have reconstructed $\beta_{i}(\tau; \boldsymbol{\alpha}_i)$ and discretised for each hour of the day, resulting in $\beta_{i,\tau}$ for $i = 1, \ldots, n$ where $n$ is the number of covariates and $\tau = 1, \ldots, 24$. 
+
+Given these, we can solve $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for every hour of the day. This will result in an RSF map for each hour of the day, which we will use in the simulations.
+
+Then, when we do our step selection simulations, we can just subset these maps by the current hour of the day, and extract the values of $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for each proposed step location, rather than solving $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for every step location.
+
+
+# Calculating the next-step probabilities for the 0p and 2p models
+
+## Select model coefficients
+
+```{r}
+
+# season <- "" # for models fitted to both seasons
+# season <- "_dry" # for models fitted to dry season
+season <- "_wet" # for models fitted to wet season
+
+model_date <- "2025-01-03"
+
+focal_id <- 2005
+
+```
+
+
+## Setting up the data
+
+```{r}
+
+# create vector of GPS date filenames
+buffalo_data_ids <- list.files(path = "buffalo_local_data_id", pattern = ".csv") 
+ids <- substr(buffalo_data_ids, 9, 12)
+
+# import data
+buffalo_id_list <- vector(mode = "list", length = length(buffalo_data_ids))
+
+# read in the data
+for(i in 1:length(buffalo_data_ids)){
+  
+  buffalo_id_list[[i]] <-  read.csv(paste("buffalo_local_data_id/",
+                                             buffalo_data_ids[[i]], 
+                                             sep = ""))
+  buffalo_id_list[[i]]$id <- ids[i]
+  
+}
+
+```
+
+## Calculating the next-step probabilities
+
+```{r}
+
+for(k in 1:length(buffalo_id_list)) {
+
+  data_id <- buffalo_id_list[[k]]
+  attr(data_id$t_, "tzone") <- "Australia/Queensland"
+  attr(data_id$t2_, "tzone") <- "Australia/Queensland"
+  
+  data_id <- data_id %>% mutate(
+    year_t2 = year(t2_),
+    yday_t2_2018_base = ifelse(year_t2 == 2018, yday_t2, 365+yday_t2)
+  )
+  
+  sample_extent <- 1250
+  
+  # remove steps that fall outside of the local spatial extent
+  data_id <- data_id %>%
+    filter(x2_cent > -sample_extent & 
+             x2_cent < sample_extent & 
+             y2_cent > -sample_extent & 
+             y2_cent < sample_extent) %>%
+    drop_na(ta)
+  
+  # max(data_id$yday_t2_2018_base)
+  # write_csv(data_id, paste0("buffalo_local_data_id/validation/validation_", buffalo_data_ids[k]))
+  
+  
+  model_harmonics <- c("0p", "2p")
+  
+  # test_data <- data_id %>% slice(1:10) # test with a subset of the data
+  test_data <- data_id
+
+  
+  # subset rasters
+  buffer <- 2000
+  template_raster_crop <- terra::rast(xmin = min(test_data$x2_) - buffer, 
+                                      xmax = max(test_data$x2_) + buffer, 
+                                      ymin = min(test_data$y2_) - buffer, 
+                                      ymax = max(test_data$y2_) + buffer, 
+                                      resolution = 25, 
+                                      crs = "epsg:3112")
+  
+  ## Crop the rasters
+  ndvi_projected_cropped <- terra::crop(ndvi_projected, template_raster_crop)
+  ndvi_projected_cropped_sq <- ndvi_projected_cropped^2
+  
+  canopy_cover_cropped <- terra::crop(canopy_cover, template_raster_crop)
+  canopy01_cropped <- canopy_cover_cropped/100
+  canopy01_cropped_sq <- canopy01_cropped^2
+    
+  veg_herby_cropped <- terra::crop(veg_herby, template_raster_crop)
+  slope_cropped <- terra::crop(slope, template_raster_crop)
+  
+  tic()
+  
+  for(j in 1:length(model_harmonics)) {
+  
+    ssf_coefs_file_path <- paste0("ssf_coefficients/id", focal_id, "_", model_harmonics[j], "Daily_coefs", season, "_", model_date, ".csv")
+    print(ssf_coefs_file_path)
+    
+    ssf_coefs <- read_csv(ssf_coefs_file_path)
+    
+    # keep only the integer hours using the modulo operator
+    ssf_coefs <- ssf_coefs %>% filter(ssf_coefs$hour %% 1 == 0)
+    
+    n <- nrow(test_data)
+    
+    pb <- progress_bar$new(
+      format = "  Progress [:bar] :percent in :elapsed",
+      total = n,
+      clear = FALSE
+    )
+    
+    
+    tic()
+    
+    # for (i in 2:n) {
+    for (i in 7003:n) {
+    
+    sample_tm1 <- test_data[i-1, ] # get the step at t - 1 for the bearing of the approaching step
+    sample <- test_data[i, ]
+    sample_extent <- ext(sample$x_min, sample$x_max, sample$y_min, sample$y_max)
+    
+    print(paste0("yday_t2 ", sample$yday_t2_2018_base))
+    print(paste0("hour_t2 ", sample$hour_t2))
+    
+    # get the local covariate layers for the sample
+    ndvi_index <- which.min(abs(difftime(sample$t_, terra::time(ndvi_projected_cropped))))
+    ndvi_sample <- crop(ndvi_projected[[ndvi_index]], sample_extent)
+    ndvi_sq_sample <- crop(ndvi_projected_cropped_sq[[ndvi_index]], sample_extent)
+    # plot(ndvi_sample)
+    
+    canopy_sample <- crop(canopy01_cropped, sample_extent)
+    canopy_sq_sample <- crop(canopy01_cropped_sq, sample_extent)
+    # plot(canopy_sample)
+    veg_herby_sample <- crop(veg_herby_cropped, sample_extent)
+    # plot(veg_herby_sample)
+    slope_sample <- crop(slope_cropped, sample_extent)
+    # plot(slope_sample)
+    
+    # create a SpatVector from the coordinates
+    next_step_vect <- vect(cbind(sample$x2_, sample$y2_), crs = crs(ndvi_sample))
+    
+    
+    ### calculate the next-step probability surface
+    
+    # get the coefficients for the appropriate hour
+    coef_hour <- which(ssf_coefs$hour == sample$hour_t2)
+    
+    # ndvi
+    ndvi_linear <- ndvi_sample * ssf_coefs$ndvi[[coef_hour]]
+    ndvi_quad <- ndvi_sq_sample * ssf_coefs$ndvi_2[[coef_hour]]
+    
+    # canopy cover
+    canopy_linear <- canopy_sample * ssf_coefs$canopy[[coef_hour]]
+    canopy_quad <- canopy_sq_sample * ssf_coefs$canopy_2[[coef_hour]]
+    # veg_herby
+    veg_herby_pred <- veg_herby_sample * ssf_coefs$herby[[coef_hour]]
+    # veg_herby
+    slope_pred <- slope_sample * ssf_coefs$slope[[coef_hour]]
+    
+    # combining all covariates (on the log-scale)
+    habitat_log <- ndvi_linear + ndvi_quad + canopy_linear + canopy_quad + slope_pred + veg_herby_pred
+    # plot(habitat_log)
+    
+    # create template raster
+    habitat_pred <- habitat_log
+    # convert to normalised probability
+    habitat_pred[] <- exp(values(habitat_log) - max(values(habitat_log), na.rm = T)) / 
+      sum(exp(values(habitat_log) - max(values(habitat_log), na.rm = T)), na.rm = T)
+    # plot(habitat_pred)
+    # print(sum(values(habitat_pred)))
+    
+    # habitat probability value at the next step
+    prob_habitat <- as.numeric(terra::extract(habitat_pred, next_step_vect)[2])
+    print(paste0("Habitat probability: ", prob_habitat))
+    
+    plot(terra::mask(habitat_pred, next_step_vect, inverse = T))
+    
+    # movement probability
+    
+    # step lengths
+    # calculated on the log scale
+    step_log <- habitat_log
+    step_log[] <- dgamma(distance_values, 
+                         shape = ssf_coefs$shape[[coef_hour]], 
+                         scale = ssf_coefs$scale[[coef_hour]], log = TRUE)
+    # plot(step_log)
+    
+    # turning angles
+    ta_log <- habitat_log
+    vm_mu <- sample$bearing
+    vm_mu_updated <- ifelse(ssf_coefs$kappa[[coef_hour]] > 0, sample_tm1$bearing, sample_tm1$bearing - pi)
+    ta_log[] <- suppressWarnings(circular::dvonmises(bearing_values, 
+                                                     mu = vm_mu_updated, 
+                                                     kappa = abs(ssf_coefs$kappa[[coef_hour]]), 
+                                                     log = TRUE))
+    # plot(ta_pred)
+    
+    # combine the step and turning angle probabilities
+    move_log <- step_log + ta_log
+    # plot(move_pred)
+    
+    # create template raster
+    move_pred <- habitat_log
+    # convert to normalised probability
+    move_pred[] <- exp(values(move_log) - max(values(move_log), na.rm = T)) / 
+      sum(exp(values(move_log) - max(values(move_log), na.rm = T)), na.rm = T)
+    # plot(move_pred)
+    # print(sum(values(move_pred)))
+    
+    # movement probability value at the next step
+    prob_movement <- as.numeric(terra::extract(move_pred, next_step_vect)[2])
+    # print(prob_movement)
+    
+    # calculate the log next-step probability
+    next_step_log <- habitat_log + move_log
+    # plot(next_step_log)
+    
+    
+    # calculate next-step probability
+    
+    # create template raster
+    next_step_pred <- habitat_log
+    # normalise using log-sum-exp trick
+    next_step_pred[] <- exp(values(next_step_log) - max(values(next_step_log), na.rm = T)) / 
+      sum(exp(values(next_step_log) - max(values(next_step_log), na.rm = T)), na.rm = T)
+    # plot(next_step_pred)
+    # print(sum(values(next_step_pred)))
+    
+    # check next-step location
+    next_step_sample <- terra::mask(next_step_pred, next_step_vect, inverse = T)
+    # plot(next_step_sample)
+    
+    # check which cell is NA in rows and columns
+    # print(rowColFromCell(next_step_pred, which(is.na(values(next_step_sample)))))
+    
+    # NDVI value at next step (to check against the deepSSF version)
+    # ndvi_next_step <- as.numeric(terra::extract(ndvi_sample, next_step_vect)[2])
+    # print(paste("NDVI value = ", ndvi_next_step))
+    
+    # next-step probability value at the next step
+    prob_next_step <- as.numeric(terra::extract(next_step_pred, next_step_vect)[2])
+    # print(prob_next_step)
+    
+    test_data[i, paste0("prob_habitat_ssf_", model_harmonics[j])] <- prob_habitat
+    test_data[i, paste0("prob_movement_ssf_", model_harmonics[j])] <- prob_movement
+    test_data[i, paste0("prob_next_step_ssf_", model_harmonics[j])] <- prob_next_step
+    
+    # pb$tick()  # Update progress bar
+     
+    }
+    
+    toc()
+    
+  }
+  
+  write.csv(test_data, file = paste0("outputs/next_step_probs_ssf", season, "_id", ids[k], "_", Sys.Date(), ".csv"))
+  
+  gc()
+  
+}
+
+toc()
+
+```

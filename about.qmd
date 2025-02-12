@@ -1,6 +1,0 @@
----
-title: "About"
-format: html
----
-
-# This is the website for deepSSF - (about.html)
