@@ -3,6 +3,9 @@
 .draft_R
 Python/.draft_Python
 
+Python/outputs
+_freeze
+
 data/
 mapping/
 outputs/
@@ -16,7 +19,6 @@ synthetic_local_layers/
 synthetic_trajectories/
 data_layers_single/
 *.tif
-*.png
 *.json
 *.npy
 *.csv
