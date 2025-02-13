@@ -23,11 +23,11 @@ editor:
   source
 abstract: |
   To compare the next-step predictions of the deepSSF models to SSF models, we need to fit some SSF models to the same data and covariates. 
-  Here we fit SSF models with and without temporal harmonics to buffalo data, which is similar to the approach in @Forrest2024-g except that here we
+  Here we fit SSF models with and without temporal harmonics to buffalo data, which is similar to the approach in @Forrest2024-gc except that here we
   are just fitting the models to the focal individual, rather than to multiple individuals. 
   
   We use the estimated parameters of the SSF models to generate next-step predictions of the SSF models in the
-  [SSF Validation](next_step_validation.qmd) script, and compare these to the next-step predictions of the deepSSF models.
+  [SSF Validation](ssf_validation.qmd) script, and compare these to the next-step predictions of the deepSSF models.
 ---
 
 ```{r}

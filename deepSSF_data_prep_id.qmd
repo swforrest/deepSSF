@@ -242,7 +242,7 @@ for(i in 1:length(buffalo_ids)) {
   
   # to use a subset of the data for that individual for testing
   # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:100)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
 
   n_samples <- nrow(buffalo_data)
   

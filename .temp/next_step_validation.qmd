@@ -1,6 +1,5 @@
 ---
 title: "SSF Validation"
-subtitle: "To compare the predictions of the deepSSF model with predictions of typical SSFs"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -107,12 +106,12 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
 
 ```{r}
 
-# buffalo_all %>%
-#   ggplot(aes(x = x_, y = y_, colour = t_)) +
-#   geom_point(alpha = 0.25, size = 1) + 
-#   coord_fixed() +
-#   scale_colour_viridis_c() +
-#   theme_classic()
+buffalo_all %>%
+  ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_point(alpha = 0.25, size = 1) +
+  coord_fixed() +
+  scale_colour_viridis_c() +
+  theme_classic()
 
 ```
 
@@ -164,7 +163,7 @@ hourly_lag <- 1
 
 ```
 
-Import the data that was used to train the deepSSF model
+## Import the data that was used to train the deepSSF model
 
 ```{r}
 
@@ -186,6 +185,7 @@ data_id <- data_id %>%
 
 max(data_id$yday_t2_2018_base)
 
+# essentially the same dataframe but with some extra variables
 write_csv(data_id, "buffalo_local_data_id/validation/validation_buffalo_2005_data_df_lag_1hr_n10297.csv")
 
 ```
@@ -225,6 +225,7 @@ distance_values <- terra::values(distance_layer)
 bearing_values <- terra::values(bearing_layer)
 
 ```
+
 # Calculating the habitat selection probabilities
 
 The habitat selection term of a step selection function is typically modelled analogously to a resource-selection function (RSF), that assumes an exponential (log-linear) form as

@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Scott Forrest">
+<meta name="dcterms.date" content="2025-02-13">
+
+<title>deepSSF Landscape Predictions - S2 – deepSSF</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../Python/deepSSF_next_step_validation.html" rel="next">
+<link href="../Python/deepSSF_landscape_preds.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fd053a38988e21bb3d3b0b617a2084cf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">deepSSF</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../study_system.html"> 
+<span class="menu-text">Study System</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../step_selection_intuition.html"> 
+<span class="menu-text">Step Selection Intuition</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../deepSSF_model_overview.html"> 
+<span class="menu-text">deepSSF Model Overview</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/swforrest/deepSSF"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../Python/deepSSF_landscape_preds.html">Landscape predictions</a></li><li class="breadcrumb-item"><a href="../Python/deepSSF_landscape_preds_S2.html">deepSSF Landscape Predictions - S2</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">Data Preparation</span></span>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Model Training</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_train.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Training</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_train_S2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Training - S2</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Generating simulations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_simulations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Simulations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_simulations_S2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Simulations - S2</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Landscape predictions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_landscape_preds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Landscape Predictions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_landscape_preds_S2.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">deepSSF Landscape Predictions - S2</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">SSF Model Fitting</span></span>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Next-Step Validation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_next_step_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Python/deepSSF_next_step_validation_S2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Validation - S2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ssf_model_fit_id.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SSF Model Fitting</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#import-packages" id="toc-import-packages" class="nav-link active" data-scroll-target="#import-packages">Import packages</a>
+  <ul class="collapse">
+  <li><a href="#if-using-google-colab-uncomment-the-following-lines" id="toc-if-using-google-colab-uncomment-the-following-lines" class="nav-link" data-scroll-target="#if-using-google-colab-uncomment-the-following-lines">If using Google Colab, uncomment the following lines</a></li>
+  </ul></li>
+  <li><a href="#import-the-gps-data" id="toc-import-the-gps-data" class="nav-link" data-scroll-target="#import-the-gps-data">Import the GPS data</a></li>
+  <li><a href="#importing-spatial-data" id="toc-importing-spatial-data" class="nav-link" data-scroll-target="#importing-spatial-data">Importing spatial data</a>
+  <ul class="collapse">
+  <li><a href="#sentinel-2-bands" id="toc-sentinel-2-bands" class="nav-link" data-scroll-target="#sentinel-2-bands">Sentinel-2 bands</a>
+  <ul class="collapse">
+  <li><a href="#plot-as-rgb" id="toc-plot-as-rgb" class="nav-link" data-scroll-target="#plot-as-rgb">Plot as RGB</a></li>
+  </ul></li>
+  <li><a href="#slope" id="toc-slope" class="nav-link" data-scroll-target="#slope">Slope</a></li>
+  </ul></li>
+  <li><a href="#prepare-data-for-running-the-model" id="toc-prepare-data-for-running-the-model" class="nav-link" data-scroll-target="#prepare-data-for-running-the-model">Prepare data for running the model</a>
+  <ul class="collapse">
+  <li><a href="#select-a-smaller-extent-of-the-landscape" id="toc-select-a-smaller-extent-of-the-landscape" class="nav-link" data-scroll-target="#select-a-smaller-extent-of-the-landscape">Select a smaller extent of the landscape</a>
+  <ul class="collapse">
+  <li><a href="#select-a-monthly-stack-of-sentinel-2-bands" id="toc-select-a-monthly-stack-of-sentinel-2-bands" class="nav-link" data-scroll-target="#select-a-monthly-stack-of-sentinel-2-bands">Select a monthly stack of Sentinel 2 bands</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#subset-all-layers" id="toc-subset-all-layers" class="nav-link" data-scroll-target="#subset-all-layers">Subset all layers</a>
+  <ul class="collapse">
+  <li><a href="#create-directory-for-saving-plots" id="toc-create-directory-for-saving-plots" class="nav-link" data-scroll-target="#create-directory-for-saving-plots">Create directory for saving plots</a></li>
+  </ul></li>
+  <li><a href="#load-the-model" id="toc-load-the-model" class="nav-link" data-scroll-target="#load-the-model">Load the model</a>
+  <ul class="collapse">
+  <li><a href="#set-the-device-for-the-model" id="toc-set-the-device-for-the-model" class="nav-link" data-scroll-target="#set-the-device-for-the-model">Set the device for the model</a></li>
+  <li><a href="#define-the-parameters-for-the-model" id="toc-define-the-parameters-for-the-model" class="nav-link" data-scroll-target="#define-the-parameters-for-the-model">Define the parameters for the model</a></li>
+  </ul></li>
+  <li><a href="#run-habitat-selection-subnetwork-on-landscape-layers" id="toc-run-habitat-selection-subnetwork-on-landscape-layers" class="nav-link" data-scroll-target="#run-habitat-selection-subnetwork-on-landscape-layers">Run habitat selection subnetwork on landscape layers</a>
+  <ul class="collapse">
+  <li><a href="#prepare-the-scalar-covariates" id="toc-prepare-the-scalar-covariates" class="nav-link" data-scroll-target="#prepare-the-scalar-covariates">Prepare the scalar covariates</a></li>
+  <li><a href="#combine-the-spatial-and-scalar-as-grid-covariates" id="toc-combine-the-spatial-and-scalar-as-grid-covariates" class="nav-link" data-scroll-target="#combine-the-spatial-and-scalar-as-grid-covariates">Combine the spatial and scalar (as grid) covariates</a></li>
+  <li><a href="#run-habitat-selection-subnetwork-on-the-landscape-layers" id="toc-run-habitat-selection-subnetwork-on-the-landscape-layers" class="nav-link" data-scroll-target="#run-habitat-selection-subnetwork-on-the-landscape-layers">Run habitat selection subnetwork on the landscape layers</a></li>
+  <li><a href="#plot-the-predictions" id="toc-plot-the-predictions" class="nav-link" data-scroll-target="#plot-the-predictions">Plot the predictions</a></li>
+  <li><a href="#loop-over-hours" id="toc-loop-over-hours" class="nav-link" data-scroll-target="#loop-over-hours">Loop over hours</a>
+  <ul class="collapse">
+  <li><a href="#select-the-day-of-the-year" id="toc-select-the-day-of-the-year" class="nav-link" data-scroll-target="#select-the-day-of-the-year">Select the day of the year</a></li>
+  </ul></li>
+  <li><a href="#crop-the-sentinel-2-bands" id="toc-crop-the-sentinel-2-bands" class="nav-link" data-scroll-target="#crop-the-sentinel-2-bands">Crop the Sentinel-2 bands</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../Python/deepSSF_landscape_preds.html">Landscape predictions</a></li><li class="breadcrumb-item"><a href="../Python/deepSSF_landscape_preds_S2.html">deepSSF Landscape Predictions - S2</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">deepSSF Landscape Predictions - S2</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Scott Forrest <a href="mailto:scottwforrest@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 13, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>As trained convolution filters can be applied to images (i.e.&nbsp;rasters) of any size, it is possible to generate habitat selection surfaces of any size by using the trained filters from the habitat selection subnetwork. These have been trained to extract the salient features of the input data, and produce higher probability values where an animal is likely to take its next step, which also depends on the time of day and the day of the year. Additionally, these habitat selection filters have been conditioned on the movement process of the animal, as only local covariates that are ‘available’ to the animal are used in the training data, which was the reason for the initial development of step selection functions <span class="citation" data-cites="Fortin2005-zw Rhodes2005-ep">(<a href="#ref-Fortin2005-zw" role="doc-biblioref">Fortin et al. 2005</a>; <a href="#ref-Rhodes2005-ep" role="doc-biblioref">Rhodes et al. 2005</a>)</span>.</p>
+    <p>When applied to a larger landscape area, the resulting probability surface denotes only habitat selection, and not the expected distribution of animals, as of course when this surface is generated it ignores the movement process, and assumes that an animal could access any point in the landscape at the next step. This is an assumption of resource selection functions (RSFs), and has been called a ‘naive’ estimation by <span class="citation" data-cites="Signer2017-th">Signer, Fieberg, and Avgar (<a href="#ref-Signer2017-th" role="doc-biblioref">2017</a>)</span>, because it ignores the movement dynamics. Predicting over broader areas should also be used with caution as covariate values that were not encountered during model training may produce inaccurate or misleading results. Acknowledging these assumptions, we include examples of landscape-scale habitat selection to suggest they have some utility for diagnosing model performance and understaning the influence of certain covariates. Primarily, the resultant habitat selection map provides a visual representation of what the habitat selection subnetwork has learned from the environmental covariates, and how this changes with respect to the other covariates such as the hour and day of the year. This can be used as a diagnostic tool for further model development, or as an end in itself, as it highlights the features present in the environmental covariates that the model considered to be influential in determining the next-step’s location. From these maps, we can also directly plot the correlation between the covariate values and the habitat selection prediction probability, which represents the marginal contribution of the covariate values.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="import-packages" class="level2">
+<h2 class="anchored" data-anchor-id="import-packages">Import packages</h2>
+<div id="cell-2" class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># If using Google Colab, uncomment the following line</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install rasterio</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sys.version)  <span class="co"># Print Python version in use</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np                                      <span class="co"># Array operations</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt                         <span class="co"># Plotting library</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch                                            <span class="co"># Main PyTorch library</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os                                               <span class="co"># Operating system utilities</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob                                             <span class="co"># File path management</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd                                     <span class="co"># Data manipulation</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> rasterio                                         <span class="co"># Geospatial raster data</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime, timedelta                <span class="co"># Date/time utilities</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> deepSSF_model                                    <span class="co"># Import the .py file containing the deepSSF model                                          </span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Get today's date</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>today_date <span class="op">=</span> datetime.today().strftime(<span class="st">'%Y-%m-</span><span class="sc">%d</span><span class="st">'</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># output directory for saving plots</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>base_dir <span class="op">=</span> <span class="ss">f'outputs/landscape_predictions/S2'</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>os.makedirs(base_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Base output directory: </span><span class="sc">{</span>base_dir<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>3.12.5 | packaged by Anaconda, Inc. | (main, Sep 12 2024, 18:18:29) [MSC v.1929 64 bit (AMD64)]
+Output directory: outputs/landscape_predictions/S2</code></pre>
+</div>
+</div>
+<section id="if-using-google-colab-uncomment-the-following-lines" class="level3">
+<h3 class="anchored" data-anchor-id="if-using-google-colab-uncomment-the-following-lines">If using Google Colab, uncomment the following lines</h3>
+<p>The file directories will also need to be changed to match the location of the files in your Google Drive.</p>
+<div id="cell-4" class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from google.colab import drive</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># drive.mount('/content/drive')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="import-the-gps-data" class="level2">
+<h2 class="anchored" data-anchor-id="import-the-gps-data">Import the GPS data</h2>
+<p>We only use this for selecting a spatial extent for the area we want to predict over.</p>
+<div id="cell-6" class="cell" data-execution_count="3">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select the id of that data that the model was trained on</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>buffalo_id <span class="op">=</span> <span class="dv">2005</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">10297</span> <span class="co"># 2005 has 10297 samples</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the path to your CSV file</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>csv_file_path <span class="op">=</span> <span class="ss">f'../buffalo_local_data_id/buffalo_</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_data_df_lag_1hr_n</span><span class="sc">{</span>n_samples<span class="sc">}</span><span class="ss">.csv'</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the CSV file into a DataFrame</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>buffalo_df <span class="op">=</span> pd.read_csv(csv_file_path)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows of the DataFrame</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(buffalo_df.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>             x_            y_                    t_    id           x1_  \
+0  41969.310875 -1.435671e+06  2018-07-25T01:04:23Z  2005  41969.310875   
+1  41921.521939 -1.435654e+06  2018-07-25T02:04:39Z  2005  41921.521939   
+2  41779.439594 -1.435601e+06  2018-07-25T03:04:17Z  2005  41779.439594   
+3  41841.203272 -1.435635e+06  2018-07-25T04:04:39Z  2005  41841.203272   
+4  41655.463332 -1.435604e+06  2018-07-25T05:04:27Z  2005  41655.463332   
+
+            y1_           x2_           y2_     x2_cent    y2_cent  ...  \
+0 -1.435671e+06  41921.521939 -1.435654e+06  -47.788936  16.857110  ...   
+1 -1.435654e+06  41779.439594 -1.435601e+06 -142.082345  53.568427  ...   
+2 -1.435601e+06  41841.203272 -1.435635e+06   61.763677 -34.322938  ...   
+3 -1.435635e+06  41655.463332 -1.435604e+06 -185.739939  31.003534  ...   
+4 -1.435604e+06  41618.651923 -1.435608e+06  -36.811409  -4.438037  ...   
+
+         ta    cos_ta         x_min         x_max         y_min         y_max  \
+0  1.367942  0.201466  40706.810875  43231.810875 -1.436934e+06 -1.434409e+06   
+1 -0.021429  0.999770  40659.021939  43184.021939 -1.436917e+06 -1.434392e+06   
+2  2.994917 -0.989262  40516.939594  43041.939594 -1.436863e+06 -1.434338e+06   
+3 -2.799767 -0.942144  40578.703272  43103.703272 -1.436898e+06 -1.434373e+06   
+4  0.285377  0.959556  40392.963332  42917.963332 -1.436867e+06 -1.434342e+06   
+
+   s2_index  points_vect_cent  year_t2  yday_t2_2018_base  
+0         7               NaN     2018                206  
+1         7               NaN     2018                206  
+2         7               NaN     2018                206  
+3         7               NaN     2018                206  
+4         7               NaN     2018                206  
+
+[5 rows x 35 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="importing-spatial-data" class="level1">
+<h1>Importing spatial data</h1>
+<p>Instead of importing the stacks of local layers (one for each step), here can import the spatial covariates at any extent, which we can predict the habitat selection over. We use an extent that covers all of the observed locations, which refer to as the ‘landscape’.</p>
+<section id="sentinel-2-bands" class="level2">
+<h2 class="anchored" data-anchor-id="sentinel-2-bands">Sentinel-2 bands</h2>
+<p>Each stack represents a month of median values of cloud-free pixels, and each layer in the stack are the bands.</p>
+<p>During the data preparation all of these layers were scaled by 10,000, and don’t need to be scaled any further.</p>
+<div id="cell-9" class="cell" data-execution_count="4">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the directory containing your TIFF files</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> <span class="st">'../mapping/cropped rasters/sentinel2/25m'</span>  <span class="co"># Replace with the actual path to your TIFF files</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Use glob to get a list of all TIFF files matching the pattern</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>tif_files <span class="op">=</span> glob.glob(os.path.join(data_dir, <span class="st">'S2_SR_masked_scaled_25m_*.tif'</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Found </span><span class="sc">{</span><span class="bu">len</span>(tif_files)<span class="sc">}</span><span class="ss"> TIFF files'</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>.join(tif_files))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Found 12 TIFF files
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_01.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_02.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_03.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_04.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_05.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_06.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_07.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_08.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_09.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_10.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_11.tif
+../mapping/cropped rasters/sentinel2/25m\S2_SR_masked_scaled_25m_2019_12.tif</code></pre>
+</div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="5">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise a dictionary to store data with date as the key</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>data_dict <span class="op">=</span> {}</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop over each TIFF file to read and process the data</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tif_file <span class="kw">in</span> tif_files:</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract the filename from the path</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    filename <span class="op">=</span> os.path.basename(tif_file)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract the date from the filename</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Assuming filenames are in the format 'S2_SR_masked_YYYY_MM.tif'</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    date_str <span class="op">=</span> filename.replace(<span class="st">'S2_SR_masked_scaled_25m_'</span>, <span class="st">''</span>).replace(<span class="st">'.tif'</span>, <span class="st">''</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># date_str will be something like '2019_01'</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Read the TIFF file using rasterio</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> rasterio.<span class="bu">open</span>(tif_file) <span class="im">as</span> src:</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Read all bands of the TIFF file</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> src.read()</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 'data' is a NumPy array with shape (bands, height, width)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Count the number of cells that are NaN</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        n_nan <span class="op">=</span> np.isnan(data).<span class="bu">sum</span>()</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Date: </span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Number of NaN values in </span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>n_nan<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'Proportion of NaN values: </span><span class="sc">{</span>n_nan <span class="op">/</span> data<span class="sc">.</span>size<span class="sc">:.4%}</span><span class="ch">\n</span><span class="ss">'</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Replace NaN values with zeros </span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> np.nan_to_num(data, nan<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add the data to the dictionary with date as the key</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        data_dict[date_str] <span class="op">=</span> data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Date: 2019_01
+Number of NaN values in 2019_01: 2460
+Proportion of NaN values: 0.0037%
+
+Date: 2019_02
+Number of NaN values in 2019_02: 420
+Proportion of NaN values: 0.0006%
+
+Date: 2019_03
+Number of NaN values in 2019_03: 478731
+Proportion of NaN values: 0.7291%
+
+Date: 2019_04
+Number of NaN values in 2019_04: 13296
+Proportion of NaN values: 0.0202%
+
+Date: 2019_05
+Number of NaN values in 2019_05: 144
+Proportion of NaN values: 0.0002%
+
+Date: 2019_06
+Number of NaN values in 2019_06: 144
+Proportion of NaN values: 0.0002%
+
+Date: 2019_07
+Number of NaN values in 2019_07: 96
+Proportion of NaN values: 0.0001%
+
+Date: 2019_08
+Number of NaN values in 2019_08: 144
+Proportion of NaN values: 0.0002%
+
+Date: 2019_09
+Number of NaN values in 2019_09: 36
+Proportion of NaN values: 0.0001%
+
+Date: 2019_10
+Number of NaN values in 2019_10: 0
+Proportion of NaN values: 0.0000%
+
+Date: 2019_11
+Number of NaN values in 2019_11: 48
+Proportion of NaN values: 0.0001%
+
+Date: 2019_12
+Number of NaN values in 2019_12: 0
+Proportion of NaN values: 0.0000%
+</code></pre>
+</div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="6">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select some bands from the processed data stored in 'data_dict' for plotting</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>layers_to_plot <span class="op">=</span> []</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the date and band numbers you want to plot</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>dates_to_plot <span class="op">=</span> [<span class="st">'2019_01'</span>, <span class="st">'2019_05'</span>]  <span class="co"># This grabs all available dates. You can select specific ones if needed.</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>bands_to_plot <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]  <span class="co"># Band indices for bands 2, 3, and 4, which are B, G, and R</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through the selected dates and bands to prepare them for plotting</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> date_str <span class="kw">in</span> dates_to_plot:</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data_dict[date_str]  <span class="co"># Get the normalized data for this date</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> band_idx <span class="kw">in</span> bands_to_plot:</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Collect the specific band for plotting</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        layers_to_plot.append((data[band_idx], band_idx <span class="op">+</span> <span class="dv">1</span>, date_str))</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the stored layers</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> band, band_number, date_str <span class="kw">in</span> layers_to_plot:</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    plt.imshow(band, cmap<span class="op">=</span><span class="st">'viridis'</span>) </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Band </span><span class="sc">{</span>band_number<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>date_str<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    plt.colorbar() <span class="co">#label='Normalized Value'</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-5.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-7-output-6.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="plot-as-rgb" class="level3">
+<h3 class="anchored" data-anchor-id="plot-as-rgb">Plot as RGB</h3>
+<p>We can also visualise the Sentinel-2 bands as an RGB image, using the Red, Green and Blue bands.</p>
+<p>The plotting was a bit dark so we will adjust the brightness of the image using a gamma correction.</p>
+<div id="cell-13" class="cell" data-execution_count="7">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the date for the RGB layers</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>date_str <span class="op">=</span> <span class="st">'2019_08'</span>  </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># pull out the RGB bands</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>r_band <span class="op">=</span> data_dict[date_str][<span class="dv">3</span>]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>g_band <span class="op">=</span> data_dict[date_str][<span class="dv">2</span>]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>b_band <span class="op">=</span> data_dict[date_str][<span class="dv">1</span>]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Stack the bands along a new axis</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> np.stack([r_band, g_band, b_band], axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize to the range [0, 1] for display</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> (rgb_image <span class="op">-</span> rgb_image.<span class="bu">min</span>()) <span class="op">/</span> (rgb_image.<span class="bu">max</span>() <span class="op">-</span> rgb_image.<span class="bu">min</span>())</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply gamma correction to the image</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>gamma <span class="op">=</span> <span class="fl">1.75</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> rgb_image <span class="op">**</span> (<span class="dv">1</span><span class="op">/</span>gamma)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>plt.figure()  <span class="co"># Create a new figure</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>plt.imshow(rgb_image)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Sentinel 2 RGB'</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="slope" class="level2">
+<h2 class="anchored" data-anchor-id="slope">Slope</h2>
+<div id="cell-15" class="cell" data-execution_count="89">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Path to the slope raster file</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>file_path <span class="op">=</span> <span class="st">'../mapping/cropped rasters/slope.tif'</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># read the raster file</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> rasterio.<span class="bu">open</span>(file_path) <span class="im">as</span> src:</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Read the raster band as separate variable</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    slope_landscape <span class="op">=</span> src.read(<span class="dv">1</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the metadata of the raster</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    slope_meta <span class="op">=</span> src.meta</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    raster_transform <span class="op">=</span> src.transform <span class="co"># same as the raster transform in the NDVI raster read</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="cell-16" class="cell" data-execution_count="90">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the slope metadata:</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Slope metadata:"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(slope_meta)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the shape (rows, columns) of the slope landscape raster:</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Shape of slope landscape raster:"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(slope_landscape.shape)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for NA values in the slope raster:</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of NA values in the slope raster:"</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.isnan(slope_landscape).<span class="bu">sum</span>())</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace NaNs in the slope array with 0.0 (representing water):</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>slope_landscape <span class="op">=</span> np.nan_to_num(slope_landscape, nan<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the maximum and minimum slope values from the stack of local layers:</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>slope_max <span class="op">=</span> <span class="fl">12.2981</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>slope_min <span class="op">=</span> <span class="fl">0.0006</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the slope landscape data from a NumPy array to a PyTorch tensor:</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>slope_landscape_tens <span class="op">=</span> torch.from_numpy(slope_landscape)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize the slope landscape data:</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>slope_landscape_norm <span class="op">=</span> (slope_landscape_tens <span class="op">-</span> slope_min) <span class="op">/</span> (slope_max <span class="op">-</span> slope_min)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the slope landscape (note: displaying the original tensor, not the normalised data):</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>plt.imshow(slope_landscape_tens.numpy())</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>plt.colorbar()</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Slope metadata:
+{'driver': 'GTiff', 'dtype': 'float32', 'nodata': nan, 'width': 2400, 'height': 2280, 'count': 1, 'crs': CRS.from_wkt('LOCAL_CS["GDA94 / Geoscience Australia Lambert",UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]'), 'transform': Affine(25.0, 0.0, 0.0,
+       0.0, -25.0, -1406000.0)}
+
+
+Shape of slope landscape raster:
+(2280, 2400)
+
+
+Number of NA values in the slope raster:
+9356</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="prepare-data-for-running-the-model" class="level1">
+<h1>Prepare data for running the model</h1>
+<section id="select-a-smaller-extent-of-the-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="select-a-smaller-extent-of-the-landscape">Select a smaller extent of the landscape</h2>
+<p>To illustrate the approach, we will select a smaller extent of the landscape to predict over, which covers the spatial extent of the training data.</p>
+<div id="cell-19" class="cell" data-execution_count="91">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from the buffalo data</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">buffer</span> <span class="op">=</span> <span class="dv">1250</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>min_x <span class="op">=</span> <span class="bu">min</span>(buffalo_df[<span class="st">'x_'</span>]) <span class="op">-</span> <span class="bu">buffer</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>max_x <span class="op">=</span> <span class="bu">max</span>(buffalo_df[<span class="st">'x_'</span>]) <span class="op">+</span> <span class="bu">buffer</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>min_y <span class="op">=</span> <span class="bu">min</span>(buffalo_df[<span class="st">'y_'</span>]) <span class="op">-</span> <span class="bu">buffer</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>max_y <span class="op">=</span> <span class="bu">max</span>(buffalo_df[<span class="st">'y_'</span>]) <span class="op">+</span> <span class="bu">buffer</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># custom extent in epsg:3112</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># min_x = 28148.969145</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># max_x = 47719.496935</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># min_y = -1442210.335861</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># max_y = -1433133.681746</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>min_px, min_py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (min_x, min_y)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(min_px, min_py)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>max_px, max_py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (max_x, max_y)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(max_px, max_py)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Round pixel coordinates to integers</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>min_px, max_px, min_py, max_py <span class="op">=</span> <span class="bu">int</span>(<span class="bu">round</span>(min_px)), <span class="op">\</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">int</span>(<span class="bu">round</span>(max_px)), <span class="op">\</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">int</span>(<span class="bu">round</span>(min_py)), <span class="op">\</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>            <span class="bu">int</span>(<span class="bu">round</span>(max_py))</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the pixel coordinates   </span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Min x = </span><span class="sc">{</span>min_px<span class="sc">}</span><span class="ss">, Max x = </span><span class="sc">{</span>max_px<span class="sc">}</span><span class="ss">, </span><span class="ch">\n</span><span class="ss">Min y = </span><span class="sc">{</span>min_py<span class="sc">}</span><span class="ss">, Max y = </span><span class="sc">{</span>max_py<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>1091.3389860694217 1546.6350942641802
+2166.104503472696 888.6517715825685
+Min x = 1091, Max x = 2166, 
+Min y = 1547, Max y = 889</code></pre>
+</div>
+</div>
+<section id="select-a-monthly-stack-of-sentinel-2-bands" class="level3">
+<h3 class="anchored" data-anchor-id="select-a-monthly-stack-of-sentinel-2-bands">Select a monthly stack of Sentinel 2 bands</h3>
+<p>We will select a monthly stack of Sentinel 2 bands to predict the habitat selection over. First use a function that will select the correct stack of bands for a given month.</p>
+<p>This indexing is slightly different from the indexing we used for the <code>deepSSF_landscape_preds.ipynb</code> and <code>deepSSF_simulations.ipynb</code> notebooks, which was indexing NDVI layers. In that case we were indexing the layers directly, and therefore the first entry was at 0 (i.e., March was in month_index = 2). Here, we are creating a string that corresponds to the layer name, and therefore the first entry is at 1. (i.e., March will be at month_index = 3)</p>
+<div id="cell-21" class="cell" data-execution_count="92">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mapping from day of the year to month index</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> day_to_month_index(day_of_year):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the year and the day within that year</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    base_date <span class="op">=</span> datetime(<span class="dv">2019</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    date <span class="op">=</span> base_date <span class="op">+</span> timedelta(days<span class="op">=</span><span class="bu">int</span>(day_of_year) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    year_diff <span class="op">=</span> date.year <span class="op">-</span> base_date.year</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    month_index <span class="op">=</span> (date.month) <span class="op">+</span> (year_diff <span class="op">*</span> <span class="dv">12</span>)  <span class="co"># month index (1-based)</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> month_index <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        month_index <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> month_index</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Choose a day of the year and get the month to index by.</p>
+<div id="cell-23" class="cell" data-execution_count="93">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Choose a day of the year</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>yday_t2 <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the month index for the selected day</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>month_index <span class="op">=</span> day_to_month_index(yday_t2) </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Month index:    </span><span class="sc">{</span>month_index<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For sentinel 2 data</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>selected_month <span class="op">=</span> <span class="ss">f'2019_</span><span class="sc">{</span>month_index<span class="sc">:02d}</span><span class="ss">'</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Selected month: </span><span class="sc">{</span>selected_month<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the data for the selected month</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>sentinel_layers <span class="op">=</span> data_dict[selected_month]</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sentinel_layers.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Month index:    2
+Selected month: 2019_02
+(12, 2280, 2400)</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="subset-all-layers" class="level1">
+<h1>Subset all layers</h1>
+<section id="create-directory-for-saving-plots" class="level3">
+<h3 class="anchored" data-anchor-id="create-directory-for-saving-plots">Create directory for saving plots</h3>
+<div id="cell-25" class="cell" data-execution_count="94">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Output directory for saving plots</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>base_id_dir <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>base_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>os.makedirs(base_id_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output directory: </span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Output directory: outputs/landscape_predictions/S2/id2005</code></pre>
+</div>
+</div>
+<p>Here we want to crop the layers to the spatial extent defined above.</p>
+<p>For plotting purposes, we convert the normalised landscape layers back to their natural scale. This is only for plotting and are not used for modelling.</p>
+<p>We also calculate the minimum and maximum values of the normalised landscape subsets, which we will use to define the colour scale when plotting the layers.</p>
+<div id="cell-27" class="cell" data-execution_count="116">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a subset array with zeros (or another padding value) </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># with the dimensions defined by the pixel indices.</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>subset <span class="op">=</span> np.zeros((min_py <span class="op">-</span> max_py, max_px <span class="op">-</span> min_px), dtype<span class="op">=</span>slope_landscape.dtype)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a list to store the results</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>layer_subsets <span class="op">=</span> []</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop over each layer in sentinel_layers and global_raster_tensors</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sentinel_layer <span class="kw">in</span> sentinel_layers:</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process the sentinel layer</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    sentinel_layer <span class="op">=</span> torch.from_numpy(sentinel_layer)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(sentinel_layer.shape)</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    sentinel_result <span class="op">=</span> sentinel_layer[max_py:min_py, min_px:max_px]</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    layer_subsets.append(sentinel_result)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the normalised slope layer to the list of layer subsets</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>slope_subset <span class="op">=</span> slope_landscape_norm[max_py:min_py, min_px:max_px]</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the slope subset back to the natural scale (for plotting only)</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>slope_subset_natural <span class="op">=</span> slope_subset <span class="op">*</span> (slope_max <span class="op">-</span> slope_min) <span class="op">+</span> slope_min</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the slope subset to the list of layer subsets</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>layer_subsets.append(slope_subset)</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Pull out the Sentinel-2 RGB bands for plotting</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>r_band <span class="op">=</span> layer_subsets[<span class="dv">1</span>].detach().numpy()</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>g_band <span class="op">=</span> layer_subsets[<span class="dv">2</span>].detach().numpy()</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>b_band <span class="op">=</span> layer_subsets[<span class="dv">3</span>].detach().numpy()</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Stack the bands along a new axis</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> np.stack([r_band, g_band, b_band], axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize to the range [0, 1] for display</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> (rgb_image <span class="op">-</span> rgb_image.<span class="bu">min</span>()) <span class="op">/</span> (rgb_image.<span class="bu">max</span>() <span class="op">-</span> rgb_image.<span class="bu">min</span>())</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a><span class="co"># # Apply gamma correction to brighten the image</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>gamma <span class="op">=</span> <span class="fl">1.1</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>rgb_image <span class="op">=</span> rgb_image <span class="op">**</span> (<span class="dv">1</span><span class="op">/</span>gamma)</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot and save the RGB image</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>plt.imshow(rgb_image)</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Sentinel 2 RGB'</span>)</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_rgb_yday</span><span class="sc">{</span>yday<span class="sc">}</span><span class="ss">.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free memory</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the subset</span></span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>plt.imshow(slope_subset_natural, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>plt.colorbar(shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Slope'</span>)</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_slope.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-15-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-15-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="load-the-model" class="level1">
+<h1>Load the model</h1>
+<section id="set-the-device-for-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="set-the-device-for-the-model">Set the device for the model</h3>
+<div id="cell-30" class="cell" data-execution_count="61">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run on the GPU or on the CPU, if a GPU is not available</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'cuda'</span>) <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> torch.device(<span class="st">'cpu'</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Using </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss"> device"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using cpu device</code></pre>
+</div>
+</div>
+</section>
+<section id="define-the-parameters-for-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="define-the-parameters-for-the-model">Define the parameters for the model</h2>
+<p>Here we enter the specific parameter values and hyperparameters for the model. These are the values that will be used to instantiate the model.</p>
+<div id="cell-32" class="cell" data-execution_count="31">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In our case the 12 Sentinel-2 layers + slope</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>num_spatial_covs <span class="op">=</span> <span class="dv">13</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>params_dict <span class="op">=</span> {<span class="st">"batch_size"</span>: <span class="dv">32</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>               <span class="st">"image_dim"</span>: <span class="dv">101</span>, <span class="co">#number of pixels along the edge of each local patch/image</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">"pixel_size"</span>: <span class="dv">25</span>, <span class="co">#number of metres along the edge of a pixel</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dim_in_nonspatial_to_grid"</span>: <span class="dv">4</span>, <span class="co">#the number of scalar predictors that are converted to a grid and appended to the spatial features</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dense_dim_in_nonspatial"</span>: <span class="dv">4</span>, <span class="co">#change this to however many other scalar predictors you have (bearing, velocity etc)</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dense_dim_hidden"</span>: <span class="dv">128</span>, <span class="co">#number of nodes in the hidden layers</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dense_dim_out"</span>: <span class="dv">128</span>, <span class="co">#number of nodes in the output of the fully connected block (FCN)</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dense_dim_in_all"</span>: <span class="dv">2500</span>,<span class="co"># + 128, #number of inputs entering the fully connected block once the nonspatial features have been concatenated to the spatial features</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>               <span class="st">"input_channels"</span>: num_spatial_covs <span class="op">+</span> <span class="dv">4</span>, <span class="co">#number of spatial layers in each image + number of scalar layers that are converted to a grid</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>               <span class="st">"output_channels"</span>: <span class="dv">4</span>, <span class="co">#number of filters to learn</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>               <span class="st">"kernel_size"</span>: <span class="dv">3</span>, <span class="co">#the size of the 2D moving windows / kernels that are being learned</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>               <span class="st">"stride"</span>: <span class="dv">1</span>, <span class="co">#the stride used when applying the kernel.  This reduces the dimension of the output if set to greater than 1</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>               <span class="st">"kernel_size_mp"</span>: <span class="dv">2</span>, <span class="co">#the size of the kernel that is used in max pooling operations</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>               <span class="st">"stride_mp"</span>: <span class="dv">2</span>, <span class="co">#the stride that is used in max pooling operations</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>               <span class="st">"padding"</span>: <span class="dv">1</span>, <span class="co">#the amount of padding to apply to images prior to applying the 2D convolution</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>               <span class="st">"num_movement_params"</span>: <span class="dv">12</span>, <span class="co">#number of parameters used to parameterise the movement kernel</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>               <span class="st">"dropout"</span>: <span class="fl">0.1</span>,</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>               <span class="st">"device"</span>: device</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>               }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>As described in the <code>deepSSF_train.ipynb</code> script, we saved the model definition into a file named <code>deepSSF_model.py</code>. We can instantiate the model by importing the file (which was done when importing other packages) and calling the classes parameter dictionary from that script.</p>
+<div id="cell-34" class="cell" data-execution_count="32">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> deepSSF_model.ModelParams(params_dict)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> deepSSF_model.ConvJointModel(params).to(device)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ConvJointModel(
+  (scalar_grid_output): Scalar_to_Grid_Block()
+  (conv_habitat): Conv2d_block_spatial(
+    (conv2d): Sequential(
+      (0): Conv2d(17, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU()
+      (2): Conv2d(4, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU()
+      (4): Conv2d(4, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (conv_movement): Conv2d_block_toFC(
+    (conv2d): Sequential(
+      (0): Conv2d(17, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU()
+      (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (3): Conv2d(4, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (4): ReLU()
+      (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (6): Flatten(start_dim=1, end_dim=-1)
+    )
+  )
+  (fcn_movement_all): FCN_block_all_movement(
+    (ffn): Sequential(
+      (0): Linear(in_features=2500, out_features=128, bias=True)
+      (1): Dropout(p=0.1, inplace=False)
+      (2): ReLU()
+      (3): Linear(in_features=128, out_features=128, bias=True)
+      (4): Dropout(p=0.1, inplace=False)
+      (5): ReLU()
+      (6): Linear(in_features=128, out_features=12, bias=True)
+    )
+  )
+  (movement_grid_output): Params_to_Grid_Block()
+)</code></pre>
+</div>
+</div>
+<div id="cell-35" class="cell" data-execution_count="33">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # load the model weights</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print(model.state_dict())</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>model.load_state_dict(torch.load(<span class="ss">f'model_checkpoints/deepSSF_S2_slope_buffalo2005_2025-02-09.pt'</span>, </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                                 map_location<span class="op">=</span>torch.device(<span class="st">'cpu'</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                                 weights_only<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co"># print(model.state_dict())</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># model.eval()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<pre><code>&lt;All keys matched successfully&gt;</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="run-habitat-selection-subnetwork-on-landscape-layers" class="level1">
+<h1>Run habitat selection subnetwork on landscape layers</h1>
+<p>Add the slope subset layer to the device.</p>
+<div id="cell-37" class="cell" data-execution_count="96">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>slope_subset <span class="op">=</span> slope_subset.to(params.device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="prepare-the-scalar-covariates" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-the-scalar-covariates">Prepare the scalar covariates</h2>
+<p>We need the hour of the day and day of the year to predict with (as the model was trained with these as inputs).</p>
+<p>In this example we’ll select a single hour and a single day of the year to predict over, and then below we’ll loop over the hours of the day to illustrate the temporal variation in habitat selection that was learned by the model.</p>
+<div id="cell-39" class="cell" data-execution_count="98">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hour of the day (hour) </span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>hour_t2 <span class="op">=</span> <span class="dv">17</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to sine and cosine (as this is what the model expects)</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>hour_t2_sin <span class="op">=</span> np.sin(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>hour_t2_cos <span class="op">=</span> np.cos(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Day of the year (yday)</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Day of the year: </span><span class="sc">{</span>yday<span class="sc">}</span><span class="ss">"</span>) <span class="co"># yday was defined earlier</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to sine and cosine</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>yday_t2_sin <span class="op">=</span> np.sin(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>yday_t2<span class="op">/</span><span class="dv">365</span>)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>yday_t2_cos <span class="op">=</span> np.cos(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>yday_t2<span class="op">/</span><span class="dv">365</span>)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the numpy scalars to PyTorch tensors and ensure they are float type.</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="co"># unsqueeze(0) adds a batch dimension.</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> scalar_to_grid(x, dim_x, dim_y):</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a><span class="co">    Reshape a scalar tensor to a grid with the given dimensions.</span></span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="co">        x (torch.Tensor): Input scalar tensor of shape [1].</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a><span class="co">        dim_x (int): Number of rows for the grid.</span></span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a><span class="co">        dim_y (int): Number of columns for the grid.</span></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a><span class="co">        torch.Tensor: Tensor expanded to shape [1, 1, dim_x, dim_y].</span></span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># View x as shape [1, 1, 1, 1] and expand to a grid of shape [1, 1, dim_x, dim_y]</span></span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a>    scalar_map <span class="op">=</span> x.view(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>).expand(<span class="dv">1</span>, <span class="dv">1</span>, dim_x, dim_y)</span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scalar_map</span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Stack the scalar tensors along a new dimension (dim=0) to form a tensor with shape [4, 1]</span></span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a><span class="co"># representing the four covariates: hour sin, hour cos, day-of-year sin, day-of-year cos.</span></span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>scalar_covariates <span class="op">=</span> torch.stack([</span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a>    hour_t2_sin_tensor, </span>
+<span id="cb31-40"><a href="#cb31-40" aria-hidden="true" tabindex="-1"></a>    hour_t2_cos_tensor, </span>
+<span id="cb31-41"><a href="#cb31-41" aria-hidden="true" tabindex="-1"></a>    yday_t2_sin_tensor, </span>
+<span id="cb31-42"><a href="#cb31-42" aria-hidden="true" tabindex="-1"></a>    yday_t2_cos_tensor</span>
+<span id="cb31-43"><a href="#cb31-43" aria-hidden="true" tabindex="-1"></a>], dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb31-44"><a href="#cb31-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(scalar_covariates.shape)  <span class="co"># Expected shape: [4, 1]</span></span>
+<span id="cb31-45"><a href="#cb31-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-46"><a href="#cb31-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert each scalar covariate into a grid matching the dimensions of the NDVI landscape.</span></span>
+<span id="cb31-47"><a href="#cb31-47" aria-hidden="true" tabindex="-1"></a><span class="co"># This creates spatial maps where each grid cell contains the same scalar value.</span></span>
+<span id="cb31-48"><a href="#cb31-48" aria-hidden="true" tabindex="-1"></a>scalar_grids <span class="op">=</span> torch.cat([</span>
+<span id="cb31-49"><a href="#cb31-49" aria-hidden="true" tabindex="-1"></a>    scalar_to_grid(tensor, slope_subset.shape[<span class="dv">0</span>], slope_subset.shape[<span class="dv">1</span>]) </span>
+<span id="cb31-50"><a href="#cb31-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tensor <span class="kw">in</span> scalar_covariates</span>
+<span id="cb31-51"><a href="#cb31-51" aria-hidden="true" tabindex="-1"></a>], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb31-52"><a href="#cb31-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(scalar_grids.shape)  <span class="co"># Expected shape: [1, 4, rows, cols]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Day of the year: 50
+torch.Size([4, 1])
+torch.Size([1, 4, 658, 1075])</code></pre>
+</div>
+</div>
+</section>
+<section id="combine-the-spatial-and-scalar-as-grid-covariates" class="level2">
+<h2 class="anchored" data-anchor-id="combine-the-spatial-and-scalar-as-grid-covariates">Combine the spatial and scalar (as grid) covariates</h2>
+<div id="cell-41" class="cell" data-execution_count="99">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stack the individual landscape layers into a single tensor.</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The resulting tensor has shape [13, rows, cols].</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>landscape_stack <span class="op">=</span> torch.stack(layer_subsets, dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add an extra batch dimension to the tensor.</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Now the shape becomes [1, 4, rows, cols], where 1 indicates a single sample.</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>landscape_stack <span class="op">=</span> landscape_stack.unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(landscape_stack.shape)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Concatenate the landscape stack with the scalar grids along the channel dimension.</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="co"># This merges the spatial features (landscape_stack) and the repeated scalar covariate grids (scalar_grids)</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co"># into a full feature tensor with shape [1, total_channels, rows, cols].</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>full_stack <span class="op">=</span> torch.cat([landscape_stack, scalar_grids], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(full_stack.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([1, 13, 658, 1075])
+torch.Size([1, 17, 658, 1075])</code></pre>
+</div>
+</div>
+</section>
+<section id="run-habitat-selection-subnetwork-on-the-landscape-layers" class="level2">
+<h2 class="anchored" data-anchor-id="run-habitat-selection-subnetwork-on-the-landscape-layers">Run habitat selection subnetwork on the landscape layers</h2>
+<p>All we need to do to run the habitat selection subnetwork of the model is to pull that component out of the model and run it on the landscape layers.</p>
+<div id="cell-43" class="cell" data-execution_count="100">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pass the full feature stack through the habitat convolutional layer of the model to get predictions.</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>landscape_predictions <span class="op">=</span> model.conv_habitat(full_stack)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the shape of the output tensor to verify the dimensions of the predictions.</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(landscape_predictions.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([1, 658, 1075])</code></pre>
+</div>
+</div>
+</section>
+<section id="plot-the-predictions" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-predictions">Plot the predictions</h2>
+<p>Create a directory with a folder for the day of the year.</p>
+<div id="cell-45" class="cell" data-execution_count="102">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To save the images, create a directory</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>base_id_day_dir <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">/yday</span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>os.makedirs(base_id_day_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output directory: </span><span class="sc">{</span>base_id_day_dir<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Output directory: outputs/landscape_predictions/S2/id2005/yday50</code></pre>
+</div>
+</div>
+<p>As the spatial inputs are padded by the model, there are artifacts at the edges of the predictions. Sometimes this can result in quite different values to the rest of the predictions, which changes the colour scale. To prevent this we remove the outer pixels of the predictions.</p>
+<div id="cell-47" class="cell" data-execution_count="103">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the first sample from the output tensor, detach it from the computational graph,</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># move it to the CPU, and convert it to a NumPy array for further processing and visualization.</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>output_image <span class="op">=</span> landscape_predictions[<span class="dv">0</span>].detach().cpu().numpy()</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create masks for the x and y coordinates, as well as a water mask (unused in the code below),</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co"># with the same shape as the output image.</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>x_mask <span class="op">=</span> np.ones_like(output_image)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>y_mask <span class="op">=</span> np.ones_like(output_image)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>water_mask <span class="op">=</span> np.ones_like(output_image)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the dimensions of the output image.</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>y_dim <span class="op">=</span> output_image.shape[<span class="dv">0</span>]</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>x_dim <span class="op">=</span> output_image.shape[<span class="dv">1</span>]</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a buffer value to mask out edge cells.</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="bu">buffer</span> <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the buffer mask to the x-axis: set the first and last 'buffer' columns to -infinity.</span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>x_mask[:, :<span class="bu">buffer</span>] <span class="op">=</span> <span class="op">-</span>np.inf</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>x_mask[:, x_dim <span class="op">-</span> <span class="bu">buffer</span>:] <span class="op">=</span> <span class="op">-</span>np.inf</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the buffer mask to the y-axis: set the first and last 'buffer' rows to -infinity.</span></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>y_mask[:<span class="bu">buffer</span>, :] <span class="op">=</span> <span class="op">-</span>np.inf</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>y_mask[y_dim <span class="op">-</span> <span class="bu">buffer</span>:, :] <span class="op">=</span> <span class="op">-</span>np.inf</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Mask out edge cells in the output image by multiplying with the x and y masks.</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Also mask out water cells by multiplying with the water mask.</span></span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>output_image <span class="op">=</span> output_image <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>output_image <span class="op">=</span> output_image <span class="op">*</span> water_mask</span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the masked output image using the 'viridis' colormap.</span></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>plt.imshow(output_image, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>plt.colorbar(shrink<span class="op">=</span><span class="fl">0.7</span>)  <span class="co"># Display the color scale.</span></span>
+<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Log-probabilities: Day </span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">, Hour </span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the filename for saving the landscape prediction image</span></span>
+<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>base_id_day_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_hab_log_prob_yday</span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png"</span>, </span>
+<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>            dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>) </span>
+<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free up memory.</span></span>
+<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the exponential of the output image, which may be used to convert log-probabilities</span></span>
+<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a><span class="co"># back to probability values.</span></span>
+<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>plt.imshow(np.exp(output_image), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a>plt.colorbar(shrink<span class="op">=</span><span class="fl">0.7</span>)  <span class="co"># Display the color scale.</span></span>
+<span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Probabilities: Day </span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">, Hour </span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the filename for saving the landscape prediction image</span></span>
+<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>base_id_day_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_hab_prob_yday</span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png"</span>, </span>
+<span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a>            dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>) </span>
+<span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free up memory.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-25-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-25-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="loop-over-hours" class="level2">
+<h2 class="anchored" data-anchor-id="loop-over-hours">Loop over hours</h2>
+<p>A benefit of the <code>deepSSF</code> approach is that it can represent temporal variation in habitat selection (and movement dynamics) across the day, which interacts with the day of the year.</p>
+<p>To illustrate this, we can loop over the hours of the day and predict the habitat selection at each hour. We can also assess the contribution of each covariate to the predictions at each hour, giving us some idea of what the model has learned about the temporal variation in habitat selection, which can help us to further understand our species’ spatial ecology.</p>
+<div id="cell-49" class="cell" data-execution_count="104">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To plot the prediction maps with the same colour scale, </span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we need to determine the minimum and maximum values</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize landscape min and max values</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>landscape_vmin <span class="op">=</span> <span class="bu">float</span>(<span class="st">'inf'</span>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>landscape_vmax <span class="op">=</span> <span class="bu">float</span>(<span class="st">'-inf'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="select-the-day-of-the-year" class="level3">
+<h3 class="anchored" data-anchor-id="select-the-day-of-the-year">Select the day of the year</h3>
+<p>We will select a single day of the year to predict over, and then loop over the hours of the day.</p>
+<div id="cell-51" class="cell" data-execution_count="135">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Choose a day of the year</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>yday_t2 <span class="op">=</span> <span class="dv">250</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the month index for the selected day</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>month_index <span class="op">=</span> day_to_month_index(yday_t2) </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Month index:    </span><span class="sc">{</span>month_index<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For sentinel 2 data</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>selected_month <span class="op">=</span> <span class="ss">f'2019_</span><span class="sc">{</span>month_index<span class="sc">:02d}</span><span class="ss">'</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Selected month: </span><span class="sc">{</span>selected_month<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the data for the selected month</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>sentinel_layers <span class="op">=</span> data_dict[selected_month]</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sentinel_layers.shape)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert day of the year to sine and cosine</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>yday_t2_sin <span class="op">=</span> np.sin(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>yday_t2<span class="op">/</span><span class="dv">365</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>yday_t2_cos <span class="op">=</span> np.cos(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>yday_t2<span class="op">/</span><span class="dv">365</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Month index:    9
+Selected month: 2019_09
+(12, 2280, 2400)</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="crop-the-sentinel-2-bands" class="level2">
+<h2 class="anchored" data-anchor-id="crop-the-sentinel-2-bands">Crop the Sentinel-2 bands</h2>
+<div id="cell-53" class="cell" data-execution_count="136">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a subset array with zeros (or another padding value) </span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co"># with the dimensions defined by the pixel indices.</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>subset <span class="op">=</span> np.zeros((min_py <span class="op">-</span> max_py, max_px <span class="op">-</span> min_px), dtype<span class="op">=</span>slope_landscape.dtype)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a list to store the results</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>layer_subsets <span class="op">=</span> []</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop over each layer in sentinel_layers and global_raster_tensors</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sentinel_layer <span class="kw">in</span> sentinel_layers:</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process the sentinel layer</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    sentinel_layer <span class="op">=</span> torch.from_numpy(sentinel_layer)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(sentinel_layer.shape)</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    sentinel_result <span class="op">=</span> sentinel_layer[max_py:min_py, min_px:max_px]</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    layer_subsets.append(sentinel_result)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the slope subset to the list of layer subsets</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>layer_subsets.append(slope_subset)</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Stack the spatial layers along a new dimension (dim=0)</span></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>landscape_stack <span class="op">=</span> torch.stack(layer_subsets, dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>landscape_stack <span class="op">=</span> landscape_stack.unsqueeze(<span class="dv">0</span>) <span class="co"># add a batch dimension</span></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(landscape_stack.shape) <span class="co"># Expected shape: [1, 13, rows, cols]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([1, 13, 658, 1075])</code></pre>
+</div>
+</div>
+<p>Update the directory with the correct day of the year.</p>
+<div id="cell-55" class="cell" data-execution_count="137">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To save the images, create a directory</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>base_id_day_dir <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">/yday</span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>os.makedirs(base_id_day_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output directory: </span><span class="sc">{</span>base_id_day_dir<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Output directory: outputs/landscape_predictions/S2/id2005/yday250</code></pre>
+</div>
+</div>
+<p>As we need to run over the full loop to get the <code>landscape_vmin</code> and <code>landscape_vmax</code> values, we will first run the loop over the hours of the day once without plotting (which is much faster), and then in the following code chunk run over the loop again but plot the predictions and save the images.</p>
+<p>This loop generates the predictions and saves the probability values as a csv to correlate with covariate values (which we do in R).</p>
+<div id="cell-57" class="cell" data-execution_count="138">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the range of hours you want to loop over</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>hours <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">25</span>) <span class="co"># to start at 1</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="co"># As we used sine and cosine terms to represent the hour of the day,</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="co"># rather than the hour as integers, we can use a continuous range of hours</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="co"># (Uncomment line below)</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="co"># hours = np.arange(0,24, 0.1)</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> hour_t2 <span class="kw">in</span> hours:</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert hour to sine and cosine</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    hour_t2_sin <span class="op">=</span> np.sin(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    hour_t2_cos <span class="op">=</span> np.cos(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert numpy objects to PyTorch tensors</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>    hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>    hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>    yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>    yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stack tensors column-wise to create a tensor of shape </span></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>    scalar_covariates <span class="op">=</span> torch.stack([hour_t2_sin_tensor, </span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>                                     hour_t2_cos_tensor, </span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>                                     yday_t2_sin_tensor, </span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>                                     yday_t2_cos_tensor], </span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>                                     dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert each scalar covariate into a grid matching the dimensions of the NDVI landscape</span></span>
+<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a>    scalar_grids <span class="op">=</span> torch.cat([scalar_to_grid(tensor, </span>
+<span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>                                             slope_subset.shape[<span class="dv">0</span>], </span>
+<span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>                                             slope_subset.shape[<span class="dv">1</span>]) </span>
+<span id="cb47-32"><a href="#cb47-32" aria-hidden="true" tabindex="-1"></a>                                             <span class="cf">for</span> tensor <span class="kw">in</span> scalar_covariates</span>
+<span id="cb47-33"><a href="#cb47-33" aria-hidden="true" tabindex="-1"></a>                                             ], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb47-34"><a href="#cb47-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-35"><a href="#cb47-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stack the spatial (landscape_stack) and scalar covariates (as grids)</span></span>
+<span id="cb47-36"><a href="#cb47-36" aria-hidden="true" tabindex="-1"></a>    full_stack <span class="op">=</span> torch.cat([landscape_stack, scalar_grids], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb47-37"><a href="#cb47-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(full_stack.shape) # Expected shape: [1, n_channels, rows, cols]</span></span>
+<span id="cb47-38"><a href="#cb47-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-39"><a href="#cb47-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run the model</span></span>
+<span id="cb47-40"><a href="#cb47-40" aria-hidden="true" tabindex="-1"></a>    landscape_predictions <span class="op">=</span> model.conv_habitat(full_stack)</span>
+<span id="cb47-41"><a href="#cb47-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(landscape_predictions.shape)</span></span>
+<span id="cb47-42"><a href="#cb47-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-43"><a href="#cb47-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pull out the prediction</span></span>
+<span id="cb47-44"><a href="#cb47-44" aria-hidden="true" tabindex="-1"></a>    output_image <span class="op">=</span> landscape_predictions[<span class="dv">0</span>].detach().cpu().numpy()</span>
+<span id="cb47-45"><a href="#cb47-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-46"><a href="#cb47-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mask out cells on the edges (that affect the colour scale)</span></span>
+<span id="cb47-47"><a href="#cb47-47" aria-hidden="true" tabindex="-1"></a>    output_image <span class="op">=</span> output_image <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb47-48"><a href="#cb47-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-49"><a href="#cb47-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if output_image is valid before updating landscape min and max</span></span>
+<span id="cb47-50"><a href="#cb47-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> output_image.size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb47-51"><a href="#cb47-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Ignore masked values in the calculation</span></span>
+<span id="cb47-52"><a href="#cb47-52" aria-hidden="true" tabindex="-1"></a>        valid_values <span class="op">=</span> output_image[np.isfinite(output_image)]</span>
+<span id="cb47-53"><a href="#cb47-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> valid_values.size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb47-54"><a href="#cb47-54" aria-hidden="true" tabindex="-1"></a>            current_min <span class="op">=</span> valid_values.<span class="bu">min</span>()</span>
+<span id="cb47-55"><a href="#cb47-55" aria-hidden="true" tabindex="-1"></a>            current_max <span class="op">=</span> valid_values.<span class="bu">max</span>()</span>
+<span id="cb47-56"><a href="#cb47-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-57"><a href="#cb47-57" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Update landscape min and max values for scaling the colour map</span></span>
+<span id="cb47-58"><a href="#cb47-58" aria-hidden="true" tabindex="-1"></a>            landscape_vmin <span class="op">=</span> <span class="bu">min</span>(landscape_vmin, current_min)</span>
+<span id="cb47-59"><a href="#cb47-59" aria-hidden="true" tabindex="-1"></a>            landscape_vmax <span class="op">=</span> <span class="bu">max</span>(landscape_vmax, current_max)</span>
+<span id="cb47-60"><a href="#cb47-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-61"><a href="#cb47-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(landscape_vmin, landscape_vmax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>-18.706799 -8.748095</code></pre>
+</div>
+</div>
+<p>In this chunk we generate the plots (now the <code>landscape_vmin</code> and <code>landscape_vmax</code> values are set) and save them to the output directory.</p>
+<p>We can save both the log-probabilities and the probabilities in their natural scale. We’ve saved the images of the log-probabilities, but just uncomment the appropriate lines to save the images of the probabilities as well.</p>
+<p>Here are some examples:</p>
+<p><strong>Day 125 - May 5th - early dry season</strong></p>
+<p><img src="../figures/S2_landscape_preds_yday125.gif" class="img-fluid"></p>
+<p><strong>Day 250 - September 7th - dry season</strong></p>
+<p><img src="../figures/S2_landscape_preds_yday250.gif" class="img-fluid"></p>
+<div id="cell-59" class="cell" data-execution_count="139">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> hour_t2 <span class="kw">in</span> hours:</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert hour to sine and cosine</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    hour_t2_sin <span class="op">=</span> np.sin(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    hour_t2_cos <span class="op">=</span> np.cos(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>hour_t2<span class="op">/</span><span class="dv">24</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert numpy objects to PyTorch tensors</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>    hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>    yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stack tensors column-wise to create a tensor of shape </span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>    scalar_covariates <span class="op">=</span> torch.stack([hour_t2_sin_tensor, </span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>                                     hour_t2_cos_tensor, </span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>                                     yday_t2_sin_tensor, </span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>                                     yday_t2_cos_tensor], </span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>                                     dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert each scalar covariate into a grid matching the dimensions of the NDVI landscape</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>    scalar_grids <span class="op">=</span> torch.cat([scalar_to_grid(tensor, </span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>                                             slope_subset.shape[<span class="dv">0</span>], </span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a>                                             slope_subset.shape[<span class="dv">1</span>]) </span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>                                             <span class="cf">for</span> tensor <span class="kw">in</span> scalar_covariates</span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a>                                             ], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Stack the spatial (landscape_stack) and scalar covariates (as grids)</span></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true" tabindex="-1"></a>    full_stack <span class="op">=</span> torch.cat([landscape_stack, scalar_grids], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(full_stack.shape) # Expected shape: [1, n_channels, rows, cols]</span></span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run the model</span></span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true" tabindex="-1"></a>    landscape_predictions <span class="op">=</span> model.conv_habitat(full_stack)</span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(landscape_predictions.shape)</span></span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pull out the prediction</span></span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true" tabindex="-1"></a>    output_image <span class="op">=</span> landscape_predictions[<span class="dv">0</span>].detach().cpu().numpy()</span>
+<span id="cb49-37"><a href="#cb49-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-38"><a href="#cb49-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mask out cells on the edges (that affect the colour scale)</span></span>
+<span id="cb49-39"><a href="#cb49-39" aria-hidden="true" tabindex="-1"></a>    output_image <span class="op">=</span> output_image <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb49-40"><a href="#cb49-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-41"><a href="#cb49-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Habitat selection log-probabilities</span></span>
+<span id="cb49-42"><a href="#cb49-42" aria-hidden="true" tabindex="-1"></a>    filename_landscape_preds <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>base_id_day_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_log_hab_sel_yday</span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png"</span></span>
+<span id="cb49-43"><a href="#cb49-43" aria-hidden="true" tabindex="-1"></a>    plt.figure()  <span class="co"># Create a new figure</span></span>
+<span id="cb49-44"><a href="#cb49-44" aria-hidden="true" tabindex="-1"></a>    plt.imshow(output_image, vmin<span class="op">=</span>landscape_vmin, vmax<span class="op">=</span>landscape_vmax)</span>
+<span id="cb49-45"><a href="#cb49-45" aria-hidden="true" tabindex="-1"></a>    plt.colorbar(shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb49-46"><a href="#cb49-46" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Log-Probabilities: Day </span><span class="sc">{</span>yday_t2<span class="sc">}</span><span class="ss">, Hour </span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb49-47"><a href="#cb49-47" aria-hidden="true" tabindex="-1"></a>    plt.savefig(filename_landscape_preds, dpi<span class="op">=</span><span class="dv">300</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb49-48"><a href="#cb49-48" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb49-49"><a href="#cb49-49" aria-hidden="true" tabindex="-1"></a>    plt.close()  <span class="co"># Close the figure to free memory</span></span>
+<span id="cb49-50"><a href="#cb49-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-51"><a href="#cb49-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># # Habitat selection probabilities</span></span>
+<span id="cb49-52"><a href="#cb49-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filename_landscape_preds = f"{base_id_day_dir}/id{buffalo_id}_hab_sel_yday{yday_t2}_hour{hour_t2}.png"</span></span>
+<span id="cb49-53"><a href="#cb49-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.figure()  # Create a new figure</span></span>
+<span id="cb49-54"><a href="#cb49-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.imshow(np.exp(output_image), vmin=np.exp(landscape_vmin), vmax=np.exp(landscape_vmax))</span></span>
+<span id="cb49-55"><a href="#cb49-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.colorbar(shrink=0.7)</span></span>
+<span id="cb49-56"><a href="#cb49-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.title(f'Probabilities: Day {yday_t2}, Hour {hour_t2}')</span></span>
+<span id="cb49-57"><a href="#cb49-57" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.savefig(filename_landscape_preds, dpi=300, bbox_inches='tight')</span></span>
+<span id="cb49-58"><a href="#cb49-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.show()</span></span>
+<span id="cb49-59"><a href="#cb49-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plt.close()  # Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-5.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-6.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-7.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-8.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-9.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-10.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-11.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-12.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-13.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-14.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-15.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-16.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-17.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-18.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-19.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-20.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-21.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-22.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-23.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_landscape_preds_S2_files/figure-html/cell-31-output-24.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Fortin2005-zw" class="csl-entry" role="listitem">
+Fortin, Daniel, Hawthorne L Beyer, Mark S Boyce, Douglas W Smith, Thierry Duchesne, and Julie S Mao. 2005. <span>“Wolves Influence Elk Movements: Behavior Shapes a Trophic Cascade in Yellowstone National Park.”</span> <em>Ecology</em> 86 (5): 1320–30. <a href="https://doi.org/10.1890/04-0953">https://doi.org/10.1890/04-0953</a>.
+</div>
+<div id="ref-Rhodes2005-ep" class="csl-entry" role="listitem">
+Rhodes, Jonathan R, Clive A McAlpine, Daniel Lunney, and Hugh P Possingham. 2005. <span>“A Spatially Explicit Habitat Selection Model Incorporating Home Range Behavior.”</span> <em>Ecology</em> 86 (5): 1199–1205. <a href="https://doi.org/10.1890/04-0912">https://doi.org/10.1890/04-0912</a>.
+</div>
+<div id="ref-Signer2017-th" class="csl-entry" role="listitem">
+Signer, Johannes, John Fieberg, and Tal Avgar. 2017. <span>“Estimating Utilization Distributions from Fitted Step‐selection Functions.”</span> <em>Ecosphere</em> 8 (4): e01771. <a href="https://doi.org/10.1002/ecs2.1771">https://doi.org/10.1002/ecs2.1771</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../Python/deepSSF_landscape_preds.html" class="pagination-link" aria-label="deepSSF Landscape Predictions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">deepSSF Landscape Predictions</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../Python/deepSSF_next_step_validation.html" class="pagination-link" aria-label="deepSSF Validation">
+        <span class="nav-page-text">deepSSF Validation</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
