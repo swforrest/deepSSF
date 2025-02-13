@@ -26,8 +26,9 @@ editor:
 abstract: |
   In this script we are comparing the nezt-step ahead predictions of the SSF (with and without temporal dynamics) and deepSSF models. We are comparing the probabilities of movement, habitat selection and next-step selection, and how they change throughout time.
   
+  By comparing the predictions of each process across the entire tracking period or for each hour of the day, we can critically evaluate the covariates that are used by the models and allow for model refinement. 
   
-  
+  As we expected, the deepSSF models outperformed the SSF models on the in-sample data, which was particularly the case for when the model was trained with Sentinel-2 spectral bands and slope as the spatial covariates (deepSSF S2). The performance dropped for out-of-sample data for all models (including SSFs), and the deepSSF trained with the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope) performed worse than the SSF models, and was only marginally better than a null model, which bears some evidence of overfitting. However, the deepSSF S2 model, trained on `raw' Sentinel-2 layers rather than derived quantities, retained greater accuracy than all other approaches for out-of-sample data, suggesting that these inputs contain more information that is relevant to buffalo movement and habitat selection than derived quantities like NDVI and slope.
 ---
 
 ## Loading packages
@@ -40,12 +41,14 @@ packages <- c("amt", "sf", "terra", "beepr", "tictoc", "circular",
               "matrixStats", "progress", "paletteer", "slider")
 walk(packages, require, character.only = T)
 
-options(scipen = 999)  # Prevent scientific notation
+options(scipen = 999)  # Prevent scientific notation in plots
 options(scipen = 0)  # Reset
 
 ```
 
 ## Script setup
+
+Specify the focal id for selecting the in-sample predictions.
 
 ```{r}
 
@@ -55,9 +58,10 @@ focal_id <- 2005
 
 # Step selection function probabilities
 
-## Models fitted to wet AND dry seasons
+## SSF models fitted with and without temporal dynamics
 
 ```{r}
+#| message=FALSE
 
 # create vector of GPS data filenames
 validation_ssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_ssf_id") 
@@ -79,13 +83,14 @@ for(i in 1:length(validation_ssf)){
   
 }
 
-validation_ssf_list
+# check that the data has been imported correctly
+# validation_ssf_list
 
 validation_ssf_all <- bind_rows(validation_ssf_list)
 
 ```
 
-Lengthening data frames to stack together for plotting
+### Lengthening data frames to stack together for plotting
 
 ```{r}
 
@@ -120,78 +125,14 @@ validation_ssf_long <- bind_rows(validation_ssf_move,
                                  validation_ssf_habitat,
                                  validation_ssf_next_step)
 
-```
-
-## Models fitted to dry season only
-
-```{r}
-
-# create vector of GPS data filenames
-validation_ssf_dry <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_ssf_dry") 
-validation_ids <- substr(validation_ssf_dry, 27, 30)
-
-# import data
-validation_ssf_dry_list <- vector(mode = "list", length = length(validation_ssf_dry))
-
-for(i in 1:length(validation_ssf_dry)){
-  validation_ssf_dry_list[[i]] <-  read_csv(paste("outputs/next_step_validation/",
-                                             validation_ssf_dry[[i]], 
-                                             sep = ""))
-  
-  # validation_ssf_dry_list[i]$id <- validation_ids[i]
-  attr(validation_ssf_dry_list[[i]]$t_, "tzone") <- "Australia/Queensland"
-  attr(validation_ssf_dry_list[[i]]$t2_, "tzone") <- "Australia/Queensland"
-  
-  print(sum(is.na(validation_ssf_dry_list[[i]]$prob_next_step_ssf_0p)))
-  
-}
-
-validation_ssf_dry_list
-
-validation_ssf_dry_all <- bind_rows(validation_ssf_dry_list)
+head(validation_ssf_long)
 
 ```
 
-Lengthening data frames to stack together for plotting
+# deepSSF probabilities
 
 ```{r}
-
-validation_ssf_dry_move <- validation_ssf_dry_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_movement")) %>% 
-  pivot_longer(cols = contains("movement"),
-               names_to = "full_name",
-               values_to = "value") %>% 
-  mutate(model = paste0(gsub("prob_movement_", "", full_name), "_dry"),
-         probability = "move",
-         .after = "full_name")
-
-validation_ssf_dry_habitat <- validation_ssf_dry_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_habitat")) %>% 
-  pivot_longer(cols = contains("habitat"),
-               names_to = "full_name",
-               values_to = "value") %>% 
-  mutate(model = paste0(gsub("prob_habitat_", "", full_name), "_dry"),
-         probability = "habitat",
-         .after = "full_name")
-
-validation_ssf_dry_next_step <- validation_ssf_dry_all %>%
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("prob_next_step")) %>% 
-  pivot_longer(cols = contains("next_step"),
-               names_to = "full_name",
-               values_to = "value") %>% 
-  mutate(model = paste0(gsub("prob_next_step_", "", full_name), "_dry"),
-         probability = "next_step",
-         .after = "full_name")
-
-validation_ssf_dry_long <- bind_rows(validation_ssf_dry_move,
-                                     validation_ssf_dry_habitat,
-                                     validation_ssf_dry_next_step)
-
-```
-
-## deepSSF probabilities
-
-```{r}
+#| message=FALSE
 
 # create vector of GPS data filenames
 validation_deepssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_TAmix") 
@@ -211,13 +152,14 @@ for(i in 1:length(validation_deepssf)){
   
 }
 
-validation_deepssf_list
+# To check that the data has been imported correctly
+# validation_deepssf_list
 
 validation_deepssf_all <- bind_rows(validation_deepssf_list)
 
 ```
 
-Lengthening data frames to stack together for plotting
+### Lengthening data frames to stack together for plotting
 
 ```{r}
 
@@ -232,9 +174,10 @@ validation_deepssf_long <- validation_deepssf_all %>%
 
 ```
 
-## deepSSF Sentinel 2 probabilities
+# deepSSF Sentinel 2 probabilities
 
 ```{r}
+#| message=FALSE
 
 # create vector of GPS data filenames
 validation_deepssf_s2 <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_S2") 
@@ -254,13 +197,14 @@ for(i in 1:length(validation_deepssf_s2)){
   
 }
 
-validation_deepssf_s2_list
+# To check that the data has been imported correctly
+# validation_deepssf_s2_list
 
 validation_deepssf_s2_all <- bind_rows(validation_deepssf_s2_list)
 
 ```
 
-Lengthening data frames to stack together for plotting
+### Lengthening data frames to stack together for plotting
 
 ```{r}
 
@@ -275,12 +219,13 @@ validation_deepssf_s2_long <- validation_deepssf_s2_all %>%
 
 ```
 
+# Compare the probabilities
+
 ## Combine the data frames
 
 ```{r}
 
 validation_all_long <- bind_rows(validation_ssf_long,
-                                 # validation_ssf_dry_long,
                                  validation_deepssf_long,
                                  validation_deepssf_s2_long)
 
@@ -306,1963 +251,11 @@ head(validation_all_long)
 
 ```
 
-# Plot the validation data
+### Prepare sliding window
 
-## Setting plotting parameters
+The predicted probabilities are very noisy, so we apply some smoothing by using a sliding window (rolling mean).
 
-```{r}
-
-# if there were uniform probabilities (i.e. no selection)
-uniform_prob <- 1/(101*101)
-
-primary_linewidth <- 0.75
-secondary_linewidth <- 0.15
-
-ribbon_alpha <- 0
-
-daily_knots <- 15
-
-```
-
-## Daily all models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0.7e-4, alpha = 0.5) +
-  geom_hline(yintercept = 1.3e-4, alpha = 0.5) +
-  
-    # geom_smooth(data = validation_all_long %>% 
-    #             filter(probability == "habitat" & 
-    #                      # !id == focal_id,
-    #                      !grepl("deepSSF", model)),
-    #           aes(x = t_, 
-    #               y = value, 
-    #               colour = model, 
-    #               fill = model,
-    #               group = interaction(id, model)), 
-    #           formula = y ~ s(x, bs = "cs", k = daily_knots),
-    #           alpha = ribbon_alpha,
-    #           linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = daily_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = daily_knots),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = daily_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  coord_cartesian(ylim = c(0, 6e-4)) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-ggsave(paste0("outputs/validation_all_daily_GAM_k", daily_knots, ".png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0.7e-4, alpha = 0.5) +
-  geom_hline(yintercept = 1.3e-4, alpha = 0.5) +
-  
-    # geom_smooth(data = validation_all_long %>% 
-    #             filter(probability == "habitat" & 
-    #                      !id == focal_id,
-    #                      !grepl("deepSSF", model)),
-    #           aes(x = t_, 
-    #               y = value, 
-    #               colour = model, 
-    #               fill = model,
-    #               group = interaction(id, model)), 
-    #           # formula = y ~ s(x, bs = "cs", k = daily_knots),
-    #           formula = y ~ x,
-    #           alpha = ribbon_alpha,
-    #           linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              # formula = y ~ s(x, bs = "cs", k = daily_knots),
-              method = "loess",
-              formula = y ~ x,
-              span = 0.005,
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  # geom_smooth(data = validation_all_long %>% 
-  #               filter(probability == "habitat" & 
-  #                        !id == focal_id,
-  #                        grepl("deepSSF", model)),
-  #             aes(x = t_, 
-  #                 y = value, 
-  #                 colour = model, 
-  #                 fill = model,
-  #                 group = interaction(id, model)), 
-  #             formula = y ~ s(x, bs = "cs", k = daily_knots),
-  #             alpha = ribbon_alpha,
-  #             linewidth = secondary_linewidth) +
-  
-    # geom_smooth(data = validation_all_long %>% 
-    #             filter(probability == "habitat" & 
-    #                      id == focal_id,
-    #                      grepl("deepSSF", model)),
-    #           aes(x = t_, 
-    #               y = value, 
-    #               colour = model, 
-    #               fill = model,
-    #               group = interaction(id, model)), 
-    #           formula = y ~ s(x, bs = "cs", k = daily_knots),
-    #           alpha = ribbon_alpha,
-    #           linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 6e-4)) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-```
-
-
-## Daily - deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0.7e-4, alpha = 0.5) +
-  geom_hline(yintercept = 1.3e-4, alpha = 0.5) +
-  
-    # geom_point(data = validation_all_long %>% 
-    #             filter(probability == "habitat" & 
-    #                      # !id == focal_id,
-    #                      grepl("deepSSF", model)),
-    #          aes(x = t_,
-    #              y = value,
-    #              colour = model,
-    #              group = interaction(id, model)),
-    #          alpha = 0.01) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  coord_cartesian(ylim = c(0, 6e-4)) +
-  # scale_y_log10("Probability value") +
-  # scale_colour_viridis_d(option = "D") +
-  # scale_fill_viridis_d(option = "D") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave(paste0("outputs/validation_deepSSF_daily_GAM_k", daily_knots, ".png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Daily - SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value", 
-                     position = "right",
-                     labels = function(x) format(x, scientific = TRUE)) +
-  
-  scale_x_datetime("Date") +
-  coord_cartesian(ylim = c(0.7e-4, 1.3e-4)) +
-  # scale_y_log10("Probability value") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-  
-  ggsave(paste0("outputs/validation_SSF_daily_GAM_k", daily_knots, ".png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly all models
-
-```{r}
-
-hourly_knots <- 15
-
-ggplot() +
-  
-  geom_hline(yintercept = 0.5e-4, alpha = 0.5) +
-  geom_hline(yintercept = 1.5e-4, alpha = 0.5) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  coord_cartesian(ylim = c(0, 4e-4)) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom"
-    )
-
-
-ggsave(paste0("outputs/validation_all_hourly_GAM_k", hourly_knots, ".png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0.5e-4, alpha = 0.5) +
-  geom_hline(yintercept = 1.5e-4, alpha = 0.5) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  coord_cartesian(ylim = c(0, 4e-4)) +
-  # scale_y_log10("Probability value") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    # axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave("outputs/validation_deepSSF_hourly_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "habitat" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = hourly_knots),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value", 
-                     position = "right",
-                     labels = function(x) format(x, scientific = TRUE)) +
-  
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  coord_cartesian(ylim = c(0.5e-4, 1.5e-4)) +
-  # scale_y_log10("Probability value") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    # axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-  
-  ggsave("outputs/validation_SSF_hourly_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-# Movement probabilities
-
-## Daily - all models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.005, alpha = 0.5) +
-  
-      geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value") +
-  coord_cartesian(ylim = c(0, 0.3)) +
-  
-  scale_x_datetime("Date") +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave("outputs/validation_all_daily_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.005, alpha = 0.5) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value") +
-  coord_cartesian(ylim = c(0, 0.3)) +
-  
-  scale_x_datetime("Date") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave("outputs/validation_deepSSF_daily_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # scale_y_log10("Probability value") +
-  
-  scale_y_continuous("Probability value",
-                     position = "right",
-                     # labels = function(x) format(x, scientific = TRUE)
-                     # breaks = c(1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.3, 0.4)
-                     ) +
-
-  coord_cartesian(ylim = c(0, 0.005)) +
-  
-  # coord_trans(x = "log10", y = "log10", 
-  #             ylim = c(uniform_prob, 0.3)) +
-  
-  scale_x_datetime("Date") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-  
-  ggsave("outputs/validation_SSF_daily_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - all models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.01, alpha = 0.5) +
-  
-    geom_smooth(data = validation_all_long %>% 
-              filter(probability == "move" & 
-                       !id == focal_id,
-                       !grepl("deepSSF", model)),
-            aes(x = hour_t2, 
-                y = value, 
-                colour = model, 
-                fill = model,
-                group = interaction(id, model)), 
-            formula = y ~ s(x, bs = "cc", k = 15),
-            alpha = ribbon_alpha,
-            linewidth = secondary_linewidth) +
-
-  geom_smooth(data = validation_all_long %>% 
-              filter(probability == "move" & 
-                       id == focal_id,
-                       !grepl("deepSSF", model)),
-            aes(x = hour_t2, 
-                y = value, 
-                colour = model, 
-                fill = model,
-                group = interaction(id, model)), 
-            formula = y ~ s(x, bs = "cc", k = 15),
-            alpha = ribbon_alpha,
-            linewidth = primary_linewidth) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.4)) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom"
-    )
-
-
-ggsave("outputs/validation_all_hourly_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.01, alpha = 0.5) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.4)) +
-  # scale_y_log10("Probability value") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom"
-    )
-
-
-ggsave("outputs/validation_deepSSF_hourly_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "move" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value", 
-                     position = "right",
-                     # labels = function(x) format(x, scientific = TRUE)
-                     ) +
-  
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.01)) +
-  # scale_y_log10("Probability value") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    )
-  
-  ggsave("outputs/validation_SSF_hourly_move_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-# Next-step probabilities
-
-## Daily - all models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.005, alpha = 0.5) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value") +
-  coord_cartesian(ylim = c(0, 0.3)) +
-  
-  scale_x_datetime("Date") +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave("outputs/validation_all_daily_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Daily - deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.005, alpha = 0.5) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # scale_y_continuous("Probability value",
-  #                    position = "right",
-  #                    # labels = function(x) format(x, scientific = TRUE)
-  #                    breaks = c(1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.3, 0.4)
-  #                    ) +
-  
-  # scale_y_log10("Probability value") +
-  scale_y_continuous("Probability value") +
-  coord_cartesian(ylim = c(0, 0.3)) +
-  
-  # coord_trans(x = "log10", y = "log10", 
-  #             ylim = c(uniform_prob, 0.3)) +
-  
-  scale_x_datetime("Date") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-
-
-ggsave("outputs/validation_deepSSF_daily_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Daily - SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         # !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = t_, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cs", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # scale_y_log10("Probability value") +
-  
-  scale_y_continuous("Probability value",
-                     position = "right",
-                     # labels = function(x) format(x, scientific = TRUE)
-                     # breaks = c(1e-4, 1e-3, 1e-2, 0.1, 0.2, 0.3, 0.4)
-                     ) +
-
-  coord_cartesian(ylim = c(0, 0.005)) +
-  
-  # coord_trans(x = "log10", y = "log10", 
-  #             ylim = c(uniform_prob, 0.3)) +
-  
-  scale_x_datetime("Date") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1)
-    )
-  
-  ggsave("outputs/validation_SSF_daily_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - all models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.01, alpha = 0.5) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.4)) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom"
-    )
-
-
-ggsave("outputs/validation_all_hourly_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - deepSSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = 0, alpha = 0.5) +
-  geom_hline(yintercept = 0.01, alpha = 0.5) +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  scale_y_continuous("Probability value") +
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.4)) +
-  # scale_y_log10("Probability value") +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                     labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_fill_manual(name = "Model",
-                    values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom"
-    )
-
-
-ggsave("outputs/validation_deepSSF_hourly_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Hourly - SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         !id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = secondary_linewidth) +
-  
-    geom_smooth(data = validation_all_long %>% 
-                filter(probability == "next_step" & 
-                         id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = hour_t2, 
-                  y = value, 
-                  colour = model, 
-                  fill = model,
-                  group = interaction(id, model)), 
-              formula = y ~ s(x, bs = "cc", k = 15),
-              alpha = ribbon_alpha,
-              linewidth = primary_linewidth) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_y_continuous("Probability value", 
-                     position = "right",
-                     # labels = function(x) format(x, scientific = TRUE)
-                     ) +
-  
-  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  
-  coord_cartesian(ylim = c(0, 0.01)) +
-  # scale_y_log10("Probability value") +
-
-  scale_color_manual(name = "",
-                     values = c("#26456E", "#9ECFDD"),
-                     labels = c("SSF", "SSF 2p")) +
-  
-  scale_fill_manual(name = "",
-                    values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  theme_bw() +
-  theme(
-    legend.position = "bottom",
-    )
-  
-  ggsave("outputs/validation_SSF_hourly_next_step_GAM_k15.png", 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-# Average probabilities
-
-## Focal individual
-
-```{r}
-
-validation_all_long %>% 
-  filter(id == focal_id) %>%
-  group_by(model, probability) %>% 
-  summarise(n = n(),
-            average_prob = mean(value, na.rm = T),
-            se_prob = sd(value, na.rm = T) / sqrt(n()),
-            sd_prob = sd(value, na.rm = T))
-
-```
-
-## Out-of-sample
-
-```{r}
-
-validation_all_long %>% 
-  filter(!id == focal_id) %>%
-  group_by(model, probability) %>% 
-  summarise(n = n(),
-            average_prob = mean(value, na.rm = T),
-            se_prob = sd(value, na.rm = T) / sqrt(n()),
-            sd_prob = sd(value, na.rm = T))
-
-```
-
-# Plotting with binned values
-
-## Using the mean and quantiles of bins
-
-```{r}
-
-validation_all_long <- validation_all_long %>% mutate(yday_t2_2018 = ifelse(year_t2 == 2018, yday_t2, yday_t2 + 365),
-                                                      day_t2 = round_date(t2_, "day"),
-                                                      three_day_t2 = round_date(t2_, "3 days"),
-                                                      five_day_t2 = round_date(t2_, "5 days"),
-                                                      week_t2 = round_date(t2_, "week"),
-                                                      month_t2 = month(t2_))
-
-head(validation_all_long)
-
-```
-
-## Set plotting parameters
-
-```{r}
-
-# set plotting parameters here that will change in each plot
-
-path_mean_alpha <- 0.5
-path_95_alpha <- 1
-
-ribbon_95_alpha <- 0.1
-ribbon_50_alpha <- 0.15
-
-# linewidth
-path_linewidth <- 0.5
-
-# Create color mapping
-# unique_groups <- unique(summaries_hourly_all_long$Data)
-# colors <- viridis(length(unique_groups))
-# names(colors) <- unique_groups
-# colors["Buffalo"] <- "red"
-
-```
-
-## Both seasons - daily
-
-```{r}
-
-validation_all_quantiles_daily <- validation_all_long %>% 
-  # filter(id == focal_id) %>%
-  group_by(id, model, probability, day_t2) %>% 
-  summarise(average_prob = mean(value, na.rm = T),
-            sd_prob = sd(value, na.rm = T),
-            q025 = quantile(value, probs = 0.025, na.rm = T), 
-            q25 = quantile(value, probs = 0.25, na.rm = T),
-            q50 = quantile(value, probs = 0.5, na.rm = T), 
-            q75 = quantile(value, probs = 0.75, na.rm = T),
-            q975 = quantile(value, probs = 0.975, na.rm = T)
-            )
-
-head(validation_all_quantiles_daily)
-
-```
-
-## Plotting
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_quantiles_daily %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = day_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
-  geom_ribbon(data = validation_all_quantiles_daily %>%
-                filter(probability == "habitat",
-                       id == focal_id),
-              aes(x = day_t2,
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model,
-                  group = interaction(id, model)),
-              alpha = ribbon_50_alpha) +
-  
-  geom_line(data = validation_all_quantiles_daily %>% 
-              filter(probability == "habitat",
-                     id == focal_id),
-            aes(x = day_t2, 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = path_linewidth) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_y_continuous("Probability value") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom")
-
-```
-
-## Binning - time period
-
-```{r}
-
-time_period <- "week_t2"
-
-validation_all_quantiles_period <- validation_all_long %>% 
-  # filter(id == focal_id) %>%
-  group_by(id, model, probability, !!sym(time_period)) %>% 
-  summarise(average_prob = mean(value, na.rm = T),
-            sd_prob = sd(value, na.rm = T),
-            q025 = quantile(value, probs = 0.025, na.rm = T), 
-            q25 = quantile(value, probs = 0.25, na.rm = T),
-            q50 = quantile(value, probs = 0.5, na.rm = T), 
-            q75 = quantile(value, probs = 0.75, na.rm = T),
-            q975 = quantile(value, probs = 0.975, na.rm = T)
-            )
-
-head(validation_all_quantiles_period)
-
-```
-
-## Plotting
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_quantiles_weekly %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = week_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
-  geom_ribbon(data = validation_all_quantiles_period %>%
-                filter(probability == "habitat",
-                       id == focal_id),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model,
-                  group = interaction(id, model)),
-              alpha = 0.25) +
-  
-  geom_line(data = validation_all_quantiles_period %>% 
-              filter(probability == "habitat",
-                     id == focal_id),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.25) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_all_InS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## deepSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_quantiles_weekly %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = week_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
-  geom_ribbon(data = validation_all_quantiles_period %>%
-                filter(probability == "habitat",
-                       id == focal_id,
-                         grepl("deepSSF", model)),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model,
-                  group = interaction(id, model)),
-              alpha = 0.25) +
-  
-  geom_line(data = validation_all_quantiles_period %>%
-              filter(probability == "habitat",
-                     !id == focal_id),
-            aes(x = !!sym(time_period),
-                y = average_prob,
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.035) +
-  
-  geom_line(data = validation_all_quantiles_period %>% 
-              filter(probability == "habitat",
-                     id == focal_id,
-                         grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.25) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_deepSSF_InS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## SSF models
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_quantiles_weekly %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = week_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
-  geom_ribbon(data = validation_all_quantiles_period %>%
-                filter(probability == "habitat",
-                       id == focal_id,
-                         !grepl("deepSSF", model)),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model,
-                  group = interaction(id, model)),
-              alpha = 0.25) +
-  
-  geom_line(data = validation_all_quantiles_period %>% 
-              filter(probability == "habitat",
-                     id == focal_id,
-                         !grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.25) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_SSF_InS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Out-of-sample
-
-```{r}
-
-validation_all_OOS_quantiles_period <- validation_all_long %>% 
-  filter(!id == focal_id) %>%
-  group_by(model, probability, !!sym(time_period)) %>% 
-  summarise(average_prob = mean(value, na.rm = T),
-            q025 = quantile(value, probs = 0.025, na.rm = T), 
-            q25 = quantile(value, probs = 0.25, na.rm = T),
-            q50 = quantile(value, probs = 0.5, na.rm = T), 
-            q75 = quantile(value, probs = 0.75, na.rm = T),
-            q975 = quantile(value, probs = 0.975, na.rm = T)
-            )
-
-head(validation_all_OOS_quantiles_period)
-
-```
-
-## All models
-
-```{r}
-
-ggplot() +
-  
-  # geom_ribbon(data = validation_all_OOS_quantiles_weekly %>%
-  #               filter(probability == "habitat"),
-  #             aes(x = time_period,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = 0.25) +
-  
-  geom_ribbon(data = validation_all_OOS_quantiles_period %>%
-                filter(probability == "habitat"),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model),
-              alpha = 0.35) +
-  
-  # geom_line(data = validation_all_quantiles_period %>% 
-  #             filter(probability == "habitat",
-  #                    !id == focal_id),
-  #           aes(x = !!sym(time_period), 
-  #               y = average_prob, 
-  #               colour = model,
-  #               group = interaction(id, model)),
-  #           linewidth = 0.035) +
-  
-  geom_line(data = validation_all_OOS_quantiles_period %>% 
-              filter(probability == "habitat"),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model),
-            linewidth = 0.35) +
-
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_all_OOS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## deepSSF
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_OOS_quantiles_weekly %>%
-  #               filter(probability == "habitat"),
-  #             aes(x = time_period,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = 0.25) +
-  
-  geom_ribbon(data = validation_all_OOS_quantiles_period %>%
-                filter(probability == "habitat",
-                       grepl("deepSSF", model)),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model),
-              alpha = 0.35) +
-  
-  geom_line(data = validation_all_quantiles_period %>% 
-              filter(probability == "habitat",
-                     !id == focal_id,
-                     grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.035) +
-  
-  geom_line(data = validation_all_OOS_quantiles_period %>% 
-              filter(probability == "habitat",
-                     grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model),
-            linewidth = 0.35) +
-
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65"),
-                    labels = c("deepSSF", "deepSSF S2")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_deepSSF_OOS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-## Plotting
-
-```{r}
-
-ggplot() +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed") +
-  
-  # geom_ribbon(data = validation_all_OOS_quantiles_weekly %>%
-  #               filter(probability == "habitat"),
-  #             aes(x = time_period,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = 0.25) +
-  
-  geom_ribbon(data = validation_all_OOS_quantiles_period %>%
-                filter(probability == "habitat",
-                       !grepl("deepSSF", model)),
-              aes(x = !!sym(time_period),
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model),
-              alpha = 0.25) +
-  
-  geom_line(data = validation_all_quantiles_period %>% 
-              filter(probability == "habitat",
-                     !id == focal_id,
-                     !grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = 0.05) +
-  
-  geom_line(data = validation_all_OOS_quantiles_period %>% 
-              filter(probability == "habitat",
-                     !grepl("deepSSF", model)),
-            aes(x = !!sym(time_period), 
-                y = average_prob, 
-                colour = model),
-            linewidth = 0.25) +
-
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#26456E", "#9ECFDD"),
-                    labels = c("SSF", "SSF 2p")) +
-  
-  scale_y_continuous("Probability value") +
-  scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 1.5e-3)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_SSF_OOS_habitat_", time_period, ".png"), 
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
-
-# Using a sliding period
-
-### Preparing function
+We first need a function to calculate the summary statistics for each window.
 
 ```{r}
 
@@ -2283,33 +276,45 @@ window_summary <- function(data) {
 ### All IDs
 
 ```{r}
+#| message=FALSE
 
-window_width <- 15 # should be odd
+window_width <- 15 # number of days in each window - should be odd
+# how many observations before and after the current observation
 before_after <- (window_width - 1) / 2
 
+# ensure that the data is sorted by time (while respecting the id and model grouping)
 all_data <- validation_all_long %>% 
   group_by(id, model, probability) %>%
   arrange(t2_)
 
+# apply the sliding window function
 validation_all_sliding_period <- all_data %>% 
   slide_period_dfr(
     all_data$t2_,
+    # specify that we want to split by days (and slide across at daily intervals)
     "day",
+    # our window function (calculates mean and quantiles for each window)
     window_summary,
+    # how many days before and after the current observation we want to include in the window
     .before = before_after,
     .after = before_after
 )
 
-validation_all_sliding_period
+head(validation_all_sliding_period, 10)
 
 ```
 
+We can see from the function above that we have the average time, average probability, and quantiles for eac overlapping window, for each model and probability surface (habitat, movement and next-step).
+
 ## Out-of-sample validation
+
+The above sliding windows are for each individual separately, but we also want to calculate the average and quantiles for all out-of-sample individuals together.
 
 ### Calculating mean and quantiles
 
 ```{r}
 
+# out-of-sample data - all ids but the focal id
 OOS_data <- validation_all_long %>% 
   filter(!id == focal_id) %>%
   group_by(model, probability) %>%
@@ -2324,13 +329,24 @@ validation_all_sliding_period_OOS <- OOS_data %>%
     .after = before_after
 )
 
-validation_all_sliding_period_OOS
+head(validation_all_sliding_period_OOS, 10)
 
 ```
 
+Now the summaries are calculated for all out-of-sample individuals together.
+
+# Habitat selection across the tracking period
+
 ## All models
 
+The solid coloured lines show the average probability for the focal individual that the model was fitted to, and the shaded ribbon is the 50% quantile (there is high variability between probability values, so for clarity we omitted the 95% quantiles). The thin coloured lines are the average probability values for 12 individuals that the model was not fitted to, and are therefore out-of-sample validation data. The dashed coloured lines are the mean values for each model for all of the out-of-sample individuals.
+
+We also show the 'null' probability, i.e. if the selection was completely random, which is just the probability divided equally between all cells.
+
 ```{r}
+
+# if there were uniform probabilities (i.e. no selection)
+uniform_prob <- 1/(101*101)
 
 ribbon_50_alpha <- 0.2
 primary_linewidth <- 0.5
@@ -2339,19 +355,11 @@ secondary_linewidth <- 0.04
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities (for zooming into in the paper)
   geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "habitat" &
                        id == focal_id),
@@ -2362,6 +370,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>%
               filter(probability == "habitat" &
                      !id == focal_id),
@@ -2371,6 +380,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "habitat"),
             aes(x = average_time,
@@ -2379,6 +389,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat" &
                      id == focal_id),
@@ -2388,6 +399,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2400,16 +412,20 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
+
+The first thing to note is difference in magnitude between the deepSSF and the SSF predictions. The deepSSF predicted probabilities are often much higher, but can also be much lower, suggesting that the deepSSF models are more 'confident'. 
+
+The deepSSF and deepSSF S2 models both performed particularly well between December 2018 and July 2019, (wet-season and early dry-season), although only the deepSSF S2 model performs well outside of this period (for most of the dry season). This suggests that the derived covariates may lack information that is relevant to buffalo during this period, such as a representation of water.
+
+The higher performance of the deepSSF S2 predictions is also echoed in the out-of-sample predictions, which are generally quite a lot higher than the other models. 
 
 ## deepSSF models
 
@@ -2417,19 +433,11 @@ ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities (for zooming into in the paper)
   geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "habitat" &
                        id == focal_id &
@@ -2441,6 +449,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat" &
                      !id == focal_id &
@@ -2451,6 +460,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "habitat" &
                      grepl("deepSSF", model)),
@@ -2460,6 +470,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat" &
                      id == focal_id &
@@ -2470,6 +481,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2482,14 +494,12 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_deepSSF_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -2499,14 +509,7 @@ ggsave(paste0("outputs/validation_deepSSF_sliding_", window_width, "days.png"),
 
 ggplot() +
   
-  # geom_ribbon(data = validation_all_quantiles_daily %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = day_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "habitat",
                        id == focal_id,
@@ -2518,6 +521,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat",
                        !id == focal_id,
@@ -2528,6 +532,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "habitat" &
                      !grepl("deepSSF", model)),
@@ -2537,6 +542,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat",
                      id == focal_id,
@@ -2547,6 +553,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2563,42 +570,30 @@ ggplot() +
   
   scale_x_datetime("Date") +
   coord_cartesian(ylim = c(0.6e-4, 1.5e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_SSF_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-# Movement probabilities
+There isn't a clear seasonal trend with the SSF predictions, but in general the models do better than the null model, although the out-of-sample predictions vary around the null model.
+
+# Movement probability across the tracking period
 
 ## All models
 
 ```{r}
 
-ribbon_50_alpha <- 0.2
-primary_linewidth <- 0.5
-OOS_mean_linewidth <- 0.5
-secondary_linewidth <- 0.04
-
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "move" &
                        id == focal_id),
@@ -2609,6 +604,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>%
               filter(probability == "move" &
                      !id == focal_id),
@@ -2618,6 +614,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "move"),
             aes(x = average_time,
@@ -2626,6 +623,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move" &
                      id == focal_id),
@@ -2635,6 +633,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2647,16 +646,18 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
+
+The movement probabilities for the deepSSF models are much higher than the for the SSF models, which I suspect is mostly due to the mixture of distributions in the deepSSF models. When the buffalo are in a low movement period, there can be very high probability in the few cells close to the buffalo, which is often accurate (when the predicted probability is 0.2 that means all of the probability mass is shared between only 5 cells. I don't think the SSF movement kernel has the same flexibility to capture this. 
+
+This also comes out very clearly in the hourly predictions, with much higher predicted probabilities during the low movement periods.
 
 ## deepSSF models
 
@@ -2664,19 +665,11 @@ ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 9e-3, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "move" &
                        id == focal_id &
@@ -2688,6 +681,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move" &
                      !id == focal_id &
@@ -2698,6 +692,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "move" &
                      grepl("deepSSF", model)),
@@ -2707,6 +702,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move" &
                      id == focal_id &
@@ -2717,6 +713,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2729,14 +726,12 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_deepSSF_move_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_move_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -2746,14 +741,7 @@ ggsave(paste0("outputs/validation_deepSSF_move_sliding_", window_width, "days.pn
 
 ggplot() +
   
-  # geom_ribbon(data = validation_all_quantiles_daily %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = day_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "move",
                        id == focal_id,
@@ -2765,6 +753,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move",
                        !id == focal_id,
@@ -2775,6 +764,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "move" &
                      !grepl("deepSSF", model)),
@@ -2784,6 +774,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move",
                      id == focal_id,
@@ -2794,6 +785,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2804,51 +796,37 @@ ggplot() +
                      values = c("#0096B5", "#26185F"),
                     labels = c("SSF", "SSF 2p")) +
   
-  # scale_y_continuous("Probability value", 
-  #                    position = "right",
-  #                    labels = function(x) format(x, scientific = TRUE)) +
-  
     scale_y_continuous("Probability value", 
                      position = "right") +
   
   scale_x_datetime("Date") +
   coord_cartesian(ylim = c(0, 9e-3)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_SSF_move_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_move_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-# Next-step probabilities
+The temporally dynamic models have consistently higher probabilities of movement than the static models, which again is likely due to the concentration of the movement kernel during the low movement periods, where the probability values are distributed across much fewer cells.
+
+# Next-step probabilities across the tracking period
+
+The next-step probability values are very similar to the movement probabilities due to the concentration of the probability mass in fewer cells that are closer to the buffalo, whereas the habitat selection probabilities are distributed across all of the local layers, so they're not actually that informative beyond the movement probabilities.
 
 ## All models
 
 ```{r}
 
-ribbon_50_alpha <- 0.2
-primary_linewidth <- 0.5
-OOS_mean_linewidth <- 0.5
-secondary_linewidth <- 0.04
-
 ggplot() +
   
+  # dashed lines containing the SSF probability values
   geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "next_step" &
                        id == focal_id),
@@ -2859,6 +837,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>%
               filter(probability == "next_step" &
                      !id == focal_id),
@@ -2868,6 +847,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "next_step"),
             aes(x = average_time,
@@ -2876,6 +856,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "next_step" &
                      id == focal_id),
@@ -2885,6 +866,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2897,14 +879,12 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_all_next_step_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_next_step_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -2914,19 +894,11 @@ ggsave(paste0("outputs/validation_all_next_step_sliding_", window_width, "days.p
 
 ggplot() +
   
+  # dashed lines containing the SSF probability values
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 9e-3, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "next_step" &
                        id == focal_id &
@@ -2938,6 +910,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "next_step" &
                      !id == focal_id &
@@ -2948,6 +921,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "next_step" &
                      grepl("deepSSF", model)),
@@ -2957,6 +931,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "next_step" &
                      id == focal_id &
@@ -2967,6 +942,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -2979,14 +955,12 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_datetime("Date") +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_deepSSF_next_step_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_next_step_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -2996,14 +970,7 @@ ggsave(paste0("outputs/validation_deepSSF_next_step_sliding_", window_width, "da
 
 ggplot() +
   
-  # geom_ribbon(data = validation_all_quantiles_daily %>% 
-  #               filter(probability == "habitat"),
-  #             aes(x = day_t2,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "next_step",
                        id == focal_id,
@@ -3015,6 +982,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "next_step",
                        !id == focal_id,
@@ -3025,6 +993,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line for all individuals
   geom_line(data = validation_all_sliding_period_OOS %>%
               filter(probability == "next_step" &
                      !grepl("deepSSF", model)),
@@ -3034,6 +1003,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "next_step",
                      id == focal_id,
@@ -3044,6 +1014,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
   
   scale_fill_manual(name = "Model",
@@ -3054,29 +1025,31 @@ ggplot() +
                      values = c("#0096B5", "#26185F"),
                     labels = c("SSF", "SSF 2p")) +
   
-  # scale_y_continuous("Probability value", 
-  #                    position = "right",
-  #                    labels = function(x) format(x, scientific = TRUE)) +
-  
     scale_y_continuous("Probability value", 
                      position = "right") +
   
   scale_x_datetime("Date") +
   coord_cartesian(ylim = c(0, 9e-3)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_SSF_next_step_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_next_step_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-# Hourly
+# Hourly probabilities
+
+We can also calculate the habitat selection, movement and next-step probabilities for each hour of the day, indicating when the models are accurate (or notr) at different times of the day.
+
+For this we don't need a sliding window, we will just bin by the hour of the day.
+
+Here we just show the hourly probabilities across the whole tracking period, but we could also split this up into seasons and assess how accurate the models are during the wet and dry seasons.
 
 ```{r}
 
+# grouping by each individual, model and hour of the day
 validation_all_quantiles_hourly <- validation_all_long %>% 
   group_by(id, model, probability, hour_t2) %>% 
   summarise(average_prob = mean(value, na.rm = T),
@@ -3090,6 +1063,8 @@ validation_all_quantiles_hourly <- validation_all_long %>%
 
 head(validation_all_quantiles_hourly)
 
+# out-of-sample ids
+# grouping by each model and hour of the day (combining all OOS individuals to get the average)
 validation_all_quantiles_hourly_OOS <- validation_all_long %>% 
   filter(!id == focal_id) %>%
   group_by(model, probability, hour_t2) %>% 
@@ -3106,32 +1081,19 @@ head(validation_all_quantiles_hourly_OOS)
 
 ```
 
-# Habitat probability
+# Habitat selection across the day
 
 ## All models
 
 ```{r}
 
-ribbon_50_alpha <- 0.2
-primary_linewidth <- 0.5
-OOS_mean_linewidth <- 0.5
-secondary_linewidth <- 0.05
-
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 3e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "habitat",
                        id == focal_id),
@@ -3142,6 +1104,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>%
               filter(probability == "habitat",
                      !id == focal_id),
@@ -3151,6 +1114,16 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = 0.075) +
   
+  # out-of-sample mean line
+  geom_line(data = validation_all_quantiles_hourly_OOS %>%
+              filter(probability == "habitat"),
+            aes(x = hour_t2,
+                y = average_prob,
+                colour = model),
+            linewidth = OOS_mean_linewidth, 
+            linetype = "dashed") +
+  
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "habitat",
                      id == focal_id),
@@ -3158,8 +1131,9 @@ ggplot() +
                 y = average_prob, 
                 colour = model,
                 group = interaction(id, model)),
-            linewidth = 0.35) +
+            linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3172,15 +1146,17 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_all_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
+
+The deepSSF models both predict well in the evening (at least in-sample), but only the deepSSF S2 predicts well during the middle of the day, again suggesting that there is information in the Sentinel-2 layers that isn't present in the derived covariates. 
+
+The out-of-sample predictions are also much higher for the deepSSF S2 model, suggesting that it is better at generalising to new data.
 
 ## deepSSF models
 
@@ -3188,9 +1164,11 @@ ggsave(paste0("outputs/validation_all_hourly.png"),
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "habitat",
                        id == focal_id,
@@ -3202,6 +1180,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "habitat",
                      !id == focal_id,
@@ -3212,6 +1191,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "habitat" &
                      grepl("deepSSF", model)),
@@ -3221,6 +1201,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "habitat",
                      id == focal_id,
@@ -3231,6 +1212,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3244,12 +1226,11 @@ ggplot() +
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", seq(0,24,6)) +
   coord_cartesian(ylim = c(0, 4e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_deepSSF_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -3259,6 +1240,7 @@ ggsave(paste0("outputs/validation_deepSSF_hourly.png"),
 
 ggplot() +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "habitat",
                        id == focal_id,
@@ -3270,6 +1252,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "habitat",
                        !id == focal_id,
@@ -3280,6 +1263,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "habitat" &
                      !grepl("deepSSF", model)),
@@ -3289,6 +1273,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "habitat",
                      id == focal_id,
@@ -3299,6 +1284,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for the null probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3313,46 +1299,31 @@ ggplot() +
                      position = "right",
                      labels = function(x) format(x, scientific = TRUE)) +
   
-  # scale_y_continuous("Probability value", 
-  #                    position = "right") +
-  
   scale_x_continuous("Hour", seq(0,24,6)) +
   coord_cartesian(ylim = c(0.6e-4, 1.5e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_SSF_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-# Movement probability
+The SSF model with temporal dynamics had higher prediction accuracy than the SSF model without temporal dynamics overall (in- and out-of-sample), but it was more variable throughout the day, and was quite poor between midnight and about 5am.
+
+# Movement probability across the day
 
 ## All models
 
 ```{r}
 
-ribbon_50_alpha <- 0.2
-primary_linewidth <- 0.5
-OOS_mean_linewidth <- 0.5
-secondary_linewidth <- 0.05
-
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 3e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "move",
                        id == focal_id),
@@ -3363,6 +1334,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>%
               filter(probability == "move",
                      !id == focal_id),
@@ -3372,6 +1344,16 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = 0.075) +
   
+  # out-of-sample mean line
+  geom_line(data = validation_all_quantiles_hourly_OOS %>%
+              filter(probability == "move"),
+            aes(x = hour_t2,
+                y = average_prob,
+                colour = model),
+            linewidth = OOS_mean_linewidth, 
+            linetype = "dashed") +
+  
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "move",
                      id == focal_id),
@@ -3393,15 +1375,17 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_all_move_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_move_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
+
+The movement probabilities are much lower during the high movement periods. This is because there are many more cells that the buffalo are likely to move to, and so the probability of moving to any one cell is lower, and the model must spread the prediction probability across many more cells.
+
+The SSF probabilities are also much much lower than the deepSSF probabilities, as explained for the movement probabilities across the tracking period.
 
 ## deepSSF models
 
@@ -3409,9 +1393,11 @@ ggsave(paste0("outputs/validation_all_move_hourly.png"),
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.25e-2, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "move",
                        id == focal_id,
@@ -3423,6 +1409,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "move",
                      !id == focal_id,
@@ -3433,6 +1420,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "move" &
                      grepl("deepSSF", model)),
@@ -3442,6 +1430,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "move",
                      id == focal_id,
@@ -3452,6 +1441,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for uniform probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3464,13 +1454,11 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", seq(0,24,6)) +
-  # coord_cartesian(ylim = c(0, 4e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_deepSSF_move_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_move_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -3480,6 +1468,7 @@ ggsave(paste0("outputs/validation_deepSSF_move_hourly.png"),
 
 ggplot() +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "move",
                        id == focal_id,
@@ -3491,6 +1480,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "move",
                        !id == focal_id,
@@ -3501,6 +1491,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "move" &
                      !grepl("deepSSF", model)),
@@ -3510,6 +1501,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "move",
                      id == focal_id,
@@ -3520,6 +1512,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for uniform probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3530,50 +1523,34 @@ ggplot() +
                      values = c("#0096B5", "#26185F"),
                     labels = c("SSF", "SSF 2p")) +
   
-  # scale_y_continuous("Probability value", 
-  #                    position = "right",
-  #                    labels = function(x) format(x, scientific = TRUE)) +
-  
     scale_y_continuous("Probability value",
                      position = "right") +
   
   scale_x_continuous("Hour", seq(0,24,6)) +
   coord_cartesian(ylim = c(0, 1.25e-2)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_SSF_move_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_move_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-# Next-step probability
+The SSF models perform similarly, expect at night, where the temporally dynamic performs much better in- and out-of-sample.
+
+# Next-step probability across the day
 
 ## All models
 
 ```{r}
 
-ribbon_50_alpha <- 0.2
-primary_linewidth <- 0.5
-OOS_mean_linewidth <- 0.5
-secondary_linewidth <- 0.05
-
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 3e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "habitat",
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_95_alpha) +
-  
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "next_step",
                        id == focal_id),
@@ -3584,6 +1561,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>%
               filter(probability == "next_step",
                      !id == focal_id),
@@ -3593,6 +1571,17 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = 0.075) +
   
+  # out-of-sample mean line
+  geom_line(data = validation_all_quantiles_hourly_OOS %>%
+              filter(probability == "move" &
+                     !grepl("deepSSF", model)),
+            aes(x = hour_t2,
+                y = average_prob,
+                colour = model),
+            linewidth = OOS_mean_linewidth, 
+            linetype = "dashed") +
+  
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "next_step",
                      id == focal_id),
@@ -3602,6 +1591,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = 0.35) +
   
+  # dashed line for uniform probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3614,13 +1604,11 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  # coord_cartesian(ylim = c(0, 2e-4)) +
-  # ggtitle("Focal individual") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_all_next_step_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_next_step_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -3630,9 +1618,11 @@ ggsave(paste0("outputs/validation_all_next_step_hourly.png"),
 
 ggplot() +
   
+  # dashed lines containing the SSF probabilities
   geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   geom_hline(yintercept = 1.25e-2, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "next_step",
                        id == focal_id,
@@ -3644,6 +1634,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "next_step",
                      !id == focal_id,
@@ -3654,6 +1645,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "next_step" &
                      grepl("deepSSF", model)),
@@ -3663,6 +1655,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "next_step",
                      id == focal_id,
@@ -3673,6 +1666,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for uniform probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3685,13 +1679,11 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", seq(0,24,6)) +
-  # coord_cartesian(ylim = c(0, 4e-4)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_deepSSF_next_step_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_deepSSF_next_step_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -3701,6 +1693,7 @@ ggsave(paste0("outputs/validation_deepSSF_next_step_hourly.png"),
 
 ggplot() +
   
+  # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "next_step",
                        id == focal_id,
@@ -3712,6 +1705,7 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
+  # out-of-sample thin line for each individual
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "next_step",
                        !id == focal_id,
@@ -3722,6 +1716,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = secondary_linewidth) +
   
+  # out-of-sample mean line
   geom_line(data = validation_all_quantiles_hourly_OOS %>%
               filter(probability == "next_step" &
                      !grepl("deepSSF", model)),
@@ -3731,6 +1726,7 @@ ggplot() +
             linewidth = OOS_mean_linewidth, 
             linetype = "dashed") +
   
+  # in sample mean line
   geom_line(data = validation_all_quantiles_hourly %>% 
               filter(probability == "next_step",
                      id == focal_id,
@@ -3741,6 +1737,7 @@ ggplot() +
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
+  # dashed line for uniform probability
   geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
   
   scale_fill_manual(name = "Model",
@@ -3750,106 +1747,18 @@ ggplot() +
   scale_color_manual(name = "Model",
                      values = c("#0096B5", "#26185F"),
                     labels = c("SSF", "SSF 2p")) +
-  
-  # scale_y_continuous("Probability value", 
-  #                    position = "right",
-  #                    labels = function(x) format(x, scientific = TRUE)) +
   
     scale_y_continuous("Probability value",
                      position = "right") +
   
   scale_x_continuous("Hour", seq(0,24,6)) +
   coord_cartesian(ylim = c(0, 1.25e-2)) +
-  # ggtitle("Habitat selection") +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/validation_SSF_next_step_hourly.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_SSF_next_step_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## All models
-
-```{r}
-
-ribbon_50_alpha <- 0.25
-
-ggplot() +
-  
-  # geom_ribbon(data = validation_all_sliding_period_OOS %>%
-  #               filter(probability == "habitat"),
-  #             aes(x = average_time,
-  #                 ymin = q025,
-  #                 ymax = q975,
-  #                 fill = model),
-  #             alpha = ribbon_95_alpha) +
-  
-  geom_ribbon(data = validation_all_sliding_period_OOS %>%
-                filter(probability == "habitat"),
-              aes(x = average_time,
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model),
-              alpha = ribbon_50_alpha) +
-  
-  # geom_line(data = validation_all_sliding_period %>% 
-  #             filter(probability == "habitat",
-  #                    !id == focal_id),
-  #           aes(x = average_time, 
-  #               y = average_prob, 
-  #               colour = model,
-  #               group = interaction(id, model)),
-  #           linewidth = 0.075) +
-  
-  geom_line(data = validation_all_sliding_period_OOS %>% 
-              filter(probability == "habitat"),
-            aes(x = average_time, 
-                y = average_prob, 
-                colour = model),
-            linewidth = 0.35) +
-  
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
-  
-  scale_fill_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-  scale_color_manual(name = "Model",
-                     values = c("#AF3602", "#FDAA65", "#26456E", "#9ECFDD"),
-                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
-  
-    scale_y_continuous("Probability value", 
-                     position = "right",
-                     labels = function(x) format(x, scientific = TRUE)) +
-  
-  scale_x_datetime("Date") +
-  coord_cartesian(ylim = c(0, 3e-4)) +
-  # ggtitle("Habitat selection") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(angle = 30, hjust = 1))
-
-ggsave(paste0("outputs/validation_all_sliding_OOS_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
-
-```
 

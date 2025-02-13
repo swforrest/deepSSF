@@ -144,7 +144,7 @@ $$
     \omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha})) = \exp(\beta_{1}(\tau; \boldsymbol{\alpha}_1) X_1(s_t) + \cdots + \beta_{n}(\tau; \boldsymbol{\alpha}_n) X_n(s_t)),
 $$
 
-where $\boldsymbol{\beta}(\tau; \boldsymbol{\alpha}) = (\beta_{1}(\tau; \boldsymbol{\alpha}_1), \ldots, \beta_{n}(\tau; \boldsymbol{\alpha}_n))$ in our case, 
+where $\boldsymbol{\beta}(\tau; \boldsymbol{\alpha}) = (\beta_{1}(\tau; \boldsymbol{\alpha}_1), \ldots, \beta_{n}(\tau; \boldsymbol{\alpha}_n))$ in our case,
 
 $$
 \beta_i(\tau; \boldsymbol{\alpha}_i) = \alpha_{i,0} + \sum_{j = 1}^P \alpha_{i,j} \sin \left(\frac{2j \pi \tau}{T} \right) + \sum_{j = 1}^P \alpha_{i,j + P} \cos \left(\frac{2j \pi \tau}{T} \right),
@@ -154,12 +154,11 @@ and $\boldsymbol{\alpha}_i = (\alpha_{i, 0}, \dots, \alpha_{i, 2P})$, where $P$ 
 
 To aid the computation of the simulations, we can precompute $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for each hour prior to running the simulations.
 
-In the dataframe of temporally varying coefficients, for each covariate we have reconstructed $\beta_{i}(\tau; \boldsymbol{\alpha}_i)$ and discretised for each hour of the day, resulting in $\beta_{i,\tau}$ for $i = 1, \ldots, n$ where $n$ is the number of covariates and $\tau = 1, \ldots, 24$. 
+In the dataframe of temporally varying coefficients, for each covariate we have reconstructed $\beta_{i}(\tau; \boldsymbol{\alpha}_i)$ and discretised for each hour of the day, resulting in $\beta_{i,\tau}$ for $i = 1, \ldots, n$ where $n$ is the number of covariates and $\tau = 1, \ldots, 24$.
 
 Given these, we can solve $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for every hour of the day. This will result in an RSF map for each hour of the day, which we will use in the simulations.
 
 Then, when we do our step selection simulations, we can just subset these maps by the current hour of the day, and extract the values of $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for each proposed step location, rather than solving $\omega(\mathbf{X}(s_t); \boldsymbol{\beta}(\tau; \boldsymbol{\alpha}))$ for every step location.
-
 
 # Calculating the next-step probabilities for the 0p and 2p models
 
@@ -179,7 +178,7 @@ Read in the data of all individuals, which includes the focal or 'in-sample' ind
 ```{r}
 
 # create vector of GPS date filenames
-buffalo_data_ids <- list.files(path = "../buffalo_local_data_id", pattern = ".csv") 
+buffalo_data_ids <- list.files(path = "buffalo_local_data_id", pattern = ".csv") 
 print(buffalo_data_ids)
 
 ids <- substr(buffalo_data_ids, 9, 12)
@@ -190,7 +189,7 @@ buffalo_id_list <- vector(mode = "list", length = length(buffalo_data_ids))
 # read in the data
 for(i in 1:length(buffalo_data_ids)){
   
-  buffalo_id_list[[i]] <-  read.csv(paste("../buffalo_local_data_id/",
+  buffalo_id_list[[i]] <-  read.csv(paste("buffalo_local_data_id/",
                                              buffalo_data_ids[[i]], 
                                              sep = ""))
   buffalo_id_list[[i]]$id <- ids[i]
@@ -210,7 +209,68 @@ n_samples_subset <- 10
 
 ```
 
-## Loop over all individuals
+## Loop over all individuals and models
+
+This script loops over all individuals and models, and calculates the next-step probabilities for each step of the individual.
+
+Here's high-level overview of the full chunk below
+
+### Outermost loop: `for(k in 1:length(buffalo_id_list)) {...}`
+
+-   **Data Preparation and Subsetting**
+
+    -   Each buffalo’s trajectory (`data_id`) is filtered to retain location steps within the local spatial spatial extent (±1250m).
+    -   Any steps with missing data (e.g., turning angle, `ta`) are removed.
+    -   The data is used to define a local bounding box (`template_raster_crop`) for cropping relevant raster datasets. This bounding box covers the extent of all points for that individual, and is for computational efficiency (so the full raster isn't being subsetted at every step). This is only done once per individual and is not the same as the local cropping done at every step.
+
+-   **Covariate Rasters Cropped to Bounding Box**
+
+    -   **NDVI** (Normalized Difference Vegetation Index - including squared term)
+    -   **Canopy Cover** (including squared term)
+    -   **Herbaceous Vegetation**
+    -   **Slope**
+
+### Middle loop: `for(j in 1:length(model_harmonics)) {...}`
+
+-   **SSF Models**
+
+    -   The script selects one of the two models: `0p` (no temporal harmonics) or `2p` (temporal harmonics), indicated by `model_harmonics`.
+    -   Corresponding coefficients for each model are read from CSV files (e.g., `"ssf_coefficients/id{focal_id}_{model_harmonics[j]}Daily_coefs_{model_date}.csv"`).
+    -   Only integer hours are used (filtered via `hour %% 1 == 0`).\
+
+### Inner loop: `for (i in 2:n) {..}`
+
+-   **Loop Over Steps**\
+    For each step in the buffalo’s trajectory:
+
+    -   **Extract Local Covariates**\
+        A subset of each covariate raster is cropped to the step’s spatial extent.
+
+    -   **Habitat Selection Probability**
+
+        -   Relevant coefficients (e.g., `ndvi`, `ndvi_2`, `canopy`, `canopy_2`, `herby`, `slope`) for the current hour are retrieved, given the model.
+        -   A log-probability (`habitat_log`) is computed from the linear combination of covariates.
+        -   The habitat selection probability is calculated by exponentiating the log-probability and normalising it to sum to 1.
+
+    -   **Movement Probability**
+
+        -   **Step length** is modeled via a Gamma distribution (using `shape` and `scale` parameters).
+        -   **Turning angle** is modeled via the von Mises distribution (using `kappa` and a mean angle based on the previous step’s bearing).
+        -   The log-probability of these components is combined (`move_log`) and normalised.
+
+    -   **Next-Step Probability**
+
+        -   The **habitat** and **movement** log-probabilities are summed to get the next-step log-probability.
+        -   It is normalised to yield the **next-step probability** for each candidate pixel (where all pixels sum to 1).
+        -   The script then extracts the probability at the buffalo’s actual next location (`prob_next_step_ssf_0p` or `prob_next_step_ssf_2p`).
+
+### **Outputs**
+
+-   For each step, the script appends probabilities (`prob_habitat_ssf_0/2p`, `prob_movement_ssf_0/2p`, and `prob_next_step_ssf_0/2p`) to the data frame.
+
+### **Diagnostic Plots**
+
+-   For the first few steps of the first buffalo (which is the focal id), the script plots local covariate layers and the log-probability surfaces (habitat, movement, and combined next-step).
 
 ```{r}
 
@@ -277,7 +337,7 @@ for(k in 1:length(buffalo_id_list)) {
   
   for(j in 1:length(model_harmonics)) {
   
-    ssf_coefs_file_path <- paste0("../ssf_coefficients/id", focal_id, "_", model_harmonics[j], "Daily_coefs_", model_date, ".csv")
+    ssf_coefs_file_path <- paste0("ssf_coefficients/id", focal_id, "_", model_harmonics[j], "Daily_coefs_", model_date, ".csv")
     print(ssf_coefs_file_path)
     
     ssf_coefs <- read_csv(ssf_coefs_file_path)

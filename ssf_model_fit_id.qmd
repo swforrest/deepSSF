@@ -27,6 +27,13 @@ abstract: |
   
   We use the estimated parameters of the SSF models to generate next-step predictions of the SSF models in the
   [SSF Validation](ssf_validation.qmd) script, and compare these to the next-step predictions of the deepSSF models.
+  
+  Whilst we have included temporal dynamics on an daily time-scale using the harmonics, also including seasonal temporal dynamics 
+  (such that daily behaviours also change across seasons - requiring an interaction between the daily and seasonal harmonics) is
+  difficult. We have therefore only fitted the SSF models with daily temporal dynamics.
+  
+  We have also not fitted the SSF models to the Sentinel-2 data, as we have done with the deepSSF models. 
+  
 ---
 
 ```{r}
@@ -663,7 +670,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms.rds"))) 
   
   tic()
     model_0p_harms <- fit_clogit(formula = formula_0p,
-                                         data = buffalo_data_scaled_0p)
+                                 data = buffalo_data_scaled_0p)
   toc()
   
   # save model object
@@ -691,7 +698,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms.rds"))) 
 
   tic()
   model_1p_harms <- fit_clogit(formula = formula_1p,
-                                       data = buffalo_data_scaled_1p)
+                               data = buffalo_data_scaled_1p)
   toc()
   
   # save model object
@@ -719,7 +726,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms.rds"))) 
 
   tic()
   model_2p_harms <- fit_clogit(formula = formula_2p,
-           data = buffalo_data_scaled_2p)
+                               data = buffalo_data_scaled_2p)
   toc()
   
   # save model object
@@ -747,7 +754,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms.rds"))) 
 
   tic()
   model_3p_harms <- fit_clogit(formula = formula_3p,
-                                     data = buffalo_data_scaled_3p)
+                               data = buffalo_data_scaled_3p)
   toc()
   
   # save model object
@@ -787,8 +794,12 @@ model_0p_harms
 # create a dataframe of the coefficients and their scaling attributes
 coefs_clr_0p <- data.frame(coefs = names(model_0p_harms$model$coefficients), 
                            value = model_0p_harms$model$coefficients)
+
+# return coefficients to natural scale
 coefs_clr_0p$scale_sd <- scaling_attributes_0p$sd
 coefs_clr_0p <- coefs_clr_0p %>% mutate(value_nat = value / scale_sd)
+
+# show the first few rows
 head(coefs_clr_0p)
 
 ```
@@ -809,8 +820,12 @@ head(coefs_clr_0p)
 
 coefs_clr_1p <- data.frame(coefs = names(model_1p_harms$model$coefficients), 
                            value = model_1p_harms$model$coefficients)
+
+# return coefficients to natural scale
 coefs_clr_1p$scale_sd <- scaling_attributes_1p$sd
 coefs_clr_1p <- coefs_clr_1p %>% mutate(value_nat = value / scale_sd)
+
+# show the first few rows
 head(coefs_clr_1p)
 
 ```
@@ -832,8 +847,12 @@ head(coefs_clr_1p)
 # creating data frame of model coefficients
 coefs_clr_2p <- data.frame(coefs = names(model_2p_harms$model$coefficients), 
                            value = model_2p_harms$model$coefficients)
+
+# return coefficients to natural scale
 coefs_clr_2p$scale_sd <- scaling_attributes_2p$sd
 coefs_clr_2p <- coefs_clr_2p %>% mutate(value_nat = value / scale_sd)
+
+# show the first few rows
 head(coefs_clr_2p)
 
 ```
@@ -854,11 +873,16 @@ head(coefs_clr_2p)
 # creating dataframe of coefficients
 coefs_clr_3p <- data.frame(coefs = names(model_3p_harms$model$coefficients), 
                            value = model_3p_harms$model$coefficients)
+
+# return coefficients to natural scale
 coefs_clr_3p$scale_sd <- scaling_attributes_3p$sd
 coefs_clr_3p <- coefs_clr_3p %>% mutate(value_nat = value / scale_sd)
+
+# show the first few rows
 head(coefs_clr_3p)
 
 ```
+
 :::
 
 ## Reconstruct the temporally dynamic coefficients
@@ -1573,6 +1597,7 @@ ggplot() +
 Here we sample from the movement kernel to generate a distribution of step lengths for each hour of the day, to assess how well it matches the observed step lengths. This is the 'selection-free' movement kernel, so the step lengths and turning angles from the simulations will be different, as the steps will be conditioned on the habitat, but this is a useful diagnostic to assess whether the harmonics are capturing the observed movement dynamics.
 
 ::: {.panel-tabset group="model"}
+
 ## 0p
 
 ```{r}
@@ -1887,6 +1912,7 @@ gamma_df_3p %>% summarise(mean_mean = mean(mean),
                       ratio_mean = mean_mean/median_mean)
 
 ```
+
 :::
 
 ## Creating selection surfaces
@@ -2006,6 +2032,7 @@ We simply index over the linear and quadratic terms and calculate the coefficien
 ## NDVI selection surface
 
 ::: {.panel-tabset group="model"}
+
 ## 0p
 
 ```{r}
@@ -2218,11 +2245,13 @@ ndvi_quad_3p <- ggplot(data = ndvi_fresponse_long,
 ndvi_quad_3p
 
 ```
+
 :::
 
 ## Canopy cover selection surface
 
 ::: {.panel-tabset group="model"}
+
 ## 0p
 
 ```{r}
@@ -2430,6 +2459,7 @@ canopy_quad_3p <- ggplot(data = canopy_fresponse_long,
 canopy_quad_3p
 
 ```
+
 :::
 
 # Combining the plots
