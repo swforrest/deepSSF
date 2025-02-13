@@ -52,11 +52,13 @@ We can see what the model looks like during training by taking a single set of i
 
 ![](figures\model_training.gif)
 
-As the model learns it starts to pick out certain features of the landscape as where buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
+As the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
 
 
 ## Generating trajectories
-The process of actually generating trajectories is the same as what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) tab. We have some starting location, the local layers for that point are extracted and run through the model which generates the next-step probability surface, and a step is sampled according to these probability values. 
+The process of actually generating trajectories is the same as what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) tab: 
+
+We have some starting location, the local layers for that point are extracted and run through the model which generates the next-step probability surface, and a step is sampled according to these probability values. 
 
 Here's an animation of what that looks like for when the model has been trained on Sentinel-2 data:
 
