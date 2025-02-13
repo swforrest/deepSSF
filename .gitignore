@@ -21,7 +21,7 @@ data_layers_single/
 *.tif
 *.json
 *.npy
-*.csv
+# *.csv
 *events*
 .Rhistory
 buffalo2005*
