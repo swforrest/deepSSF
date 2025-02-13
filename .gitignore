@@ -6,7 +6,7 @@ Python/.draft_Python
 Python/outputs
 _freeze
 
-data/
+data/unused/
 mapping/
 outputs/
 ssf_coefficients/
@@ -25,6 +25,7 @@ data_layers_single/
 *events*
 .Rhistory
 buffalo2005*
+buffalo_parametric_popn_covs_GvM_10rs_2024-09-04.csv
 *0.csv
 sql_info*
 lossFunctions.py
