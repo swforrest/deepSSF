@@ -9,7 +9,7 @@ toc: true
 number-sections: false
 format: 
   html:
-    self-contained: true
+    # self-contained: true
     code-fold: show
     code-tools: true
     df-print: paged

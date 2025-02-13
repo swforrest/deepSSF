@@ -9,7 +9,7 @@ toc: true
 number-sections: false
 format: 
   html:
-    self-contained: true
+    # self-contained: true
     code-fold: show
     code-tools: true
     df-print: paged
@@ -345,7 +345,7 @@ for(i in 1:length(buffalo_ids)) {
                 )
 
   # save the data
-  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_", buffalo_ids[i],
+  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/website_temp/buffalo_", buffalo_ids[i],
                                     "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
 
   # saving the raster objects

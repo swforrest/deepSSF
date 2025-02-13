@@ -135,8 +135,27 @@ ul.task-list li input[type="checkbox"] {
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">Data Preparation</span></span>
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Data Preparation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deepSSF_data_prep_id.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Data Prep</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deepSSF_data_prep_S2_id.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">deepSSF Data Prep - S2</span></a>
+  </div>
+</li>
+      </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
@@ -182,6 +201,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">deepSSF Simulations - S2</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deepSSF_assessing_trajectories.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Assessing deepSSF trajectories</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -205,21 +230,23 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">deepSSF Landscape Predictions - S2</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deepSSF_habitat_selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explaining deepSSF habitat selection</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">SSF Model Fitting</span></span>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
  <span class="menu-text">Next-Step Validation</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Python/deepSSF_next_step_validation.html" class="sidebar-item-text sidebar-link">
@@ -238,6 +265,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">SSF Model Fitting</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ssf_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SSF Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing SSF and deepSSF Predictions</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -245,14 +284,8 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#website-navigation-etc---home-page" id="toc-website-navigation-etc---home-page" class="nav-link active" data-scroll-target="#website-navigation-etc---home-page">Website navigation etc - home page</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -276,11 +309,16 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="website-navigation-etc---home-page" class="level1">
-<h1>Website navigation etc - home page</h1>
+<p>This website accompanies the paper ‘Predicting animal movement with deepSSF: a deep learning step selection framework’.</p>
+<p>We created this website to help with understanding the approach, as well as providing all of the code to prepare the data, train a deepSSF model, generate simulations of animal trajectories, assess the trajectories against the observed data, and validate the next-step-ahead predictions against typical SSF models.</p>
+<p>The tools for understanding the approach are mostly contained within the navigation tabs at the top, whereas the scripts for everything else are listed in the left sidebar.</p>
+<p>For getting started, I suggested visiting the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab first, which walks through the step selection process, making the link to step selection functions (SSFs), which are the foundation for the deepSSF approach. The <a href="./deepSSF_model_overview.html">deepSSF Model Overview</a> tab provides information about the deepSSF model that we used (although deep learning is extremely flexible so there are many ways to build the model), and shows an example of what it looks like being trained, and then some simulations from the model.</p>
+<p>There are also many plots and descriptions in the scripts in the left sidebar, particularly in the <a href="./Python/deepSSF_train.html">deepSSF Training</a> script (where the model is fitted to data). I expect that these will also be helpful to understand the approach.</p>
+<p>As I (Scott) didn’t know Python before getting into this paper, there is a mix of R code (because I’m familiar with it) and Python code (because the deep learning libraries, namely Pytorch, are more developed in it). We are working on applying the deepSSF approach to some other datasets and will be continuing to develop the code, so we may work on translating some scripts the other langauage. There exists <a href="https://torch.mlverse.org/">torch for R</a>, so as far as I’m aware the deepSSF models could also be written in R (although we do have quite a few bespoke components).</p>
+<p>As the Python scripts are all written in <a href="https://jupyter.org/">Jupyter Notebooks</a>, it is straightforward to run them in <a href="https://colab.google/">Google Colab</a>, which provides a Python environment as well as access to GPUs. It can be used for free, although when we were training the model many times we paid a small fee for some computing units. The deepSSF models that we built are not big however, and can be run locally on CPU alone in about an hour (which reduces to about 5 mins on a GPU).</p>
+<p>If you want to get in contact, feel free to reach out to <code>scottwforrest@gmail.com</code>, or you can follow me on <a href="https://bsky.app/profile/scottwilliamf.bsky.social">Bluesky</a>.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
