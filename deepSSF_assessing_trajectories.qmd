@@ -38,7 +38,7 @@ options(scipen = 999)
 
 library(tidyverse)
 packages <- c("amt", "sf", "terra", "beepr", "tictoc", "viridis", 
-              "scales", "ggpubr", "patchwork", "zoo")
+              "scales", "ggpubr", "zoo")
 walk(packages, require, character.only = T)
 
 ```

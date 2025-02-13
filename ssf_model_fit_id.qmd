@@ -58,8 +58,8 @@ knitr::opts_chunk$set(echo = TRUE,
 options(scipen=999)
 
 library(tidyverse)
-packages <- c("amt", "lubridate", "survival", "terra", "tictoc", 
-              "beepr", "ggpubr", "MASS", "patchwork", "scales")
+packages <- c("amt", "lubridate", "terra", "tictoc", 
+              "beepr", "ggpubr")
 walk(packages, require, character.only = T)
 
 ```
