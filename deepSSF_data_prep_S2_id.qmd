@@ -1,6 +1,5 @@
 ---
 title: "deepSSF Data Prep - S2"
-subtitle: "Using Sentinel-2 layers"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -25,8 +24,7 @@ format:
 editor:
   source
 abstract: |
-  This document outlines the steps taken to prepare the data for the deepSSF model fitting, using Sentinel-2 data directly 
-  (instead of derived covariates such as NDVI).
+  This document outlines the steps taken to prepare the data for the deepSSF model fitting, using Sentinel-2 data directly (instead of derived covariates such as NDVI).
 ---
 
 ## Loading packages

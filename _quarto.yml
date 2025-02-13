@@ -24,8 +24,8 @@ website:
     contents:
       - section: "Data Preparation"
         contents:
-          # - deepSSF_data_prep_id.qmd
-          # - deepSSF_data_prep_S2_id.qmd
+          - deepSSF_data_prep_id.qmd
+          - deepSSF_data_prep_S2_id.qmd
       - section: "Model Training"
         contents:
           - Python/deepSSF_train.ipynb
@@ -34,20 +34,19 @@ website:
         contents:
           - Python/deepSSF_simulations.ipynb
           - Python/deepSSF_simulations_S2.ipynb
+          - deepSSF_assessing_trajectories.qmd
       - section: "Landscape predictions"
         contents:
           - Python/deepSSF_landscape_preds.ipynb
           - Python/deepSSF_landscape_preds_S2.ipynb
-      - section: "SSF Model Fitting"
-        contents:
-          # - ssf_model_fit.qmd
+          - deepSSF_habitat_selection.qmd
       - section: "Next-Step Validation"
         contents:
           - Python/deepSSF_next_step_validation.ipynb
           - Python/deepSSF_next_step_validation_S2.ipynb
           - ssf_model_fit_id.qmd
-          # - next_step_validation.qmd
-          # - next_step_validation_comparison.qmd
+          - ssf_validation.qmd
+          - validation_comparison.qmd
 page-navigation: true
 
 format:

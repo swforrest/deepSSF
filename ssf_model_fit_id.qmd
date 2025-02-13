@@ -1,6 +1,5 @@
 ---
 title: "SSF Model Fitting"
-subtitle: "Dynamic step selection functions with temporal harmonics"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 

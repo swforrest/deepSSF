@@ -23,6 +23,11 @@ format:
       - left=30mm
 editor:
   source
+abstract: |
+  In this script we are comparing the nezt-step ahead predictions of the SSF (with and without temporal dynamics) and deepSSF models. We are comparing the probabilities of movement, habitat selection and next-step selection, and how they change throughout time.
+  
+  
+  
 ---
 
 ## Loading packages
