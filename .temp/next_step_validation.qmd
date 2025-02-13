@@ -1,5 +1,5 @@
 ---
-title: "Validating the next step ahead predictions"
+title: "SSF validation"
 subtitle: "To compare the predictions of the deepSSF model with predictions of typical SSFs"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
@@ -24,6 +24,22 @@ format:
       - left=30mm
 editor:
   source
+abstract: |
+  Similar to the deepSSF next-step validation scripts, we can do the same for the fitted SSF models.
+  
+  We fitted the SSF models (with and without temporal dynamics) in the [SSF Model Fitting](ssf_model_fit_id.qmd) script,
+  and we can use the fitted parameters to generate the movement, habitat sele
+
+  Whilst the realism and emergent properties of simulated trajectories are difficult to assess, 
+  we can validate the deepSSF models on their predictive performance at the next step, 
+  for each of the habitat selection, movement and next-step probability surfaces. 
+  Ensuring that the probability surfaces are normalised to sum to one, they can be 
+  compared to the predictions of typical step selection functions when the same probability 
+  surfaces are generated for the same local covariates. This approach not only allows for 
+  comparison between models, but can be informative as to when in the observed trajectory 
+  the model performs well or poorly, which can be analysed across the entire tracking period 
+  or for each hour of the day, and can lead to critical evaluation of the covariates that are 
+  used by the models and allow for model refinement. 
 ---
 
 ## Loading packages

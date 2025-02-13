@@ -22,7 +22,7 @@ website:
     style: "floating"
     search: false
     contents:
-      - section: "Data prep"
+      - section: "Data Preparation"
         contents:
           # - deepSSF_data_prep_id.qmd
           # - deepSSF_data_prep_S2_id.qmd
@@ -45,6 +45,7 @@ website:
         contents:
           - Python/deepSSF_next_step_validation.ipynb
           - Python/deepSSF_next_step_validation_S2.ipynb
+          - ssf_model_fit_id.qmd
           # - next_step_validation.qmd
           # - next_step_validation_comparison.qmd
 page-navigation: true

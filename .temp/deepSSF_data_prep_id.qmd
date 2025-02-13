@@ -1,5 +1,5 @@
 ---
-title: "Preparing data for deepSSF model fitting"
+title: "deepSSF data prep"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -24,7 +24,7 @@ format:
 editor:
   source
 abstract: |
-  Here we prepare the data for fitting a deepSSF model. We load the GPS dataand tidy it, create a trajectory object containing a series of steps and read in the environmental layers. For each observed step we crop out local subsets of the environmental layers, centred on the step's location. For every step we will then have the surrounding environmental information stored as a stack of small rasters, with the 'target' of what we're trying to predict (the actual location of the next step) as a raster layer as well, with all cells being 0 except the observed next location, which is 1. These, along with temporal covariates and the previous bearing, will be the input data for the deepSSF model.
+  Here we prepare the data for fitting a deepSSF model. We load the GPS data and tidy it, create a trajectory object containing a series of steps and read in the environmental layers. For each observed step we crop out local subsets of the environmental layers, centred on the step's location. For every step we will then have the surrounding environmental information stored as a stack of small rasters, with the 'target' of what we're trying to predict (the actual location of the next step) as a raster layer as well, with all cells being 0 except the observed next location, which is 1. These, along with temporal covariates and the previous bearing, will be the input data for the deepSSF model.
 ---
 
 ## Loading packages

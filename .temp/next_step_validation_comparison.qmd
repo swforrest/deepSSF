@@ -1,5 +1,5 @@
 ---
-title: "Validating the next step ahead predictions"
+title: "Comparing SSF and deepSSF Predictions"
 subtitle: "To compare the predictions of the deepSSF model with predictions of typical SSFs"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
