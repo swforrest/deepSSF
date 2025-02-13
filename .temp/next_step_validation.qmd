@@ -1,5 +1,5 @@
 ---
-title: "SSF validation"
+title: "SSF Validation"
 subtitle: "To compare the predictions of the deepSSF model with predictions of typical SSFs"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
@@ -25,7 +25,10 @@ format:
 editor:
   source
 abstract: |
-  Similar to the deepSSF next-step validation scripts, we can do the same for the fitted SSF models.
+  Similar to the deepSSF next-step validation scripts, we can validate the fitted SSF models
+  by assessing the predicted probability values at the location of the next step. We can do this
+  for the movement, habitat selection and next-step probability surfcaes, providing information
+  about the accuracy of each of these processes, and how that changes through time.
   
   We fitted the SSF models (with and without temporal dynamics) in the [SSF Model Fitting](ssf_model_fit_id.qmd) script,
   and we can use the fitted parameters to generate the movement, habitat sele
