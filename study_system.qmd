@@ -1,6 +1,15 @@
 ---
 title: "Study System"
 format: html
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+date: 2025-02-15
+# categories: [Quarto, R] # self-defined categories
+citation: 
+  url: https://swforrest.github.io/deepSSF/study_system.html
 bibliography: references.bib
 ---
 

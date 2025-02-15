@@ -15,9 +15,17 @@ website:
         text: Step Selection Intuition
       - href: deepSSF_model_overview.qmd
         text: deepSSF Model Overview
+      - href: deep_learning_concepts.qmd
+        text: Deep Learning Concepts
+
     right:
     - icon: github
       href: https://github.com/swforrest/deepSSF
+    - icon: envelope-at-fill
+      href: mailto:scottwforrest@gmail.com
+    - icon: linkedin
+      href: https://www.linkedin.com/in/swforrest/
+
   sidebar:
     style: "floating"
     search: false
