@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-15">
 
-<title>Deep Learning Concepts – deepSSF</title>
+<title>Validation – deepSSF</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,40 +67,11 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -124,7 +93,7 @@ window.Quarto = {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./getting_started.html" aria-current="page"> 
+    <a class="nav-link" href="./getting_started.html"> 
 <span class="menu-text">Getting Started</span></a>
   </li>  
   <li class="nav-item">
@@ -148,7 +117,7 @@ window.Quarto = {
 <span class="menu-text">Inference</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./validation.html"> 
+    <a class="nav-link active" href="./validation.html" aria-current="page"> 
 <span class="menu-text">Validation</span></a>
   </li>  
 </ul>
@@ -174,99 +143,27 @@ window.Quarto = {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./deep_learning_concepts.html">Deep Learning Concepts</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./getting_started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting Started</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./python_installation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Python Installation</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./deep_learning_concepts.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Deep Learning Concepts</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./step_selection_intuition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Step Selection Intuition</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./deepSSF_model_overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">deepSSF Model Overview</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#convolutional-layers" id="toc-convolutional-layers" class="nav-link active" data-scroll-target="#convolutional-layers">Convolutional Layers</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Deep Learning Concepts</h1>
+<h1 class="title">Validation</h1>
 </div>
 
 
-<div class="quarto-title-meta-author">
-  <div class="quarto-title-meta-heading">Author</div>
-  <div class="quarto-title-meta-heading">Affiliation</div>
-  
-    <div class="quarto-title-meta-contents">
-    <p class="author"><a href="https://swforrest.github.io/">Scott Forrest</a> <a href="https://orcid.org/0000-0001-9529-0108" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
-  </div>
-  <div class="quarto-title-meta-contents">
-        <p class="affiliation">
-            Queensland University of Technology, CSIRO
-          </p>
-      </div>
-  </div>
 
 <div class="quarto-title-meta">
 
-      
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">February 15, 2025</p>
-    </div>
-  </div>
+    
   
     
   </div>
@@ -276,28 +173,9 @@ window.Quarto = {
 </header>
 
 
-<p>To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model.</p>
-<p><em>These are from the Supplementary Materials of the paper.</em></p>
-<section id="convolutional-layers" class="level1">
-<h1>Convolutional Layers</h1>
-<p>The convolutional layers employed in our neural network architecture are also known as <em>two-dimensional convolutional layers</em>. Two-dimensional convolutional layers provide a mechanism to learn new features or variables of predictive value from gridded data using sets of convolutional weights that are re-used at different locations over two-dimensional space. The input to a two-dimensional convolutional layer is a three-dimensional input tensor, <span class="math inline">\(\mathbf{Q}\)</span>, with dimensions <span class="math inline">\((d, d, n)\)</span>. In the context of our application, <span class="math inline">\(\mathbf{Q}\)</span> represents a stack of <span class="math inline">\(n\)</span> spatial covariates in a <span class="math inline">\(d \times d\)</span> pixel region of habitat surrounding an individual, which in our case was 101 x 101 cells with 25 m x 25 m resolution. Each of the <span class="math inline">\(n\)</span> spatial covariates (i.e., NDVI, slope, etc.), is usually referred to as a ‘channel’.</p>
-<p>The convolutional layer transforms this stack of spatial layers into a new three-dimensional tensor, <span class="math inline">\(\mathbf{O}\)</span>, with dimensions <span class="math inline">\((d, d, F)\)</span> through the application of <span class="math inline">\(F\)</span> unique convolution filters (also called kernels) that are learned in neural network training. As convolution layers can be considered to transform the inputs covariates and ‘extract features’ from them, the resulting layers denoted by <span class="math inline">\(F\)</span> are often called ‘feature maps’ (see Figures below). Each filter can be represented as a <span class="math inline">\((2w + 1) \times (2w + 1) \times n\)</span> tensor of weights and we denote the collection of these filters as <span class="math inline">\(\mathbf{W}^{(1)}, \dots, \mathbf{W}^{(F)}\)</span>.</p>
-<p>The hyper-parameters <span class="math inline">\(w\)</span> (the spatial width and height in pixels of the filter) and <span class="math inline">\(F\)</span> are user-specified, and in our application were set as <span class="math inline">\(w = 1\)</span> and <span class="math inline">\(F = 4\)</span> in all cases except in the final convolutional layer that had <span class="math inline">\(F = 1\)</span> to aggregate the preceding feature maps into the final habitat selection map. For <span class="math inline">\(w = 1\)</span>, each filter can be thought of as consisting of <span class="math inline">\(n\)</span> convolution filters of dimension <span class="math inline">\(3 \times 3\)</span>. Applying filter <span class="math inline">\(f \in \{ 1, \dots, F \}\)</span>, results in a <span class="math inline">\(d \times d\)</span> matrix, <span class="math inline">\(\mathbf{O}^{(f)}\)</span>, with elements</p>
-<p><span class="math display">\[
-\mathbf{O}^{(f)}_{i, j} = \sigma \left( \sum_{x = 0}^{2w} \sum_{y = 0}^{2w} \sum_{z = 1}^{n} \mathbf{W}^{(f)}_{x + 1, y + 1, z} \mathbf{Q}_{i - w + y, j - w + x, z} + b_f \right),
-\]</span></p>
-<p>where we take <span class="math inline">\(\mathbf{Q}_{i, j, z} = 0\)</span> for any index for which one or more of the following is true: <span class="math inline">\(i &lt; 1\)</span>, <span class="math inline">\(i &gt; d_i\)</span>, <span class="math inline">\(j &lt; 1\)</span>, or <span class="math inline">\(j &gt; d_j\)</span>. The parameter <span class="math inline">\(b_f\)</span> denotes the added bias parameter (a scalar that is analogous to an intercept in a regression model) for each filter and that is also learned during training. The function <span class="math inline">\(\sigma(\cdot)\)</span> is an activation function that is applied element-wise to its argument. For our model, the activation function was the rectified linear unit (ReLU), defined as <span class="math inline">\(\text{ReLU}(x) = \max(0, x)\)</span>.</p>
-<p>The output tensor of the two-dimensional convolutional layer is the tensor created by combining each of the matrices <span class="math inline">\(\mathbf{O}^{(1)}, \dots, \mathbf{O}^{(F)}\)</span> along a third dimension. The elements of <span class="math inline">\(\mathbf{O}\)</span> can therefore be written as <span class="math inline">\(\mathbf{O}_{i, j, k} = \mathbf{O}^{(k)}_{i, j}\)</span>. Ultimately, each two-dimensional convolutional layer introduces <span class="math inline">\(F[(2w + 1)(2w + 1) n + 1]\)</span> parameters to the model that must be learned from the training data.</p>
-<p>Here we show a <strong>single</strong> convolution filter from the habitat selection network and the resulting feature map (prior to being processed by an activation function, which in our case was the ReLU). A single convolution filter has <span class="math inline">\(n\)</span> channels that relate to the <span class="math inline">\(n\)</span> channels of the input layers, and each filter channel convolves over its respective input layer, which are then added together to create the feature map for that filter.</p>
-<p>To understand the convolution process, imagine the convolution filter channel starting in the top left corner of the spatial input, say NDVI, with the central cell of the filter in the top left corner. For each cell, the value of NDVI will be multiplied by the corresponding cell in the filter channel, resulting in nine values, which are then summed together to form the top left cell in the <em>intermediate</em> feature map (which are not shown here). The filter then moves to the right by one cell (as the stride is equal to one), and the element-wise multiplication is repeated. This results in transformations of many small, overlapping windows across the spatial input, resulting in another layer (the intermediate feature map).</p>
-<p>This process is repeated for the next input layer, which has its own filter channel, until each input layer has been processed into an intermediate feature map. These intermediate feature maps are then summed to create the output feature map for that filter. During training it is the values of the convolution filters that are updated. It can be helpful to see this process animated, and an example of an animation of a convolution filter across multiple channels can be found at: <a href="https://animatedai.github.io/" class="uri">https://animatedai.github.io/</a>. In the linked animation, the inputs are <span class="math inline">\(7 \times 6 \times 8\)</span>, and each coloured block in the middle represents a <span class="math inline">\(3 \times 3 \times 8\)</span> filter, and in total there are 8 filters. Each coloured layer in the output to the right represents a feature map. Note that there is no padding for these operations, which results in a dimension reduction, but below there is an animation is shown with padding which retains the <span class="math inline">\(d \times d\)</span> dimensions of the inputs, such that we have used in our deepSSF model.</p>
-<p><img src="figures/conv_filters_single.png" class="img-fluid"></p>
-<p>The benefits of deep learning come from many small operations combining together to represent complex and abstract processes. Here we show all of the convolutional layers that were used in the habitat selection subnetwork, except that for clarity we do not show the temporal inputs (hour of the day and day of the year decomposed into sine and cosine terms), which are also converted to spatial inputs, as shown in Figure 1 in the main text. Each <code>\gls{convolution filter}</code> has a channel for each of the spatial inputs and produces a single feature map.</p>
-<p>In <strong>Convolution Layer 1</strong> there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e.&nbsp;transform them in different ways). In <strong>Convolutional Layer 2</strong> there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. <strong>Convolutional Layer 3</strong> then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero). The successive convolutional layers are what give deep learning their name, where <code>depth</code> is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.</p>
-<p><img src="figures/conv_filters.png" class="img-fluid"></p>
+<p>Whilst the realism and emergent properties of simulated trajectories are difficult to assess, we can validate the deepSSF models on their predictive performance at the next step, for each of the habitat selection, movement and next-step probability surfaces. Ensuring that the probability surfaces are normalised to sum to one, they can be compared to the predictions of typical step selection functions when the same probability surfaces are generated for the same local covariates. This approach not only allows for comparison between models, but can be informative as to when in the observed trajectory the model performs well or poorly, which can be analysed across the entire tracking period or for each hour of the day, and can lead to critical evaluation of the covariates that are used by the models and allow for model refinement.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
