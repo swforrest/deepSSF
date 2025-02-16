@@ -58,24 +58,29 @@ website:
           - study_system.qmd
       - title: "Data Preparation"
         contents:
+          - data_preparation.qmd
           - deepSSF_data_prep_id.qmd
           - deepSSF_data_prep_S2_id.qmd
       - title: "Model Training"
         contents:
+          - model_training.qmd
           - Python/deepSSF_train.ipynb
           - Python/deepSSF_train_S2.ipynb
       - title: "Predictions"
         contents:
+          - predictions.qmd
           - Python/deepSSF_simulations.ipynb
           - Python/deepSSF_simulations_S2.ipynb
           - Python/deepSSF_landscape_preds.ipynb
           - Python/deepSSF_landscape_preds_S2.ipynb
       - title: "Inference"
         contents:
+          - inference.qmd
           - deepSSF_assessing_trajectories.qmd
           - deepSSF_habitat_selection.qmd
       - title: "Validation"
         contents:
+          - validation.qmd
           - Python/deepSSF_next_step_validation.ipynb
           - Python/deepSSF_next_step_validation_S2.ipynb
           - ssf_model_fit_id.qmd
@@ -112,6 +117,18 @@ website:
 #           - ssf_validation.qmd
 #           - validation_comparison.qmd
 # page-navigation: true
+
+  page-footer:
+    background: light
+    center:
+      - icon: envelope-at-fill
+        href: mailto:scottwforrest@gmail.com
+      - icon: github
+        href: https://github.com/swforrest
+      - icon: linkedin
+        href: https://www.linkedin.com/in/swforrest/
+      - text: "Scholar"
+        href: https://scholar.google.com.au/citations?user=ECYMO3YAAAAJ&hl=en&authuser=1
 
 format:
   html:
