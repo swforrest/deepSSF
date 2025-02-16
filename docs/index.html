@@ -330,7 +330,12 @@ ul.task-list li input[type="checkbox"] {
 <p>There are also many plots and descriptions in the scripts in the left sidebar, particularly in the <a href="./Python/deepSSF_train.html">deepSSF Training</a> script (where the model is fitted to data). I expect that these will also be helpful to understand the approach.</p>
 <p>As I (Scott) didn’t know Python before getting into this paper, there is a mix of R code (because I’m familiar with it) and Python code (because the deep learning libraries, namely Pytorch, are more developed in it). We are working on applying the deepSSF approach to some other datasets and will be continuing to develop the code, so we may work on translating some scripts the other langauage. There exists <a href="https://torch.mlverse.org/">torch for R</a>, so as far as I’m aware the deepSSF models could also be written in R (although we do have quite a few bespoke components).</p>
 <p>As the Python scripts are all written in <a href="https://jupyter.org/">Jupyter Notebooks</a>, it is straightforward to run them in <a href="https://colab.google/">Google Colab</a>, which provides a Python environment as well as access to GPUs. It can be used for free, although when we were training the model many times we paid a small fee for some computing units. The deepSSF models that we built are not big however, and can be run locally on CPU alone in about an hour (which reduces to about 5 mins on a GPU).</p>
-<p><img src="figures/simulation_S2.gif" class="img-fluid"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/simulation_S2.gif" class="img-fluid figure-img"></p>
+<figcaption>An animation of each step of a simulated trajectory, where the model is trained on Sentinel-2 satellite data and a slope layer, and generates habitat selection and movement (not shown here) predictions, which are combined into the probability of taking the next step. This next-step probability surface is sampled from (location of the white pixel) to become the next step in the trajectory.</figcaption>
+</figure>
+</div>
 <p>If you want to get in contact, feel free to reach out to <code>scottwforrest@gmail.com</code>, or you can follow me on <a href="https://bsky.app/profile/scottwilliamf.bsky.social">Bluesky</a>.</p>
 
 

@@ -18,6 +18,6 @@ As I (Scott) didn't know Python before getting into this paper, there is a mix o
 
 As the Python scripts are all written in [Jupyter Notebooks](https://jupyter.org/), it is straightforward to run them in [Google Colab](https://colab.google/), which provides a Python environment as well as access to GPUs. It can be used for free, although when we were training the model many times we paid a small fee for some computing units. The deepSSF models that we built are not big however, and can be run locally on CPU alone in about an hour (which reduces to about 5 mins on a GPU).
 
-![](figures/simulation_S2.gif)
+![An animation of each step of a simulated trajectory, where the model is trained on Sentinel-2 satellite data and a slope layer, and generates habitat selection and movement (not shown here) predictions, which are combined into the probability of taking the next step. This next-step probability surface is sampled from (location of the white pixel) to become the next step in the trajectory.](figures/simulation_S2.gif)
 
 If you want to get in contact, feel free to reach out to `scottwforrest@gmail.com`, or you can follow me on [Bluesky](https://bsky.app/profile/scottwilliamf.bsky.social).
