@@ -1,0 +1,7 @@
+---
+title: "Validation"
+format: html
+---
+
+Whilst the realism and emergent properties of simulated trajectories are difficult to assess, we can validate the deepSSF models on their predictive performance at the next step,  for each of the habitat selection, movement and next-step probability surfaces.  Ensuring that the probability surfaces are normalised to sum to one, they can be  compared to the predictions of typical step selection functions when the same probability  surfaces are generated for the same local covariates. This approach not only allows for  comparison between models, but can be informative as to when in the observed trajectory 
+the model performs well or poorly, which can be analysed across the entire tracking period  or for each hour of the day, and can lead to critical evaluation of the covariates that are  used by the models and allow for model refinement. 

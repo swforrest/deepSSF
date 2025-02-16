@@ -1,0 +1,6 @@
+---
+title: "Inference"
+format: html
+---
+
+Revealing what the model has learned about the data can help us to understand the movement and habitat selection of our study species, and if we were to include other processes such as memory or social dynamics, we could interrogate the model to also understand these. 

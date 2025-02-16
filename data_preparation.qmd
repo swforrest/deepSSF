@@ -1,0 +1,8 @@
+---
+title: "Data Preparation"
+format: html
+---
+
+Scripts for preparing data for deepSSF model training.
+
+We need to crop out local layers for every observed step in the trajectory.

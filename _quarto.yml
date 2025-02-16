@@ -7,16 +7,34 @@ website:
   navbar:
     # background: "#FCAB64"
     left:
-      - href: index.qmd
-        text: Home
-      - href: study_system.qmd
-        text: Study System
-      - href: step_selection_intuition.qmd
-        text: Step Selection Intuition
-      - href: deepSSF_model_overview.qmd
-        text: deepSSF Model Overview
-      - href: deep_learning_concepts.qmd
-        text: Deep Learning Concepts
+
+      - text: "Home"
+        href: index.qmd
+      - text: "Getting Started"
+        href: getting_started.qmd
+      - text: "Study System"
+        href: study_system.qmd
+      - text: "Data Preparation"
+        href: data_preparation.qmd
+      - text: "Model Training"
+        href: model_training.qmd
+      - text: "Predictions"
+        href: predictions.qmd
+      - text: "Inference"
+        href: inference.qmd
+      - text: "Validation"
+        href: validation.qmd
+
+      # - href: index.qmd
+      #   text: Home
+      # - href: study_system.qmd
+      #   text: Study System
+      # - href: step_selection_intuition.qmd
+      #   text: Step Selection Intuition
+      # - href: deepSSF_model_overview.qmd
+      #   text: deepSSF Model Overview
+      # - href: deep_learning_concepts.qmd
+      #   text: Deep Learning Concepts
 
     right:
     - icon: github
@@ -27,35 +45,73 @@ website:
       href: https://www.linkedin.com/in/swforrest/
 
   sidebar:
-    style: "floating"
-    search: false
-    contents:
-      - section: "Data Preparation"
+      - title: "Getting Started"
+        style: floating
+        contents: 
+          - getting_started.qmd
+          - python_installation.qmd
+          - deep_learning_concepts.qmd
+          - step_selection_intuition.qmd
+          - deepSSF_model_overview.qmd
+      - title: "Study System"
+        contents:
+          - study_system.qmd
+      - title: "Data Preparation"
         contents:
           - deepSSF_data_prep_id.qmd
           - deepSSF_data_prep_S2_id.qmd
-      - section: "Model Training"
+      - title: "Model Training"
         contents:
           - Python/deepSSF_train.ipynb
           - Python/deepSSF_train_S2.ipynb
-      - section: "Generating simulations"
+      - title: "Predictions"
         contents:
           - Python/deepSSF_simulations.ipynb
           - Python/deepSSF_simulations_S2.ipynb
-          - deepSSF_assessing_trajectories.qmd
-      - section: "Landscape predictions"
-        contents:
           - Python/deepSSF_landscape_preds.ipynb
           - Python/deepSSF_landscape_preds_S2.ipynb
+      - title: "Inference"
+        contents:
+          - deepSSF_assessing_trajectories.qmd
           - deepSSF_habitat_selection.qmd
-      - section: "Next-Step Validation"
+      - title: "Validation"
         contents:
           - Python/deepSSF_next_step_validation.ipynb
           - Python/deepSSF_next_step_validation_S2.ipynb
           - ssf_model_fit_id.qmd
           - ssf_validation.qmd
           - validation_comparison.qmd
-page-navigation: true
+
+#   sidebar:
+#     style: "floating"
+#     search: false
+#     contents:
+#       - section: "Data Preparation"
+#         contents:
+#           - deepSSF_data_prep_id.qmd
+#           - deepSSF_data_prep_S2_id.qmd
+#       - section: "Model Training"
+#         contents:
+#           - Python/deepSSF_train.ipynb
+#           - Python/deepSSF_train_S2.ipynb
+#       - section: "Generating simulations"
+#         contents:
+#           - Python/deepSSF_simulations.ipynb
+#           - Python/deepSSF_simulations_S2.ipynb
+#           - deepSSF_assessing_trajectories.qmd
+#       - section: "Landscape predictions"
+#         contents:
+#           - Python/deepSSF_landscape_preds.ipynb
+#           - Python/deepSSF_landscape_preds_S2.ipynb
+#           - deepSSF_habitat_selection.qmd
+#       - section: "Next-Step Validation"
+#         contents:
+#           - Python/deepSSF_next_step_validation.ipynb
+#           - Python/deepSSF_next_step_validation_S2.ipynb
+#           - ssf_model_fit_id.qmd
+#           - ssf_validation.qmd
+#           - validation_comparison.qmd
+# page-navigation: true
 
 format:
   html:

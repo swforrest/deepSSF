@@ -1,0 +1,8 @@
+---
+title: "Model Training"
+format: html
+---
+
+Here are the scripts for the training the deepSSF model.
+
+There is a script for training the deepSSF model using the derived covariates, and one for the Sentinel-2 satellite imagery.

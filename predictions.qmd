@@ -1,0 +1,10 @@
+---
+title: "Predictions"
+format: html
+---
+
+There are two main ways to generate predictions from the deepSSF models. 
+
+One is the simulate trajectories from the trained model.
+
+The other is to use the learned convolutional layers on data of any spatial extent, such as the entire landscape.
