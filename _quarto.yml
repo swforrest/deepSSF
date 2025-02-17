@@ -46,6 +46,8 @@ website:
       href: mailto:scottwforrest@gmail.com
     - icon: linkedin
       href: https://www.linkedin.com/in/swforrest/
+    - text: "Bluesky"
+      href: https://bsky.app/profile/scottwilliamf.bsky.social
 
   sidebar:
 
@@ -149,6 +151,8 @@ website:
         href: https://github.com/swforrest
       - icon: linkedin
         href: https://www.linkedin.com/in/swforrest/
+      - text: "Bluesky"
+        href: https://bsky.app/profile/scottwilliamf.bsky.social
       - text: "Scholar"
         href: https://scholar.google.com.au/citations?user=ECYMO3YAAAAJ&hl=en&authuser=1
 
