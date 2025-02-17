@@ -1,5 +1,5 @@
 ---
-title: "Setting Up Python"
+title: "Setting Up Python and the deepSSF code"
 format: html
 ---
 
@@ -9,26 +9,39 @@ For a minimal installation of Python and a package and environment manager I rec
 
 Once you have Python and Miniconda installed, you will likely want an interface ('Integrated Development Environment', an IDE) to code in (such as RStudio for R users). I use [Visual Studio Code](https://code.visualstudio.com/), or 'VS Code' as I find the functionality similar to RStudio (and as I have become familiar with VS Code I prefer it to RStudio in some ways).
 
-# Installing packages/libraries
-
-You can install packages before you have downloaded and installed VS Code, which you can do through the terminal. When you have created a conda environment using the instructions for Miniconda above, activate that environment and then use lines such as:
-
-`conda install -c conda-forge numpy`
-
-This will install the [`NumPy`](https://numpy.org/) package into the active environment. 
-
-The packages that we use are always shown at the top of the Python script when we import them, which looks something like:
-
-![](figures/packages.png)
-
-Most of these packages can be installed with `conda install -c conda-forge package-name`, although some, such as [PyTorch](https://pytorch.org/), give instructions which provide a different installation call depending on your operating system and whether you have a GPU:
-
-![](figures/pytorch_install.png)
-
-When you have VS Code (or similar) up and running
-
 If you have worked in [R Markdown](https://rmarkdown.rstudio.com/) or [Quarto](https://quarto.org/) notebooks in RStudio before, then I suggest using either [Jupyter Notebooks](https://jupyter.org/) (what I use) or [Quarto](https://quarto.org/) documents in VS Code. Using these notebooks allow for chunks of code to be isolated and run, and the output to be displayed immediately below the code. To me this feels like a similar experience to working with R and RStudio, particularly if you already use R Markdown or Quarto documents - which I highly recommend for making your code and presentable and accessible! 
 
 Additional benefits of working with Jupyter Notebooks is that they can be rendered by Quarto into polished documents, such as we have on this website, and that they can be added directly to Google Colab for access to GPUs and other cloud computing resources.
 
 On this website, all of the R code was written in Quarto documents and all of the Python code was written in Jupyter Notebooks, both of which have been rendered by Quarto.
+
+# Installing packages/libraries
+
+You can install packages before you have downloaded and installed VS Code, which you can do through the terminal. When you have created a conda environment using the instructions for Miniconda above, activate that environment using `conda activate <env>`, and then use lines such as:
+
+`conda install -c conda-forge numpy`
+
+to install packages. This will install the [`NumPy`](https://numpy.org/) package into the specific environment you have active. 
+
+The packages that we use are always shown at the top of the Python script when we import them, which looks something like:
+
+![](figures/packages.png)
+
+Most of these packages can be installed with `conda install -c conda-forge <package-name>`, although some, such as [PyTorch](https://pytorch.org/), give instructions which may provide a different installation call depending on your package manager, operating system and whether you have a GPU:
+
+![](figures/pytorch_install.png)
+
+When you have VS Code (or similar) up and running, open the folder that you want to work in (i.e. for saving scripts and saving plots etc). Or, if you don't have a folder yet and like to use [GitHub](https://github.com/) repositories, then I suggest creating a repository and 'Cloning' it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don't want pushed to GitHub is listed in the `.gitignore` file).
+
+![](figures/vscode_startup.png)
+
+# Using the deepSSF code
+
+When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding. 
+
+If you want to use the deepSSF code directly, then `forking` the [repo on GitHub](https://github.com/swforrest/deepSSF) is probably the easiest option, as we haven't turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone on your local computer, creating a working directory that you can work in. This means that you'll have all of the code to create this website as well, which may not be relevant (but which may be helpful if you want to [make your own](https://quarto.org/docs/websites/) at some point), but the R coding scripts are in the root directory, and the Python scripts are in the Python directory.
+
+An alternative is to download the scripts one by one from the repo, which means that you'll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but the you won't be bothered by all of the other stuff in the repo.
+
+You can also start from scratch with your own R scripts (e.g. using Quarto) and Jupyter Notebooks (or similar), and then just copy the code from the website or the downloaded scripts.
+
