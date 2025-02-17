@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-15">
+<meta name="dcterms.date" content="2025-02-17">
 
 <title>Deep Learning Concepts – deepSSF</title>
 <style>
@@ -153,6 +153,10 @@ window.Quarto = {
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://swforrest.github.io"> 
+<span class="menu-text">Website</span></a>
+  </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/swforrest/deepSSF"> <i class="bi bi-github" role="img">
 </i> 
@@ -200,7 +204,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./python_installation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Python Installation</span></a>
+ <span class="menu-text">Setting Up Python</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -232,6 +236,12 @@ window.Quarto = {
    
   <ul>
   <li><a href="#convolutional-layers" id="toc-convolutional-layers" class="nav-link active" data-scroll-target="#convolutional-layers">Convolutional Layers</a></li>
+  <li><a href="#fully-connected-layers" id="toc-fully-connected-layers" class="nav-link" data-scroll-target="#fully-connected-layers">Fully-connected Layers</a></li>
+  <li><a href="#max-pooling" id="toc-max-pooling" class="nav-link" data-scroll-target="#max-pooling">Max Pooling</a></li>
+  <li><a href="#max-pooling-1" id="toc-max-pooling-1" class="nav-link" data-scroll-target="#max-pooling-1">Max Pooling</a></li>
+  <li><a href="#activation-functions" id="toc-activation-functions" class="nav-link" data-scroll-target="#activation-functions">Activation Functions</a></li>
+  <li><a href="#loss-functions" id="toc-loss-functions" class="nav-link" data-scroll-target="#loss-functions">Loss Functions</a></li>
+  <li><a href="#backpropagation-and-model-training" id="toc-backpropagation-and-model-training" class="nav-link" data-scroll-target="#backpropagation-and-model-training">Backpropagation and Model Training</a></li>
   </ul>
 </nav>
     </div>
@@ -264,7 +274,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 15, 2025</p>
+      <p class="date">February 17, 2025</p>
     </div>
   </div>
   
@@ -277,7 +287,7 @@ window.Quarto = {
 
 
 <p>To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model.</p>
-<p><em>These are from the Supplementary Materials of the paper.</em></p>
+<p>Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded.</p>
 <section id="convolutional-layers" class="level1">
 <h1>Convolutional Layers</h1>
 <p>The convolutional layers employed in our neural network architecture are also known as <em>two-dimensional convolutional layers</em>. Two-dimensional convolutional layers provide a mechanism to learn new features or variables of predictive value from gridded data using sets of convolutional weights that are re-used at different locations over two-dimensional space. The input to a two-dimensional convolutional layer is a three-dimensional input tensor, <span class="math inline">\(\mathbf{Q}\)</span>, with dimensions <span class="math inline">\((d, d, n)\)</span>. In the context of our application, <span class="math inline">\(\mathbf{Q}\)</span> represents a stack of <span class="math inline">\(n\)</span> spatial covariates in a <span class="math inline">\(d \times d\)</span> pixel region of habitat surrounding an individual, which in our case was 101 x 101 cells with 25 m x 25 m resolution. Each of the <span class="math inline">\(n\)</span> spatial covariates (i.e., NDVI, slope, etc.), is usually referred to as a ‘channel’.</p>
@@ -295,6 +305,25 @@ window.Quarto = {
 <p>The benefits of deep learning come from many small operations combining together to represent complex and abstract processes. Here we show all of the convolutional layers that were used in the habitat selection subnetwork, except that for clarity we do not show the temporal inputs (hour of the day and day of the year decomposed into sine and cosine terms), which are also converted to spatial inputs, as shown in Figure 1 in the main text. Each <code>\gls{convolution filter}</code> has a channel for each of the spatial inputs and produces a single feature map.</p>
 <p>In <strong>Convolution Layer 1</strong> there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e.&nbsp;transform them in different ways). In <strong>Convolutional Layer 2</strong> there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. <strong>Convolutional Layer 3</strong> then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero). The successive convolutional layers are what give deep learning their name, where <code>depth</code> is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.</p>
 <p><img src="figures/conv_filters.png" class="img-fluid"></p>
+</section>
+<section id="fully-connected-layers" class="level1">
+<h1>Fully-connected Layers</h1>
+<p>Fully-connected layers, also called feedforward or dense layers…</p>
+</section>
+<section id="max-pooling" class="level1">
+<h1>Max Pooling</h1>
+</section>
+<section id="max-pooling-1" class="level1">
+<h1>Max Pooling</h1>
+</section>
+<section id="activation-functions" class="level1">
+<h1>Activation Functions</h1>
+</section>
+<section id="loss-functions" class="level1">
+<h1>Loss Functions</h1>
+</section>
+<section id="backpropagation-and-model-training" class="level1">
+<h1>Backpropagation and Model Training</h1>
 
 
 </section>
@@ -725,6 +754,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://swforrest.github.io">
+<p>Website</p>
+</a>
+  </li>  
     <li class="nav-item compact">
     <a class="nav-link" href="mailto:scottwforrest@gmail.com">
       <i class="bi bi-envelope-at-fill" role="img">

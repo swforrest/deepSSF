@@ -9,4 +9,4 @@ date: 2025-02-17
 format: html
 ---
 
-Here are a series of tutorials for getting started with Python and the deepSSF approach.
+In this section we provide some guidance for getting Python set up 
