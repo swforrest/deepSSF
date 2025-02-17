@@ -3,11 +3,29 @@ title: "Setting Up Python"
 format: html
 ---
 
-There are a number of approaches to installing Python and its associated libraries. Firstly there is the Python language to install, but you will also need package and environment management functionality, which allows you can create isolated working environments (which can then be different between projects to minimise version conflicts and many other headaches), and download the packages (typically called libraries in Python parlance). 
+There are a number of approaches to installing Python and its associated libraries. Firstly there is the Python language to install, but you will also need package and environment management functionality. This allows you to create isolated working environments (which can then be different between projects to minimise version conflicts and many other headaches), and download the packages (typically called libraries in Python parlance). 
 
-For a minimal installation of Python and a package and environment manager I recommend [Miniconda](https://docs.anaconda.com/miniconda/). I found the instructions here: [https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb](https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb) to be very helpful, and I suggest following them closely (particularly with respect to adding conda to PATH), and if you are planning on using [Jupyter Notebooks](https://jupyter.org/) (which I use and recommend), then also complete Step 5.
+For a minimal installation of Python and a package and environment manager I recommend [Miniconda](https://docs.anaconda.com/miniconda/). I found the instructions here: [https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb](https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb) to be very helpful, and I suggest following them closely (particularly with respect to adding conda to PATH), and if you are planning on using [Jupyter Notebooks](https://jupyter.org/) (which I used for the Python code in this project), then also complete (the second) Step 5: 'Using ipykernel to add kernel from conda environment to jupyter'.
 
 Once you have Python and Miniconda installed, you will likely want an interface ('Integrated Development Environment', an IDE) to code in (such as RStudio for R users). I use [Visual Studio Code](https://code.visualstudio.com/), or 'VS Code' as I find the functionality similar to RStudio (and as I have become familiar with VS Code I prefer it to RStudio in some ways).
+
+# Installing packages/libraries
+
+You can install packages before you have downloaded and installed VS Code, which you can do through the terminal. When you have created a conda environment using the instructions for Miniconda above, activate that environment and then use lines such as:
+
+`conda install -c conda-forge numpy`
+
+This will install the [`NumPy`](https://numpy.org/) package into the active environment. 
+
+The packages that we use are always shown at the top of the Python script when we import them, which looks something like:
+
+![](figures/packages.png)
+
+Most of these packages can be installed with `conda install -c conda-forge package-name`, although some, such as [PyTorch](https://pytorch.org/), give instructions which provide a different installation call depending on your operating system and whether you have a GPU:
+
+![](figures/pytorch_install.png)
+
+When you have VS Code (or similar) up and running
 
 If you have worked in [R Markdown](https://rmarkdown.rstudio.com/) or [Quarto](https://quarto.org/) notebooks in RStudio before, then I suggest using either [Jupyter Notebooks](https://jupyter.org/) (what I use) or [Quarto](https://quarto.org/) documents in VS Code. Using these notebooks allow for chunks of code to be isolated and run, and the output to be displayed immediately below the code. To me this feels like a similar experience to working with R and RStudio, particularly if you already use R Markdown or Quarto documents - which I highly recommend for making your code and presentable and accessible! 
 

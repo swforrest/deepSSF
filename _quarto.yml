@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: docs
+  # favicon: logo.png
 
 website:
   title: "deepSSF"

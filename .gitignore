@@ -2,6 +2,7 @@
 
 .draft_R
 Python/.draft_Python
+.draft_qmd
 
 Python/outputs
 _freeze
