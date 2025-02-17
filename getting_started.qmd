@@ -9,4 +9,6 @@ date: 2025-02-17
 format: html
 ---
 
-In this section we provide some guidance for getting Python set up 
+In this section we provide some guidance for [getting Python set up](python_installation.qmd), a brief introduction to some of the [deep learning concepts](deep_learning_concepts.qmd) that we use in the deepSSF models, some intuition about the [step selection approach](step_selection_intuition.qmd) for modelling animal movement, and then a high-level overview of how we applied those concepts in the [deepSSF model](deepSSF_model_overview.qmd).
+
+In terms of understanding the deepSSF model, the code itself will also be useful, particularly in the [model training](model_training.qmd) and [predictions](predictions.qmd) scripts. These three scripts are written in Python but I've added examples along the way that test pieces of code to show what they do (such as the blocks the comprise the deepSSF model). 
