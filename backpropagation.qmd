@@ -1,5 +1,5 @@
 ---
-title: "Getting Started"
+title: "Backpropagation and Model Training"
 author:
   - name: Scott Forrest
     url: https://swforrest.github.io/
@@ -9,4 +9,3 @@ date: 2025-02-17
 format: html
 ---
 
-Here are a series of tutorials for getting started with Python and the deepSSF approach.

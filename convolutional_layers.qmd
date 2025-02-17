@@ -1,21 +1,13 @@
 ---
-title: "Deep Learning Concepts"
+title: "Convolutional Layers"
 author:
   - name: Scott Forrest
     url: https://swforrest.github.io/
     orcid: 0000-0001-9529-0108
     affiliation: Queensland University of Technology, CSIRO
 date: 2025-02-17
-# categories: [Quarto, R] # self-defined categories
-# citation: 
-#   url: https://swforrest.github.io/deepSSF/deepSSF_model_overview.html
 format: html
-bibliography: references.bib
 ---
-
-To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model.
-
-Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded.
 
 # Convolutional Layers
 
@@ -47,28 +39,3 @@ In **Convolution Layer 1** there are four filters, resulting in four feature map
 
 ![](figures/conv_filters.png)
 
-
-
-# Fully-connected Layers
-
-Fully-connected layers, also called feedforward or dense layers...
-
-
-
-# Max Pooling
-
-
-
-# Max Pooling
-
-
-
-# Activation Functions
-
-
-
-# Loss Functions
-
-
-
-# Backpropagation and Model Training

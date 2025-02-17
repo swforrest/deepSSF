@@ -37,6 +37,8 @@ website:
       #   text: Deep Learning Concepts
 
     right:
+    - text: "Website"
+      href: https://swforrest.github.io
     - icon: github
       href: https://github.com/swforrest/deepSSF
     - icon: envelope-at-fill
@@ -45,6 +47,7 @@ website:
       href: https://www.linkedin.com/in/swforrest/
 
   sidebar:
+
       - title: "Getting Started"
         style: floating
         contents: 
@@ -53,19 +56,33 @@ website:
           - deep_learning_concepts.qmd
           - step_selection_intuition.qmd
           - deepSSF_model_overview.qmd
+
+      # - title: "Deep Learning Concepts"
+      #   style: floating
+      #   contents: 
+      #     - deep_learning_concepts.qmd
+      #     - convolutional_layers.qmd
+      #     - feedforward_layers.qmd
+      #     - max_pooling.qmd
+      #     - activation_functions.qmd
+      #     - backpropagation.qmd
+      
       - title: "Study System"
         contents:
           - study_system.qmd
+
       - title: "Data Preparation"
         contents:
           - data_preparation.qmd
           - deepSSF_data_prep_id.qmd
           - deepSSF_data_prep_S2_id.qmd
+
       - title: "Model Training"
         contents:
           - model_training.qmd
           - Python/deepSSF_train.ipynb
           - Python/deepSSF_train_S2.ipynb
+
       - title: "Predictions"
         contents:
           - predictions.qmd
@@ -73,11 +90,13 @@ website:
           - Python/deepSSF_simulations_S2.ipynb
           - Python/deepSSF_landscape_preds.ipynb
           - Python/deepSSF_landscape_preds_S2.ipynb
+
       - title: "Inference"
         contents:
           - inference.qmd
           - deepSSF_assessing_trajectories.qmd
           - deepSSF_habitat_selection.qmd
+
       - title: "Validation"
         contents:
           - validation.qmd
@@ -121,6 +140,8 @@ website:
   page-footer:
     background: light
     center:
+      - text: "Website"
+        href: https://swforrest.github.io
       - icon: envelope-at-fill
         href: mailto:scottwforrest@gmail.com
       - icon: github
