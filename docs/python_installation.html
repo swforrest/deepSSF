@@ -141,6 +141,10 @@ ul.task-list li input[type="checkbox"] {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://bsky.app/profile/scottwilliamf.bsky.social"> 
+<span class="menu-text">Bluesky</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -205,6 +209,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#installing-packageslibraries" id="toc-installing-packageslibraries" class="nav-link active" data-scroll-target="#installing-packageslibraries">Installing packages/libraries</a></li>
+  <li><a href="#creating-a-working-directory-and-opening-it-with-vs-code" id="toc-creating-a-working-directory-and-opening-it-with-vs-code" class="nav-link" data-scroll-target="#creating-a-working-directory-and-opening-it-with-vs-code">Creating a working directory and opening it with VS Code</a></li>
   <li><a href="#using-the-deepssf-code" id="toc-using-the-deepssf-code" class="nav-link" data-scroll-target="#using-the-deepssf-code">Using the deepSSF code</a></li>
   </ul>
 </nav>
@@ -246,15 +251,21 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="figures/packages.png" class="img-fluid"></p>
 <p>Most of these packages can be installed with <code>conda install -c conda-forge &lt;package-name&gt;</code>, although some, such as <a href="https://pytorch.org/">PyTorch</a>, give instructions which may provide a different installation call depending on your package manager, operating system and whether you have a GPU:</p>
 <p><img src="figures/pytorch_install.png" class="img-fluid"></p>
-<p>When you have VS Code (or similar) up and running, open the folder that you want to work in (i.e.&nbsp;for saving scripts and saving plots etc). Or, if you don’t have a folder yet and like to use <a href="https://github.com/">GitHub</a> repositories, then I suggest creating a repository and ‘Cloning’ it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don’t want pushed to GitHub is listed in the <code>.gitignore</code> file).</p>
+</section>
+<section id="creating-a-working-directory-and-opening-it-with-vs-code" class="level1">
+<h1>Creating a working directory and opening it with VS Code</h1>
+<p>When you have VS Code (or similar) up and running, create the folder that you want to work in (i.e.&nbsp;for saving scripts and saving plots etc). Or, if you don’t have a folder yet and want to use a <a href="https://github.com/">GitHub</a> repository, then I suggest creating a repository and ‘Cloning’ it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don’t want pushed to GitHub is listed in the <code>.gitignore</code> file).</p>
+<p><strong>Note: this folder should be different to your conda environment!</strong> The conda environment is Python and your packages are stored (which seems to work better when its close to your computer’s root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn’t need to close to the root of your computer, for instance I have mine in a OneDrive folder.</p>
 <p><img src="figures/vscode_startup.png" class="img-fluid"></p>
+<p>You can then also create an <a href="https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects">RStudio project</a> (also recommended for working with R code) in this directory using the ‘New Project’ option in RStudio, and selecting ‘Existing Directory’ if you already have a GitHub repo, as RStudio will scan for a .git folder which will be present when you cloned the repo, or using the ‘Version Control’ option if you haven’t already cloned it using VS Code, as this does the same thing. Then you can have your .Rproj project file and all of you R and Python scripts in the same working directory.</p>
 </section>
 <section id="using-the-deepssf-code" class="level1">
 <h1>Using the deepSSF code</h1>
-<p>When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding.</p>
-<p>If you want to use the deepSSF code directly, then <code>forking</code> the <a href="https://github.com/swforrest/deepSSF">repo on GitHub</a> is probably the easiest option, as we haven’t turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone on your local computer, creating a working directory that you can work in. This means that you’ll have all of the code to create this website as well, which may not be relevant (but which may be helpful if you want to <a href="https://quarto.org/docs/websites/">make your own</a> at some point), but the R coding scripts are in the root directory, and the Python scripts are in the Python directory.</p>
-<p>An alternative is to download the scripts one by one from the repo, which means that you’ll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but the you won’t be bothered by all of the other stuff in the repo.</p>
+<p>When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding in Python (I’m assuming you already have R and RStudio set up).</p>
+<p>If you want to use the deepSSF code directly, then <code>forking</code> the <a href="https://github.com/swforrest/deepSSF">repo on GitHub</a> is probably the easiest option, as we haven’t turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone onto your local computer, creating a working directory that you can work in which contains all of the code in the repo. This means that you’ll also have all of the code to create this website, which may not be relevant (but which may be helpful if you want to <a href="https://quarto.org/docs/websites/">make your own</a> at some point). For finding the scripts in the repo, all of the R coding scripts are in the root directory, and the Python scripts are in the <code>Python/</code> directory.</p>
+<p>An alternative is to download the scripts one-by-one from the repo, which means that you’ll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but then you won’t be bothered by all of the other stuff in the repo.</p>
 <p>You can also start from scratch with your own R scripts (e.g.&nbsp;using Quarto) and Jupyter Notebooks (or similar), and then just copy the code from the website or the downloaded scripts.</p>
+<p>Good luck! And feel free to get in touch using the contact channels in the navbar or footer (preferably email).</p>
 
 
 </section>
@@ -707,6 +718,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       <i class="bi bi-linkedin" role="img">
 </i> 
     </a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="https://bsky.app/profile/scottwilliamf.bsky.social">
+<p>Bluesky</p>
+</a>
   </li>  
     <li class="nav-item">
     <a class="nav-link" href="https://scholar.google.com.au/citations?user=ECYMO3YAAAAJ&amp;hl=en&amp;authuser=1">
