@@ -13,12 +13,44 @@ format: html
 bibliography: references.bib
 ---
 
-To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model. Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded here.
+To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model. Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded here. 
+
+There are numerous courses, books and tutorials online that are excellent for getting started with deep learning, many of them free. I've provided a couple that I've found helpful below, or have been recommended, but there are many, many more.
+
+### Online courses for deep learning
+**Learn PyTorch for Deep Learning: Zero to Mastery** :https://www.learnpytorch.io/
+- I found this resource very useful for getting started with deep learning and PyTorch, and it is accompanied by 25 hours of [YouTube videos](https://www.youtube.com/watch?v=Z_ikDlimN6A)!
+
+**PyTorch Tutorials**: https://pytorch.org/tutorials/
+- Helpful for getting started with PyTorch, although not as detailed as the course above.
+
+**DeepLearning.AI Courses and other Resources**: https://www.deeplearning.ai/
+- I haven't tried these personally but I have heard they are good. 
+
+### Excellent videos for developing an intuition about the mechanics of deep learning
+**3Blue1Brown's Neural Network YoutTube Series** :https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=_v1iHPWA8VeecsP0
+- Grant Sanderson's (creator of the 3Blue1Brown channel) YouTube videos are beautiful and extremely informative, particularly for visualising complex processes such as deep learning. The YouTube series on neural networks include an introduction to neural networks (essentially just the fully-connected layers described below), gradient descent, backpropagation, LLMs and more.
+
+### Free books
+**Dive into Deep Learning**: https://d2l.ai/index.html 
+- Interactive deep learning book with code, math, and discussions
+- Implemented with PyTorch, NumPy/MXNet, JAX, and TensorFlow
+
+**Understanding Deep Learning**: https://udlbook.github.io/udlbook/
+- Free PDF download
+
+**Probabilistic Machine Learning: An Introduction**: https://probml.github.io/pml-book/book1.html
+- This 'introduction' is still over 800 pages long, but the 'ProbML' book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It's quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks.
+- Click the download draft button for a copy
 
 # Convolutional Layers
 
 A convolutional layer applies a series of learned convolution filters across the spatial dimensions of the input, producing feature maps that highlight important patterns or structures. This operation preserves spatial hierarchies within the data and allows the network to capture local dependencies. The processing elements of convolutional layers are therefore the convolution filters.
 
+### Helpful resources for convolutional layers
+[CNN explainer](https://poloclub.github.io/cnn-explainer/): An interactive visualisation of convolution filters and activation functions
+[Animated AI](https://animatedai.github.io/): Animations over depth (for when we have multiple channels, such as different spatial layers)
+[https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html](https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html): 2D animations (i.e., for a single channel)
 
 ## Convolution filters
 
@@ -34,12 +66,16 @@ This process is repeated for the next input layer, which has its own filter chan
 
 The benefits of deep learning come from many small operations combining together to represent complex and abstract processes. Here we show all of the convolutional layers that were used in the habitat selection subnetwork, except that for clarity we do not show the temporal inputs (hour of the day and day of the year decomposed into sine and cosine terms), which are also converted to spatial inputs, as shown in Figure 1 in the main text. Each convolution filter has a channel for each of the spatial inputs and produces a single feature map.
 
-In **Convolution Layer 1** there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e. transform them in different ways). In **Convolutional Layer 2** there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. **Convolutional Layer 3** then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero). The successive convolutional layers are what give deep learning their name, where 'depth' is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.
+In **Convolution Layer 1** there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e. transform them in different ways). In **Convolutional Layer 2** there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. **Convolutional Layer 3** then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero - which are exponentiated values below 1). The successive convolutional layers are what give deep learning their name, where 'depth' is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.
 
 ![](figures/conv_filters.png)
 
+We can see in the habitat selection subnetwork, we are simply passing the inputs, which are spatial covariates (e.g. NDVI, slope, etc) and temporal covariates which have been turned into grids (see [Model Overview](deepSSF_model_overview.qmd)), through several convolutional layers which result in the next-step probabilities. During training, *the model learns to give probability weight to features (certain values, spatial features) that are associated with the buffalo's next steps*. Thaat means that if there is an observed next step near a river, the model will use the convolution filters to give higher values to the cells in the spatial covariates that describe the river. This could be just the values of the covariates themselves, such as low canopy cover, or it could be the shape of the river described by the arrangement of pixels. As convolution layers assess the local neighbourhood of cells (with a perception that increases as the layers get deeper), they can learn to associate spatial features, such as rivers, waterholes, forest edges, roads, with higher or lower probabilities of being selected as the next step.
 
-## The Maths
+![](figures/model_diagram_hab.png){width=50%}
+
+
+## The Math
 
 The convolutional layers employed in our neural network architecture are also known as *two-dimensional convolutional layers*. Two-dimensional convolutional layers provide a mechanism to learn new features or variables of predictive value from gridded data using sets of convolutional weights that are re-used at different locations over two-dimensional space. The input to a two-dimensional convolutional layer is a three-dimensional input tensor, $\mathbf{Q}$, with dimensions $(d, d, n)$. In the context of our application, $\mathbf{Q}$ represents a stack of $n$ spatial covariates in a $d \times d$ pixel region of habitat surrounding an individual, which in our case was 101 x 101 cells with 25 m x 25 m resolution. Each of the $n$ spatial covariates (i.e., NDVI, slope, etc.), is usually referred to as a 'channel'. 
 
@@ -55,24 +91,17 @@ where we take $\mathbf{Q}_{i, j, z} = 0$ for any index for which one or more of 
 
 The output tensor of the two-dimensional convolutional layer is the tensor created by combining each of the matrices $\mathbf{O}^{(1)}, \dots, \mathbf{O}^{(F)}$ along a third dimension. The elements of $\mathbf{O}$ can therefore be written as $\mathbf{O}_{i, j, k} = \mathbf{O}^{(k)}_{i, j}$. Ultimately, each two-dimensional convolutional layer introduces $F[(2w + 1)(2w + 1) n + 1]$ parameters to the model that must be learned from the training data.
 
-## Additional resources for convolutional layers
-[CNN explainer](https://poloclub.github.io/cnn-explainer/)
-
-### Animations
-[Animated AI](https://animatedai.github.io/)
-[https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html](https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html)
-
 
 
 # Fully-connected Layers
 
 Fully-connected layers, also called feedforward or dense layers, refer to layers where each 'node' (a computing unit with a weight, bias and activation function) is connected to every node in the preceding and succeeding layers. It is often used in the final stages of a neural network to combine the features extracted by previous layers and produce the final output.
 
-![](figures/fully-connected.png)
+![This file is licensed under the Creative Commons Attribution-Share Alike 4.0 International license. Author: BrunelloN](figures/fully-connected.png)
 
 In our case we used fully-connected layers in the movement subnetwork to process the outputs of the convolutional layers into movement parameters than defined our movement kernel.
 
-## The Maths
+## The Math
 
 A fully connected layer in the neural network, maps an input vector $\boldsymbol{u}$ of length $n_u$ to an output vector $\boldsymbol{o}$ of length $n_o$ using
 $$
@@ -85,13 +114,31 @@ In our neural network architecture, the activation function is usually taken to 
 
 # Max Pooling
 
+Max pooling is an operation that is often used in convolutional neural networks to reduce dimensionality and condense information. Here we present a typical way that max pooling is applied in practice (and how it is applied in our model). The max pooling operation is best thought of as a function that accepts an $a \times a$ matrix, $\mathbf{A}$, as input and outputs an $a^{\star} \times a^{\star}$ matrix $\mathbf{A}^{\star}$, where $a^{\star} = \frac{a}{k}$. For simplicity here, we assume that $\frac{a}{k}$ is integer-valued, but where this is not the case, the dimensions of the matrix $\mathbf{A}$ can be modified using "padding" to augment the matrix with additional rows and columns at it's edges.
 
+We refer to $k$ as the kernel-width in the max pooling operation and use this to partition the matrix $\mathbf{A}$ as
 
-# Max Pooling
+$$\mathbf{A} = \left(\begin{array}{cccc} 
+\mathbf{A}_{1, 1} & \mathbf{A}_{1, 2}  & \dots & \mathbf{A}_{1, a^{\star}}  \\  
+\mathbf{A}_{2, 1} & \mathbf{A}_{2, 2} & \dots & \mathbf{A}_{2, a^{\star}} \\ 
+\vdots & \vdots & \ddots & \vdots \\ 
+\mathbf{A}_{a^{\star}, 1} & \mathbf{A}_{a^{\star}, 2} & \dots & \mathbf{A}_{a^{\star}, a^{\star}} 
+\end{array}\right),$$
 
+where each sub-matrix $\mathbf{A}_{i, j}$ $(i, j \in \{1, \dots, a^{\star} \})$ is of dimension $k \times k$. The output of the max pooling operation is the matrix $\mathbf{A}^{\star}$ which we define as
 
+$$\mathbf{A}^{\star} = \left(\begin{array}{cccc} 
+\max(\mathbf{A}_{1, 1}) & \max(\mathbf{A}_{1, 2})  & \dots & \max(\mathbf{A}_{1, a^{\star}})  \\  
+\max(\mathbf{A}_{2, 1}) & \max(\mathbf{A}_{2, 2}) & \dots & \max(\mathbf{A}_{2, a^{\star}}) \\ 
+\vdots & \vdots & \ddots & \vdots \\ 
+\max(\mathbf{A}_{a^{\star}, 1}) & \max(\mathbf{A}_{a^{\star}, 2}) & \dots & \max(\mathbf{A}_{a^{\star}, a^{\star}}) 
+\end{array}\right).$$
 
-# Activation Functions
+Max pooling can therefore be seen as simultaneously reducing the dimension of a matrix by a factor of $k$, and highlighting the extremes of the input feature matrix $\mathbf{A}$ over space.
+
+In practice, max pooling operations often follow two-dimensional convolutional blocks in a neural network model. Where the convolutional blocks have more than one filter, the input to the max pooling operation will actually be an $a \times a \times F$ tensor (a three-dimensional array), where $F$ is the number of filters that are learned by the model in each convolutional layer. In this case, the max pooling operation described above is simply applied independently to each of $F$ matrices of size $a \times a$ and each of the $a^{\star} \times a^{\star}$ sub-matrices are stacked to create a $a^{\star} \times a^{\star} \times f$ tensor that is passed to the next layer in the network (often another convolutional layer).
+
+<!-- # Activation Functions
 
 
 
@@ -99,4 +146,4 @@ In our neural network architecture, the activation function is usually taken to 
 
 
 
-# Backpropagation and Model Training
+# Backpropagation and Model Training -->
