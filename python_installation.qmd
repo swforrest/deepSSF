@@ -31,17 +31,20 @@ Most of these packages can be installed with `conda install -c conda-forge <pack
 
 ![](figures/pytorch_install.png)
 
-When you have VS Code (or similar) up and running, open the folder that you want to work in (i.e. for saving scripts and saving plots etc). Or, if you don't have a folder yet and like to use [GitHub](https://github.com/) repositories, then I suggest creating a repository and 'Cloning' it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don't want pushed to GitHub is listed in the `.gitignore` file).
+# Creating a working directory (and/or GitHub repository)
+
+When you have VS Code (or similar) up and running, create the folder that you want to work in (i.e. for saving scripts and saving plots etc). Or, if you don't have a folder yet and want to use [GitHub](https://github.com/) repositories, then I suggest creating a repository and 'Cloning' it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don't want pushed to GitHub is listed in the `.gitignore` file).
+
+**Note: this folder should be different to your conda environment!** The conda environment is Python and your packages are stored (which seems to work better when its close to your computer's root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn't need to close to the root of your computer, for instance I have mine in a OneDrive folder.
 
 ![](figures/vscode_startup.png)
 
 # Using the deepSSF code
 
-When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding. 
+When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding in Python. 
 
-If you want to use the deepSSF code directly, then `forking` the [repo on GitHub](https://github.com/swforrest/deepSSF) is probably the easiest option, as we haven't turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone on your local computer, creating a working directory that you can work in. This means that you'll have all of the code to create this website as well, which may not be relevant (but which may be helpful if you want to [make your own](https://quarto.org/docs/websites/) at some point), but the R coding scripts are in the root directory, and the Python scripts are in the Python directory.
+If you want to use the deepSSF code directly, then `forking` the [repo on GitHub](https://github.com/swforrest/deepSSF) is probably the easiest option, as we haven't turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone onto your local computer, creating a working directory that you can work in. This means that you'll also have all of the code to create this website, which may not be relevant (but which may be helpful if you want to [make your own](https://quarto.org/docs/websites/) at some point). To navigate, all of the R coding scripts are in the root directory, and the Python scripts are in the `Python/` directory.
 
-An alternative is to download the scripts one by one from the repo, which means that you'll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but the you won't be bothered by all of the other stuff in the repo.
+An alternative is to download the scripts one-by-one from the repo, which means that you'll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but then you won't be bothered by all of the other stuff in the repo.
 
 You can also start from scratch with your own R scripts (e.g. using Quarto) and Jupyter Notebooks (or similar), and then just copy the code from the website or the downloaded scripts.
-

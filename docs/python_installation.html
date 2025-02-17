@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Setting Up Python – deepSSF</title>
+<title>Setting Up Python and the deepSSF code – deepSSF</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -152,7 +152,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./python_installation.html">Setting Up Python</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./python_installation.html">Setting Up Python and the deepSSF code</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -173,7 +173,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./python_installation.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Setting Up Python</span></a>
+ <span class="menu-text">Setting Up Python and the deepSSF code</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -199,15 +199,22 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#installing-packageslibraries" id="toc-installing-packageslibraries" class="nav-link active" data-scroll-target="#installing-packageslibraries">Installing packages/libraries</a></li>
+  <li><a href="#using-the-deepssf-code" id="toc-using-the-deepssf-code" class="nav-link" data-scroll-target="#using-the-deepssf-code">Using the deepSSF code</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setting Up Python</h1>
+<h1 class="title">Setting Up Python and the deepSSF code</h1>
 </div>
 
 
@@ -224,14 +231,33 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>There are a number of approaches to installing Python and its associated libraries. Firstly there is the Python language to install, but you will also need package and environment management functionality, which allows you can create working environments (which can then be separated between projects to minimise version conflicts and many other headaches), and download the packages (typically called libraries in Python parlance).</p>
-<p>For a minimal installation of Python and a package and environment manager I recommend <a href="https://docs.anaconda.com/miniconda/">Miniconda</a>. I found the instructions here: <a href="https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb">https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb</a> to be very helpful, and I suggest following them closely (particularly with respect to adding conda to PATH).</p>
+<p>There are a number of approaches to installing Python and its associated libraries. Firstly there is the Python language to install, but you will also need package and environment management functionality. This allows you to create isolated working environments (which can then be different between projects to minimise version conflicts and many other headaches), and download the packages (typically called libraries in Python parlance).</p>
+<p>For a minimal installation of Python and a package and environment manager I recommend <a href="https://docs.anaconda.com/miniconda/">Miniconda</a>. I found the instructions here: <a href="https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb">https://eduand-alvarez.medium.com/setting-up-anaconda-on-your-windows-pc-6e39800c1afb</a> to be very helpful, and I suggest following them closely (particularly with respect to adding conda to PATH), and if you are planning on using <a href="https://jupyter.org/">Jupyter Notebooks</a> (which I used for the Python code in this project), then also complete (the second) Step 5: ‘Using ipykernel to add kernel from conda environment to jupyter’.</p>
 <p>Once you have Python and Miniconda installed, you will likely want an interface (‘Integrated Development Environment’, an IDE) to code in (such as RStudio for R users). I use <a href="https://code.visualstudio.com/">Visual Studio Code</a>, or ‘VS Code’ as I find the functionality similar to RStudio (and as I have become familiar with VS Code I prefer it to RStudio in some ways).</p>
 <p>If you have worked in <a href="https://rmarkdown.rstudio.com/">R Markdown</a> or <a href="https://quarto.org/">Quarto</a> notebooks in RStudio before, then I suggest using either <a href="https://jupyter.org/">Jupyter Notebooks</a> (what I use) or <a href="https://quarto.org/">Quarto</a> documents in VS Code. Using these notebooks allow for chunks of code to be isolated and run, and the output to be displayed immediately below the code. To me this feels like a similar experience to working with R and RStudio, particularly if you already use R Markdown or Quarto documents - which I highly recommend for making your code and presentable and accessible!</p>
 <p>Additional benefits of working with Jupyter Notebooks is that they can be rendered by Quarto into polished documents, such as we have on this website, and that they can be added directly to Google Colab for access to GPUs and other cloud computing resources.</p>
 <p>On this website, all of the R code was written in Quarto documents and all of the Python code was written in Jupyter Notebooks, both of which have been rendered by Quarto.</p>
+<section id="installing-packageslibraries" class="level1">
+<h1>Installing packages/libraries</h1>
+<p>You can install packages before you have downloaded and installed VS Code, which you can do through the terminal. When you have created a conda environment using the instructions for Miniconda above, activate that environment using <code>conda activate &lt;env&gt;</code>, and then use lines such as:</p>
+<p><code>conda install -c conda-forge numpy</code></p>
+<p>to install packages. This will install the <a href="https://numpy.org/"><code>NumPy</code></a> package into the specific environment you have active.</p>
+<p>The packages that we use are always shown at the top of the Python script when we import them, which looks something like:</p>
+<p><img src="figures/packages.png" class="img-fluid"></p>
+<p>Most of these packages can be installed with <code>conda install -c conda-forge &lt;package-name&gt;</code>, although some, such as <a href="https://pytorch.org/">PyTorch</a>, give instructions which may provide a different installation call depending on your package manager, operating system and whether you have a GPU:</p>
+<p><img src="figures/pytorch_install.png" class="img-fluid"></p>
+<p>When you have VS Code (or similar) up and running, open the folder that you want to work in (i.e.&nbsp;for saving scripts and saving plots etc). Or, if you don’t have a folder yet and like to use <a href="https://github.com/">GitHub</a> repositories, then I suggest creating a repository and ‘Cloning’ it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don’t want pushed to GitHub is listed in the <code>.gitignore</code> file).</p>
+<p><img src="figures/vscode_startup.png" class="img-fluid"></p>
+</section>
+<section id="using-the-deepssf-code" class="level1">
+<h1>Using the deepSSF code</h1>
+<p>When you have Python, a package and environment manager, an IDE, and a working directory to work in (possibly linked to a GitHub repository), you are ready to start coding.</p>
+<p>If you want to use the deepSSF code directly, then <code>forking</code> the <a href="https://github.com/swforrest/deepSSF">repo on GitHub</a> is probably the easiest option, as we haven’t turned this into a package (yet). This will create a linked copy of the repository in your own GitHub, which you can then clone on your local computer, creating a working directory that you can work in. This means that you’ll have all of the code to create this website as well, which may not be relevant (but which may be helpful if you want to <a href="https://quarto.org/docs/websites/">make your own</a> at some point), but the R coding scripts are in the root directory, and the Python scripts are in the Python directory.</p>
+<p>An alternative is to download the scripts one by one from the repo, which means that you’ll have to create folders for keeping your data and for storing outputs, and then update the directories in the code based on those, but the you won’t be bothered by all of the other stuff in the repo.</p>
+<p>You can also start from scratch with your own R scripts (e.g.&nbsp;using Quarto) and Jupyter Notebooks (or similar), and then just copy the code from the website or the downloaded scripts.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
