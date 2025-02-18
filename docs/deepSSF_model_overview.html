@@ -52,6 +52,7 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./step_selection_intuition.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -314,19 +315,19 @@ window.Quarto = {
 
 <p>If you haven’t already, I recommend checking out the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for how we set up the deepSSF model.</p>
 <p>As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we kept the general structure of step selection functions (SSFs) <span class="citation" data-cites="Fortin2005-zw Forester2009-bg">Signer, Fieberg, and Avgar (<a href="#ref-Signer2019-fi" role="doc-biblioref">2019</a>)</span>, but replaced the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers.</p>
-<p>To use deep learning in this context, we can again imagine separating out the habitat selection and the movement processes. This allows us to replace both the log-linear habitat selection component and the estimation of the movement parameters with deep learning components.</p>
 <p>The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.</p>
 <section id="model-architecture" class="level1">
 <h1>Model architecture</h1>
-<p>There are two subnetworks: a habitat selection and a movement process subnetwork.</p>
+<p>To be analogous to SSFs, there are two subnetworks representing two processes of animal movement: a habitat selection and a movement process subnetwork.</p>
 <section id="inputs" class="level2">
 <h2 class="anchored" data-anchor-id="inputs">Inputs</h2>
 <p>Both subnetworks receive the same inputs, which are spatial layers such as environmental covariates, scalar covariates such as the hour, the day of the year (yday, also called ‘ordinal’ or ‘Julian’ day), and the movement process also receives the bearing of the previous step. The periodic components (i.e.&nbsp;hour and yday) are decomposed into sine and cosine components to wrap continuously as a period, before being converted into spatial layers with constant values so they can be processed by the convolutional layer. To ensure that the turning angles are relative to the previous step, the bearing of the previous step is added directly to the predicted mean (<span class="math inline">\(\mu\)</span>) parameters of von Mises distributions.</p>
 <p><img src="figures/model_diagram_inputs.png" class="img-fluid"></p>
+<p>This gives us a stack of local covariates which we can pass to the subnetworks.</p>
 </section>
 <section id="habitat-selection-subnetwork" class="level2">
 <h2 class="anchored" data-anchor-id="habitat-selection-subnetwork">Habitat selection subnetwork</h2>
-<p>For the habitat selection process, we need to go from our spatial covariates to a habitat selection probability surface. We can do this using convolutional layers, which process spatial information and transform it into something else.</p>
+<p>For the habitat selection process, we need to go from our spatial covariates to a habitat selection probability surface. We can do this using convolutional layers, which use convolution filters to process spatial information and transform it into something else.</p>
 <p>Firstly, we set the target of the model (what the model is trying to predict) to be where the next step is, we do this by extracting the habitat selection probability at the location of the next step. When the model makes more accurate predictions, these values will be higher. The model will then try to increase the probability at the locations of the observed next steps (by minimising the negative-log of this value).</p>
 <p>Because the convolution filters apply their operations equally across the spatial covariates, they can never actually predict the next-step, but they will <em>increase the habitat selection probability for <strong>values and features in the landscape</strong> that are associated with observed next-steps</em>.</p>
 <p>The result of this habitat selection process is that we input spatial covariates (and temporal covariates that are converted to grids of the same size), and the model transforms these into a habitat selection probability surface, with higher probabilities for environmental features that are associated with observed next steps.</p>
@@ -359,8 +360,8 @@ window.Quarto = {
 </section>
 <section id="generating-trajectories" class="level2">
 <h2 class="anchored" data-anchor-id="generating-trajectories">Generating trajectories</h2>
-<p>The process of actually generating trajectories is the same as what we showed in the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab:</p>
-<p>We have some starting location, the local layers for that point are extracted and run through the model which generates the next-step probability surface, and a step is sampled according to these probability values.</p>
+<p>The process of generating trajectories is the same as what we showed in the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab:</p>
+<p>We have some starting location, the local layers for that point are extracted and run through the model, which generates the next-step probability surface, and a step is sampled according to these probability values.</p>
 <p>Here’s an animation of what that looks like for when the model has been trained on Sentinel-2 data:</p>
 <p><img src="figures/simulation_S2.gif" class="img-fluid"> <em>The white pixel is the sample of the next step</em></p>
 
@@ -379,17 +380,7 @@ Fortin, Daniel, Hawthorne L Beyer, Mark S Boyce, Douglas W Smith, Thierry Duches
 <div id="ref-Signer2019-fi" class="csl-entry" role="listitem">
 Signer, Johannes, John Fieberg, and Tal Avgar. 2019. <span>“Animal Movement Tools (Amt): <span>R</span> Package for Managing Tracking Data and Conducting Habitat Selection Analyses.”</span> <em>Ecology and Evolution</em> 9 (2): 880–90. <a href="https://doi.org/10.1002/ece3.4823">https://doi.org/10.1002/ece3.4823</a>.
 </div>
-</div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{forrest2025,
-  author = {Forrest, Scott},
-  title = {deepSSF {Model} {Overview}},
-  date = {2025-02-18},
-  url = {https://swforrest.github.io/deepSSF/deepSSF_model_overview.html},
-  langid = {en}
-}
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-forrest2025" class="csl-entry quarto-appendix-citeas" role="listitem">
-Forrest, Scott. 2025. <span>“deepSSF Model Overview.”</span> February
-18, 2025. <a href="https://swforrest.github.io/deepSSF/deepSSF_model_overview.html">https://swforrest.github.io/deepSSF/deepSSF_model_overview.html</a>.
-</div></div></section></div></main> <!-- /main -->
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -807,6 +798,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./step_selection_intuition.html" class="pagination-link" aria-label="Step Selection Intuition">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Step Selection Intuition</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

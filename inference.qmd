@@ -29,7 +29,7 @@ Now that we have generated trajectories in the [simulations](predictions.qmd) sc
 
 We can see that we match the observed movement distirbutions quite well, even when the step length distribution is log-transformed to reveal the bimodal pattern in step lengths.
 
-![](figures/movement_summaries.png.png)
+![](figures/movement_summaries.png)
 
 ## Habitat selection summaries against the observed data
 

@@ -32,6 +32,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./deep_learning_concepts.html" rel="next">
+<link href="./getting_started.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -276,7 +278,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="creating-a-working-directory-and-opening-it-with-vs-code" class="level1">
 <h1>Creating a working directory and opening it with VS Code</h1>
 <p>When you have VS Code (or similar) up and running, create the folder that you want to work in (i.e.&nbsp;for saving scripts and saving plots etc). Or, if you don’t have a folder yet and want to use a <a href="https://github.com/">GitHub</a> repository, then I suggest creating a repository and ‘Cloning’ it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don’t want pushed to GitHub is listed in the <code>.gitignore</code> file).</p>
-<p><strong>Note: this folder should be different to your conda environment!</strong> The conda environment is Python and your packages are stored (which seems to work better when its close to your computer’s root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn’t need to close to the root of your computer, for instance I have mine in a OneDrive folder.</p>
+<p><strong>Note: this folder should be different to your conda environment!</strong> The conda environment is where Python and your packages are stored (which seems to work better when its close to your computer’s root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn’t need to close to the root of your computer, for instance I have mine in a OneDrive folder.</p>
 <p><img src="figures/vscode_startup.png" class="img-fluid"></p>
 <p>You can then also create an <a href="https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects">RStudio project</a> (also recommended for working with R code) in this directory using the ‘New Project’ option in RStudio, and selecting ‘Existing Directory’ if you already have a GitHub repo, as RStudio will scan for a .git folder which will be present when you cloned the repo, or using the ‘Version Control’ option if you haven’t already cloned it using VS Code, as this does the same thing. Then you can have your .Rproj project file and all of you R and Python scripts in the same working directory.</p>
 </section>
@@ -709,6 +711,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./getting_started.html" class="pagination-link" aria-label="Getting Started">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Getting Started</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./deep_learning_concepts.html" class="pagination-link" aria-label="Deep Learning Concepts">
+        <span class="nav-page-text">Deep Learning Concepts</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

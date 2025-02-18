@@ -32,6 +32,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./step_selection_intuition.html" rel="next">
+<link href="./python_installation.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -239,9 +241,12 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#online-courses-for-deep-learning" id="toc-online-courses-for-deep-learning" class="nav-link active" data-scroll-target="#online-courses-for-deep-learning">Online courses for deep learning</a></li>
+  <li><a href="#additional-resources" id="toc-additional-resources" class="nav-link active" data-scroll-target="#additional-resources">Additional Resources</a>
+  <ul class="collapse">
+  <li><a href="#online-courses-for-deep-learning" id="toc-online-courses-for-deep-learning" class="nav-link" data-scroll-target="#online-courses-for-deep-learning">Online courses for deep learning</a></li>
   <li><a href="#excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" id="toc-excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" class="nav-link" data-scroll-target="#excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning">Excellent videos for developing an intuition about the mechanics of deep learning</a></li>
   <li><a href="#free-books" id="toc-free-books" class="nav-link" data-scroll-target="#free-books">Free books</a></li>
+  </ul></li>
   <li><a href="#convolutional-layers" id="toc-convolutional-layers" class="nav-link" data-scroll-target="#convolutional-layers">Convolutional Layers</a>
   <ul class="collapse">
   <li><a href="#helpful-resources-for-convolutional-layers" id="toc-helpful-resources-for-convolutional-layers" class="nav-link" data-scroll-target="#helpful-resources-for-convolutional-layers">Helpful resources for convolutional layers</a></li>
@@ -299,28 +304,38 @@ window.Quarto = {
 
 <p>To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model. Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded here.</p>
 <p>There are numerous courses, books and tutorials online that are excellent for getting started with deep learning, many of them free. I’ve provided a couple that I’ve found helpful below, or have been recommended, but there are many, many more.</p>
-<section id="online-courses-for-deep-learning" class="level3">
-<h3 class="anchored" data-anchor-id="online-courses-for-deep-learning">Online courses for deep learning</h3>
-<p><strong>Learn PyTorch for Deep Learning: Zero to Mastery</strong> :https://www.learnpytorch.io/ - I found this resource very useful for getting started with deep learning and PyTorch, and it is accompanied by 25 hours of <a href="https://www.youtube.com/watch?v=Z_ikDlimN6A">YouTube videos</a>!</p>
-<p><strong>PyTorch Tutorials</strong>: https://pytorch.org/tutorials/ - Helpful for getting started with PyTorch, although not as detailed as the course above.</p>
-<p><strong>DeepLearning.AI Courses and other Resources</strong>: https://www.deeplearning.ai/ - I haven’t tried these personally but I have heard they are good.</p>
+<section id="additional-resources" class="level1">
+<h1>Additional Resources</h1>
+<section id="online-courses-for-deep-learning" class="level2">
+<h2 class="anchored" data-anchor-id="online-courses-for-deep-learning">Online courses for deep learning</h2>
+<p><strong>Learn PyTorch for Deep Learning: Zero to Mastery</strong>: <a href="https://www.learnpytorch.io/">https://www.learnpytorch.io/</a> - I found this resource very useful for getting started with deep learning and PyTorch, and it is accompanied by 25 hours of <a href="https://www.youtube.com/watch?v=Z_ikDlimN6A">YouTube videos</a>!</p>
+<p><strong>PyTorch Tutorials</strong>: <a href="https://pytorch.org/tutorials/">https://pytorch.org/tutorials/</a> - Helpful for getting started with PyTorch, although not as detailed as the course above.</p>
+<p><strong>DeepLearning.AI Courses and other Resources</strong>: <a href="https://www.deeplearning.ai/">https://www.deeplearning.ai/</a> - I haven’t tried these personally but I have heard they are good.</p>
 </section>
-<section id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" class="level3">
-<h3 class="anchored" data-anchor-id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning">Excellent videos for developing an intuition about the mechanics of deep learning</h3>
-<p><strong>3Blue1Brown’s Neural Network YoutTube Series</strong> :https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&amp;si=_v1iHPWA8VeecsP0 - Grant Sanderson’s (creator of the 3Blue1Brown channel) YouTube videos are beautiful and extremely informative, particularly for visualising complex processes such as deep learning. The YouTube series on neural networks include an introduction to neural networks (essentially just the fully-connected layers described below), gradient descent, backpropagation, LLMs and more.</p>
+<section id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" class="level2">
+<h2 class="anchored" data-anchor-id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning">Excellent videos for developing an intuition about the mechanics of deep learning</h2>
+<p><strong>3Blue1Brown’s Neural Network YoutTube Series</strong>: <a href="https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&amp;si=_v1iHPWA8VeecsP0">https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&amp;si=_v1iHPWA8VeecsP0</a> - Grant Sanderson’s (creator of the 3Blue1Brown channel) YouTube videos are beautiful and extremely informative, particularly for visualising complex processes such as deep learning. The YouTube series on neural networks include an introduction to neural networks (essentially just the fully-connected layers described below), gradient descent, backpropagation, LLMs and more.</p>
 </section>
-<section id="free-books" class="level3">
-<h3 class="anchored" data-anchor-id="free-books">Free books</h3>
-<p><strong>Dive into Deep Learning</strong>: https://d2l.ai/index.html - Interactive deep learning book with code, math, and discussions - Implemented with PyTorch, NumPy/MXNet, JAX, and TensorFlow</p>
-<p><strong>Understanding Deep Learning</strong>: https://udlbook.github.io/udlbook/ - Free PDF download</p>
-<p><strong>Probabilistic Machine Learning: An Introduction</strong>: https://probml.github.io/pml-book/book1.html - This ‘introduction’ is still over 800 pages long, but the ‘ProbML’ book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It’s quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks. - Click the download draft button for a copy</p>
+<section id="free-books" class="level2">
+<h2 class="anchored" data-anchor-id="free-books">Free books</h2>
+<p><strong>Dive into Deep Learning</strong>: <a href="https://d2l.ai/index.html">https://d2l.ai/index.html</a><br>
+- Interactive deep learning book with code, math, and discussions<br>
+- Implemented with PyTorch, NumPy/MXNet, JAX, and TensorFlow</p>
+<p><strong>Understanding Deep Learning</strong>: <a href="https://udlbook.github.io/udlbook/">https://udlbook.github.io/udlbook/</a><br>
+- Free PDF download</p>
+<p><strong>Probabilistic Machine Learning: An Introduction</strong>: <a href="https://probml.github.io/pml-book/book1.html">https://probml.github.io/pml-book/book1.html</a><br>
+- This ‘introduction’ is still over 800 pages long, but the ‘ProbML’ book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It’s quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks.<br>
+- Click the download draft button for a copy</p>
+</section>
 </section>
 <section id="convolutional-layers" class="level1">
 <h1>Convolutional Layers</h1>
 <p>A convolutional layer applies a series of learned convolution filters across the spatial dimensions of the input, producing feature maps that highlight important patterns or structures. This operation preserves spatial hierarchies within the data and allows the network to capture local dependencies. The processing elements of convolutional layers are therefore the convolution filters.</p>
 <section id="helpful-resources-for-convolutional-layers" class="level3">
 <h3 class="anchored" data-anchor-id="helpful-resources-for-convolutional-layers">Helpful resources for convolutional layers</h3>
-<p><a href="https://poloclub.github.io/cnn-explainer/">CNN explainer</a>: An interactive visualisation of convolution filters and activation functions <a href="https://animatedai.github.io/">Animated AI</a>: Animations over depth (for when we have multiple channels, such as different spatial layers) <a href="https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html">https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html</a>: 2D animations (i.e., for a single channel)</p>
+<p><a href="https://poloclub.github.io/cnn-explainer/">CNN explainer</a>: An interactive visualisation of convolution filters and activation functions<br>
+<a href="https://animatedai.github.io/">Animated AI</a>: Animations over depth (for when we have multiple channels, such as different spatial layers)<br>
+<a href="https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html">https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html</a>: 2D animations (i.e., for a single channel)</p>
 </section>
 <section id="convolution-filters" class="level2">
 <h2 class="anchored" data-anchor-id="convolution-filters">Convolution filters</h2>
@@ -816,6 +831,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./python_installation.html" class="pagination-link" aria-label="Setting up Python and using the deepSSF code">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Setting up Python and using the deepSSF code</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./step_selection_intuition.html" class="pagination-link" aria-label="Step Selection Intuition">
+        <span class="nav-page-text">Step Selection Intuition</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
