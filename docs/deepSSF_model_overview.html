@@ -228,7 +228,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./python_installation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Setting up Python and the deepSSF code</span></a>
+ <span class="menu-text">Setting up Python and using the deepSSF code</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -259,13 +259,15 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link active" data-scroll-target="#model-architecture">Model architecture</a></li>
+  <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link active" data-scroll-target="#model-architecture">Model architecture</a>
+  <ul class="collapse">
   <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
   <li><a href="#habitat-selection-subnetwork" id="toc-habitat-selection-subnetwork" class="nav-link" data-scroll-target="#habitat-selection-subnetwork">Habitat selection subnetwork</a></li>
   <li><a href="#movement-subnetwork" id="toc-movement-subnetwork" class="nav-link" data-scroll-target="#movement-subnetwork">Movement subnetwork</a></li>
   <li><a href="#full-model" id="toc-full-model" class="nav-link" data-scroll-target="#full-model">Full model</a></li>
   <li><a href="#training-the-model" id="toc-training-the-model" class="nav-link" data-scroll-target="#training-the-model">Training the model</a></li>
   <li><a href="#generating-trajectories" id="toc-generating-trajectories" class="nav-link" data-scroll-target="#generating-trajectories">Generating trajectories</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -310,24 +312,32 @@ window.Quarto = {
 </header>
 
 
-<p>If you haven’t already, I recommend checking out the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for our model.</p>
-<p>As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we used a step selection approach, keeping the general structure of step selection functions (SSFs) <span class="citation" data-cites="Fortin2005-zw Forester2009-bg">Signer, Fieberg, and Avgar (<a href="#ref-Signer2019-fi" role="doc-biblioref">2019</a>)</span>, but replacing the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers. The inputs and outputs are essentially the same (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. As we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.</p>
-<section id="model-architecture" class="level2">
-<h2 class="anchored" data-anchor-id="model-architecture">Model architecture</h2>
-</section>
+<p>If you haven’t already, I recommend checking out the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for how we set up the deepSSF model.</p>
+<p>As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we kept the general structure of step selection functions (SSFs) <span class="citation" data-cites="Fortin2005-zw Forester2009-bg">Signer, Fieberg, and Avgar (<a href="#ref-Signer2019-fi" role="doc-biblioref">2019</a>)</span>, but replaced the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers.</p>
+<p>To use deep learning in this context, we can again imagine separating out the habitat selection and the movement processes. This allows us to replace both the log-linear habitat selection component and the estimation of the movement parameters with deep learning components.</p>
+<p>The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.</p>
+<section id="model-architecture" class="level1">
+<h1>Model architecture</h1>
+<p>There are two subnetworks: a habitat selection and a movement process subnetwork.</p>
 <section id="inputs" class="level2">
 <h2 class="anchored" data-anchor-id="inputs">Inputs</h2>
-<p>There are two subnetworks: a habitat selection and a movement process subnetwork. Both receive the same inputs, which are spatial layers such as environmental covariates, scalar covariates such as the hour, the day of the year (yday, also called ‘ordinal’ or ‘Julian’ day), and the movement process also receives the bearing of the previous step. The periodic components (i.e.&nbsp;hour and yday) are decomposed into sine and cosine components to wrap continuously as a period, before being converted into spatial layers with constant values so they can be processed by the convolutional layer. To ensure that the turning angles are relative to the previous step, the bearing of the previous step is added directly to the predicted mean (<span class="math inline">\(\mu\)</span>) parameters of von Mises distributions.</p>
+<p>Both subnetworks receive the same inputs, which are spatial layers such as environmental covariates, scalar covariates such as the hour, the day of the year (yday, also called ‘ordinal’ or ‘Julian’ day), and the movement process also receives the bearing of the previous step. The periodic components (i.e.&nbsp;hour and yday) are decomposed into sine and cosine components to wrap continuously as a period, before being converted into spatial layers with constant values so they can be processed by the convolutional layer. To ensure that the turning angles are relative to the previous step, the bearing of the previous step is added directly to the predicted mean (<span class="math inline">\(\mu\)</span>) parameters of von Mises distributions.</p>
 <p><img src="figures/model_diagram_inputs.png" class="img-fluid"></p>
 </section>
 <section id="habitat-selection-subnetwork" class="level2">
 <h2 class="anchored" data-anchor-id="habitat-selection-subnetwork">Habitat selection subnetwork</h2>
-<p>The habitat selection subnetwork uses convolutional layers that have parameters set to ensure that the output has the same spatial extent as the input, resulting in spatial, non-linear transformations of the input covariates, where all inputs can interact, to produce a probability surface (on the log-scale) describing the likelihood of moving to any cell based on the surrounding environment.</p>
+<p>For the habitat selection process, we need to go from our spatial covariates to a habitat selection probability surface. We can do this using convolutional layers, which process spatial information and transform it into something else.</p>
+<p>Firstly, we set the target of the model (what the model is trying to predict) to be where the next step is, we do this by extracting the habitat selection probability at the location of the next step. When the model makes more accurate predictions, these values will be higher. The model will then try to increase the probability at the locations of the observed next steps (by minimising the negative-log of this value).</p>
+<p>Because the convolution filters apply their operations equally across the spatial covariates, they can never actually predict the next-step, but they will <em>increase the habitat selection probability for <strong>values and features in the landscape</strong> that are associated with observed next-steps</em>.</p>
+<p>The result of this habitat selection process is that we input spatial covariates (and temporal covariates that are converted to grids of the same size), and the model transforms these into a habitat selection probability surface, with higher probabilities for environmental features that are associated with observed next steps.</p>
+<p>The convolutional layers have parameters set to ensure that the output has the same spatial extent as the input, resulting in spatial, non-linear transformations of the input covariates, where all inputs can interact, to produce a probability surface (on the log-scale) describing the likelihood of moving to any cell based on the surrounding environment.</p>
 <p><img src="figures/model_diagram_hab.png" class="img-fluid" style="width:50.0%"></p>
 </section>
 <section id="movement-subnetwork" class="level2">
 <h2 class="anchored" data-anchor-id="movement-subnetwork">Movement subnetwork</h2>
-<p>The movement process subnetwork uses convolutional layers with max pooling to extract features from the input covariates that are salient to movement, and fully connected layers to process the convolutional layer outputs whilst reducing the dimensionality. The predicted output of the movement subnetwork can be any number of parameters that govern a movement distribution. If we wanted a single gamma distribution (described by a shape and scale parameter) and a von Mises distribution (described by a mean, <span class="math inline">\(\mu\)</span>, and concentration, <span class="math inline">\(\kappa\)</span> parameter), we could make the neural network output four numbers, a, b, c and d.&nbsp;We could then take a and b to be our shape and scale, and using the gamma density function turn these into a gamma distribution, and the c and d to be a <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\kappa\)</span>.</p>
+<p>The movement process subnetwork also uses convolutional layers, although this time with max pooling to reduce the dimensionality, to extract features from the input covariates that are salient to movement.</p>
+<p>The outputs the the convolutional layers are then processed by fully connected layers, which can reduce the dimensionality down to a small number of output values. These predicted outputs of the movement subnetwork can be any number of parameters that govern a movement distribution.</p>
+<p>If we wanted a single gamma distribution (described by a shape and scale parameter) and a von Mises distribution (described by a mean, <span class="math inline">\(\mu\)</span>, and concentration, <span class="math inline">\(\kappa\)</span> parameter), we could make the neural network output four numbers, a, b, c and d.&nbsp;We could then take a and b to be our shape and scale, and using the gamma density function turn these into a gamma distribution, and the c and d to be a <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\kappa\)</span>.</p>
 <p>We can then turn these into the two-dimensional movement kernel:</p>
 <p><img src="figures\params_move_kernel.png" class="img-fluid"></p>
 <p>Because we can make the movement subnetwork output any number of parameters (it doesn’t know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a ‘weight’ parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\kappa\)</span> and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.</p>
@@ -356,6 +366,7 @@ window.Quarto = {
 
 
 
+</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
