@@ -1,8 +1,20 @@
 ---
 title: "Model Training"
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+date: 2025-02-15
+# categories: [Quarto, R] # self-defined categories
+# citation: 
+#   url: https://swforrest.github.io/deepSSF/step_selection_intuition.html
 format: html
+bibliography: references.bib
 ---
 
 Here are the scripts for the training the deepSSF model.
 
-There is a script for training the deepSSF model using the derived covariates, and one for the Sentinel-2 satellite imagery.
+There is a script for training the deepSSF model using the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope), and one for the Sentinel-2 satellite imagery + slope.
+
+Both of these scripts are written in Python, and PyTorch is used for training the models.

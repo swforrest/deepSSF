@@ -1,5 +1,5 @@
 ---
-title: "Step Selection and deepSSF Intuition"
+title: "Step Selection Intuition"
 author:
   - name: Scott Forrest
     url: https://swforrest.github.io/

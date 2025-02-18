@@ -1,10 +1,33 @@
 ---
 title: "Predictions"
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+date: 2025-02-15
+# categories: [Quarto, R] # self-defined categories
+# citation: 
+#   url: https://swforrest.github.io/deepSSF/step_selection_intuition.html
 format: html
+bibliography: references.bib
 ---
 
 There are two main ways to generate predictions from the deepSSF models. 
 
-One is the simulate trajectories from the trained model.
+## Simulate trajectories from the trained model
 
-The other is to use the learned convolutional layers on data of any spatial extent, such as the entire landscape.
+The primary aim of training the model is to generate animal movement trajectories from the deepSSF model.
+
+Similar to what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) section, providing that we have a habitat selection probability surface and a movement probability surface, we can combine them into a next-step probability surface that we can sample from.
+
+Here's an example of what the next-step sampling looks like for a trajectory from a model trained on the Sentinel-2 imagery:
+
+![](figures/simulation_S2.gif)
+
+## Use the trained convolution filters to estimate habitat selection across any extent
+
+As the goal of the habitat selection subnetwork is to predict where the animal is likely to move based on the underlying spatial covariates, the other prediction approach is to use the learned convolution filters on data of any spatial extent, such as the entire landscape. The result of this is analagous to the 'naive' approach 
+
+
+We have scripts for both approaches with the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope) and the Sentinel-2 satellite imagery + slope.

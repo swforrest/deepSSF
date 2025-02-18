@@ -1,6 +1,16 @@
 ---
 title: "Inference"
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+date: 2025-02-15
+# categories: [Quarto, R] # self-defined categories
+# citation: 
+#   url: https://swforrest.github.io/deepSSF/step_selection_intuition.html
 format: html
+bibliography: references.bib
 ---
 
 Revealing what the model has learned about the data can help us to understand the movement and habitat selection of our study species, and if we were to include other processes such as memory or social dynamics, we could interrogate the model to also understand these. 
