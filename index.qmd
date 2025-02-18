@@ -6,6 +6,7 @@ author:
     url: https://swforrest.github.io/
     orcid: 0000-0001-9529-0108
     affiliation: Queensland University of Technology, CSIRO
+    email: "scottwforrest@gmail.com"
 date: today
 bibliography: references.bib
 ---

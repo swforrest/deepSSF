@@ -1,6 +1,11 @@
 ---
 title: "SSF Model Fitting"
-author: "Scott Forrest"
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+    email: "scottwforrest@gmail.com"
 date: "`r Sys.Date()`"
 execute: 
   cache: false

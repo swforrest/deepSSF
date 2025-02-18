@@ -6,7 +6,8 @@ author:
     url: https://swforrest.github.io/
     orcid: 0000-0001-9529-0108
     affiliation: Queensland University of Technology, CSIRO
-date: 2025-02-15
+    email: "scottwforrest@gmail.com"
+date: today
 # categories: [Quarto, R] # self-defined categories
 citation: 
   url: https://swforrest.github.io/deepSSF/deepSSF_model_overview.html
