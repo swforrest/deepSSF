@@ -15,19 +15,35 @@ bibliography: references.bib
 
 There are two main ways to generate predictions from the deepSSF models. 
 
+
 ## Simulate trajectories from the trained model
 
 The primary aim of training the model is to generate animal movement trajectories from the deepSSF model.
 
-Similar to what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) section, providing that we have a habitat selection probability surface and a movement probability surface, we can combine them into a next-step probability surface that we can sample from.
+Similar to what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) section under the [Getting Started](getting_started.qmd) tab, providing that we have a habitat selection probability surface and a movement probability surface, we can combine them into a next-step probability surface that we can sample from.
 
 Here's an example of what the next-step sampling looks like for a trajectory from a model trained on the Sentinel-2 imagery:
 
 ![](figures/simulation_S2.gif)
 
+
 ## Use the trained convolution filters to estimate habitat selection across any extent
 
-As the goal of the habitat selection subnetwork is to predict where the animal is likely to move based on the underlying spatial covariates, the other prediction approach is to use the learned convolution filters on data of any spatial extent, such as the entire landscape. The result of this is analagous to the 'naive' approach 
+As the goal of the habitat selection subnetwork is to predict where the animal is likely to move based on the underlying spatial and temporal covariates, the other prediction approach is to use the learned convolution filters on data of any spatial extent, such as the entire landscape. The result of this is analogous to the 'naive' approach of using step selection function (SSF) coefficients equally across the entire landscape [@Signer2017-th]. 
+
+The result is not the expected distribution of the animal(s), but rather the habitat selection surface that ignores the movement dynamics (or, assumes that the animal can access anywhere on the landscape at the next step).
+
+Predicting over broader areas should also be used with caution as covariate values that were not encountered during model training may produce inaccurate or misleading results. Acknowledging these assumptions, we include the landscape-scale habitat selection to suggest they have some utility. 
+
+Primarily, the resultant habitat selection map provides a visual representation of what the habitat selection subnetwork has learned from the environmental covariates, and how this changes with respect to the other covariates such as the hour and day of the year. This can be used as a diagnostic tool for further model development, or as an end in itself, as it highlights the features present in the environmental covariates that the model considered to be influential in determining the next-step's location. From these maps, we can also directly plot the correlation between the covariate values and the habitat selection prediction probability, which represents the marginal contribution of the covariate values. We provide examples of this in the [Inference](inference.qmd) section.
+
+Here's an example of the habitat selection surfaces for two days of the year (highlighting that the model learned differing daily habitat selection across the seasons). Both of these results are from the models fitted to the Sentinel-2 satellite imagery + slope:
+
+![](figures/S2_landscape_preds_yday125.gif)
+
+![](figures/S2_landscape_preds_yday250.gif)
 
 
-We have scripts for both approaches with the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope) and the Sentinel-2 satellite imagery + slope.
+## Scripts
+
+We have scripts for both approaches with the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope) and the Sentinel-2 satellite imagery + slope, which are both written in Python as they use PyTorch for the convolutional layers.
