@@ -7,9 +7,6 @@ author:
     orcid: 0000-0001-9529-0108
     affiliation: Queensland University of Technology, CSIRO
 date: 2025-02-15
-# categories: [Quarto, R] # self-defined categories
-# citation: 
-#   url: https://swforrest.github.io/deepSSF/step_selection_intuition.html
 format: html
 bibliography: references.bib
 ---
