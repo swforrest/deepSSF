@@ -7,7 +7,6 @@ author:
     orcid: 0000-0001-9529-0108
     affiliation: Queensland University of Technology, CSIRO
 date: 2025-02-15
-format: html
 bibliography: references.bib
 ---
 
