@@ -181,36 +181,51 @@ To highlight the relationship we will fit a smoother to the data.
 
 habitat_selection_yday45_long %>% filter(Hour == 1) %>%
   ggplot(aes(x = NDVI, y = Values)) +
-  geom_point(size = 0.1, alpha = 0.5) +
+  geom_point(size = 0.1, alpha = 0.1) +
   geom_smooth(method = "gam") +
+  scale_y_continuous(limits = c(0, 1e-5)) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(
+    title = "NDVI vs Habitat Selection - Hour 1",
     x = "NDVI values",
     y = "Habitat selection"
     )
+
+ggsave("outputs/ndvi_habitat_selection_yday45_hour1.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
 
 habitat_selection_yday45_long %>% filter(Hour == 7) %>%
   ggplot(aes(x = NDVI, y = Values)) +
-  geom_point(size = 0.1, alpha = 0.5) +
+  geom_point(size = 0.1, alpha = 0.1) +
   geom_smooth(method = "gam") +
+  scale_y_continuous(limits = c(0, 1e-5)) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(
+    title = "NDVI vs Habitat Selection - Hour 7",
     x = "NDVI values",
     y = "Habitat selection"
     )
 
+ggsave("outputs/ndvi_habitat_selection_yday45_hour7.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
+
 habitat_selection_yday45_long %>% filter(Hour == 12) %>%
   ggplot(aes(x = NDVI, y = Values)) +
-  geom_point(size = 0.1, alpha = 0.5) +
+  geom_point(size = 0.1, alpha = 0.1) +
   geom_smooth(method = "gam") +
+  scale_y_continuous(limits = c(0, 1e-5)) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(
+    title = "NDVI vs Habitat Selection - Hour 12",
     x = "NDVI values",
     y = "Habitat selection"
     )
+
+ggsave("outputs/ndvi_habitat_selection_yday45_hour12.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
 
 ```
 
@@ -227,12 +242,17 @@ habitat_selection_yday45_long %>%
   geom_point(size = 0.1, alpha = 0.05) +
   geom_smooth(method = "gam") +
   scale_colour_viridis(discrete = T) +
+  scale_y_continuous(limits = c(0, 1e-5)) +
   theme_bw() +
   theme(legend.position = "right") +
   labs(
+    title = "NDVI vs Habitat Selection - All hours",
     x = "NDVI values",
     y = "Habitat selection"
     )
+
+ggsave("outputs/ndvi_habitat_selection_yday45_all_hours.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
 
 ```
 
@@ -260,8 +280,13 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
+# for manuscript
 ggsave("outputs/ndvi_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
+
+# for website
+ggsave("outputs/ndvi_habitat_selection_yday45_website.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
 
 ```
 
@@ -283,8 +308,13 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
+# for manuscript
 ggsave("outputs/ndvi_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
+
+# for website
+ggsave("outputs/ndvi_habitat_selection_yday225_website.png", width = 150, height = 90, 
+       units = "mm", dpi = 300)
 
 ```
 

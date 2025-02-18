@@ -44,6 +44,6 @@ Here's an example of the habitat selection surfaces for two days of the year (hi
 ![](figures/S2_landscape_preds_yday250.gif)
 
 
-## Scripts
+# Scripts
 
 We have scripts for both approaches with the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope) and the Sentinel-2 satellite imagery + slope, which are both written in Python as they use PyTorch for the convolutional layers.
