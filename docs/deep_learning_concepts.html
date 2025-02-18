@@ -239,23 +239,20 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#convolutional-layers" id="toc-convolutional-layers" class="nav-link active" data-scroll-target="#convolutional-layers">Convolutional Layers</a>
+  <li><a href="#online-courses-for-deep-learning" id="toc-online-courses-for-deep-learning" class="nav-link active" data-scroll-target="#online-courses-for-deep-learning">Online courses for deep learning</a></li>
+  <li><a href="#excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" id="toc-excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" class="nav-link" data-scroll-target="#excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning">Excellent videos for developing an intuition about the mechanics of deep learning</a></li>
+  <li><a href="#free-books" id="toc-free-books" class="nav-link" data-scroll-target="#free-books">Free books</a></li>
+  <li><a href="#convolutional-layers" id="toc-convolutional-layers" class="nav-link" data-scroll-target="#convolutional-layers">Convolutional Layers</a>
   <ul class="collapse">
+  <li><a href="#helpful-resources-for-convolutional-layers" id="toc-helpful-resources-for-convolutional-layers" class="nav-link" data-scroll-target="#helpful-resources-for-convolutional-layers">Helpful resources for convolutional layers</a></li>
   <li><a href="#convolution-filters" id="toc-convolution-filters" class="nav-link" data-scroll-target="#convolution-filters">Convolution filters</a></li>
-  <li><a href="#the-maths" id="toc-the-maths" class="nav-link" data-scroll-target="#the-maths">The Maths</a></li>
-  <li><a href="#additional-resources-for-convolutional-layers" id="toc-additional-resources-for-convolutional-layers" class="nav-link" data-scroll-target="#additional-resources-for-convolutional-layers">Additional resources for convolutional layers</a>
-  <ul class="collapse">
-  <li><a href="#animations" id="toc-animations" class="nav-link" data-scroll-target="#animations">Animations</a></li>
-  </ul></li>
+  <li><a href="#the-math" id="toc-the-math" class="nav-link" data-scroll-target="#the-math">The Math</a></li>
   </ul></li>
   <li><a href="#fully-connected-layers" id="toc-fully-connected-layers" class="nav-link" data-scroll-target="#fully-connected-layers">Fully-connected Layers</a>
   <ul class="collapse">
-  <li><a href="#the-maths-1" id="toc-the-maths-1" class="nav-link" data-scroll-target="#the-maths-1">The Maths</a></li>
+  <li><a href="#the-math-1" id="toc-the-math-1" class="nav-link" data-scroll-target="#the-math-1">The Math</a></li>
   </ul></li>
   <li><a href="#max-pooling" id="toc-max-pooling" class="nav-link" data-scroll-target="#max-pooling">Max Pooling</a></li>
-  <li><a href="#activation-functions" id="toc-activation-functions" class="nav-link" data-scroll-target="#activation-functions">Activation Functions</a></li>
-  <li><a href="#loss-functions" id="toc-loss-functions" class="nav-link" data-scroll-target="#loss-functions">Loss Functions</a></li>
-  <li><a href="#backpropagation-and-model-training" id="toc-backpropagation-and-model-training" class="nav-link" data-scroll-target="#backpropagation-and-model-training">Backpropagation and Model Training</a></li>
   </ul>
 </nav>
     </div>
@@ -301,9 +298,30 @@ window.Quarto = {
 
 
 <p>To help understand how the deepSSF model represents animal movement, we show some deep learning concepts in the context of the deepSSF model. Some parts of these are taken directly from the main text of the paper, and some from the Supplementary Materials, both of which we have expanded here.</p>
+<p>There are numerous courses, books and tutorials online that are excellent for getting started with deep learning, many of them free. I’ve provided a couple that I’ve found helpful below, or have been recommended, but there are many, many more.</p>
+<section id="online-courses-for-deep-learning" class="level3">
+<h3 class="anchored" data-anchor-id="online-courses-for-deep-learning">Online courses for deep learning</h3>
+<p><strong>Learn PyTorch for Deep Learning: Zero to Mastery</strong> :https://www.learnpytorch.io/ - I found this resource very useful for getting started with deep learning and PyTorch, and it is accompanied by 25 hours of <a href="https://www.youtube.com/watch?v=Z_ikDlimN6A">YouTube videos</a>!</p>
+<p><strong>PyTorch Tutorials</strong>: https://pytorch.org/tutorials/ - Helpful for getting started with PyTorch, although not as detailed as the course above.</p>
+<p><strong>DeepLearning.AI Courses and other Resources</strong>: https://www.deeplearning.ai/ - I haven’t tried these personally but I have heard they are good.</p>
+</section>
+<section id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning" class="level3">
+<h3 class="anchored" data-anchor-id="excellent-videos-for-developing-an-intuition-about-the-mechanics-of-deep-learning">Excellent videos for developing an intuition about the mechanics of deep learning</h3>
+<p><strong>3Blue1Brown’s Neural Network YoutTube Series</strong> :https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&amp;si=_v1iHPWA8VeecsP0 - Grant Sanderson’s (creator of the 3Blue1Brown channel) YouTube videos are beautiful and extremely informative, particularly for visualising complex processes such as deep learning. The YouTube series on neural networks include an introduction to neural networks (essentially just the fully-connected layers described below), gradient descent, backpropagation, LLMs and more.</p>
+</section>
+<section id="free-books" class="level3">
+<h3 class="anchored" data-anchor-id="free-books">Free books</h3>
+<p><strong>Dive into Deep Learning</strong>: https://d2l.ai/index.html - Interactive deep learning book with code, math, and discussions - Implemented with PyTorch, NumPy/MXNet, JAX, and TensorFlow</p>
+<p><strong>Understanding Deep Learning</strong>: https://udlbook.github.io/udlbook/ - Free PDF download</p>
+<p><strong>Probabilistic Machine Learning: An Introduction</strong>: https://probml.github.io/pml-book/book1.html - This ‘introduction’ is still over 800 pages long, but the ‘ProbML’ book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It’s quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks. - Click the download draft button for a copy</p>
+</section>
 <section id="convolutional-layers" class="level1">
 <h1>Convolutional Layers</h1>
 <p>A convolutional layer applies a series of learned convolution filters across the spatial dimensions of the input, producing feature maps that highlight important patterns or structures. This operation preserves spatial hierarchies within the data and allows the network to capture local dependencies. The processing elements of convolutional layers are therefore the convolution filters.</p>
+<section id="helpful-resources-for-convolutional-layers" class="level3">
+<h3 class="anchored" data-anchor-id="helpful-resources-for-convolutional-layers">Helpful resources for convolutional layers</h3>
+<p><a href="https://poloclub.github.io/cnn-explainer/">CNN explainer</a>: An interactive visualisation of convolution filters and activation functions <a href="https://animatedai.github.io/">Animated AI</a>: Animations over depth (for when we have multiple channels, such as different spatial layers) <a href="https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html">https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html</a>: 2D animations (i.e., for a single channel)</p>
+</section>
 <section id="convolution-filters" class="level2">
 <h2 class="anchored" data-anchor-id="convolution-filters">Convolution filters</h2>
 <p>A convolution filter, also called a kernel, is a small, learned matrix (in our case they were 3 cells x 3 cells) that sweeps across a set of spatial inputs and applies element-wise operations to the input data. Through training, the filter adapts to capture specific features, such as edges or textures, from localised regions of the input. Each filter is optimised via backpropagation to extract important features from the spatial layers. For the deepSSF models the convolution filters give probability to habitat features that are associated with observed buffalo locations.</p>
@@ -312,11 +330,13 @@ window.Quarto = {
 <p>To understand the convolution process, imagine the convolution filter channel starting in the top left corner of the spatial input, say NDVI, with the central cell of the filter in the top left corner. For each cell, the value of NDVI will be multiplied by the corresponding cell in the filter channel, resulting in nine values, which are then summed together to form the top left cell in the <em>intermediate</em> feature map (which are not shown here). The filter then moves to the right by one cell (as the stride is equal to one), and the element-wise multiplication is repeated. This results in transformations of many small, overlapping windows across the spatial input, resulting in another layer (the intermediate feature map).</p>
 <p>This process is repeated for the next input layer, which has its own filter channel, until each input layer has been processed into an intermediate feature map. These intermediate feature maps are then summed to create the output feature map for that filter. During training it is the values of the convolution filters that are updated. It can be helpful to see this process animated, and an example of an animation of a convolution filter across multiple channels can be found at: <a href="https://animatedai.github.io/" class="uri">https://animatedai.github.io/</a>. In the linked animation, the inputs are <span class="math inline">\(7 \times 6 \times 8\)</span>, and each coloured block in the middle represents a <span class="math inline">\(3 \times 3 \times 8\)</span> filter, and in total there are 8 filters. Each coloured layer in the output to the right represents a feature map. Note that there is no padding for these operations, which results in a dimension reduction, but below there is an animation is shown with padding which retains the <span class="math inline">\(d \times d\)</span> dimensions of the inputs, such that we have used in our deepSSF model.</p>
 <p>The benefits of deep learning come from many small operations combining together to represent complex and abstract processes. Here we show all of the convolutional layers that were used in the habitat selection subnetwork, except that for clarity we do not show the temporal inputs (hour of the day and day of the year decomposed into sine and cosine terms), which are also converted to spatial inputs, as shown in Figure 1 in the main text. Each convolution filter has a channel for each of the spatial inputs and produces a single feature map.</p>
-<p>In <strong>Convolution Layer 1</strong> there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e.&nbsp;transform them in different ways). In <strong>Convolutional Layer 2</strong> there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. <strong>Convolutional Layer 3</strong> then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero). The successive convolutional layers are what give deep learning their name, where ‘depth’ is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.</p>
+<p>In <strong>Convolution Layer 1</strong> there are four filters, resulting in four feature maps, which each extract different aspects and features of the inputs (i.e.&nbsp;transform them in different ways). In <strong>Convolutional Layer 2</strong> there are also four filters, except that the inputs to this layer are the feature maps outputted by Convolutional Layer 1. <strong>Convolutional Layer 3</strong> then takes the feature maps from Convolutional Layer 2 as inputs and processes and aggregates them into a single feature map, which are the log probabilities of the habitat selection subnetwork (there is no ReLU after this layer meaning that there can be values less than zero - which are exponentiated values below 1). The successive convolutional layers are what give deep learning their name, where ‘depth’ is described by the number of successive processing layers, allowing for the models to learn a representation for abstract features in the input covariates.</p>
 <p><img src="figures/conv_filters.png" class="img-fluid"></p>
+<p>We can see in the habitat selection subnetwork, we are simply passing the inputs, which are spatial covariates (e.g.&nbsp;NDVI, slope, etc) and temporal covariates which have been turned into grids (see <a href="./deepSSF_model_overview.html">Model Overview</a>), through several convolutional layers which result in the next-step probabilities. During training, <em>the model learns to give probability weight to features (certain values, spatial features) that are associated with the buffalo’s next steps</em>. Thaat means that if there is an observed next step near a river, the model will use the convolution filters to give higher values to the cells in the spatial covariates that describe the river. This could be just the values of the covariates themselves, such as low canopy cover, or it could be the shape of the river described by the arrangement of pixels. As convolution layers assess the local neighbourhood of cells (with a perception that increases as the layers get deeper), they can learn to associate spatial features, such as rivers, waterholes, forest edges, roads, with higher or lower probabilities of being selected as the next step.</p>
+<p><img src="figures/model_diagram_hab.png" class="img-fluid" style="width:50.0%"></p>
 </section>
-<section id="the-maths" class="level2">
-<h2 class="anchored" data-anchor-id="the-maths">The Maths</h2>
+<section id="the-math" class="level2">
+<h2 class="anchored" data-anchor-id="the-math">The Math</h2>
 <p>The convolutional layers employed in our neural network architecture are also known as <em>two-dimensional convolutional layers</em>. Two-dimensional convolutional layers provide a mechanism to learn new features or variables of predictive value from gridded data using sets of convolutional weights that are re-used at different locations over two-dimensional space. The input to a two-dimensional convolutional layer is a three-dimensional input tensor, <span class="math inline">\(\mathbf{Q}\)</span>, with dimensions <span class="math inline">\((d, d, n)\)</span>. In the context of our application, <span class="math inline">\(\mathbf{Q}\)</span> represents a stack of <span class="math inline">\(n\)</span> spatial covariates in a <span class="math inline">\(d \times d\)</span> pixel region of habitat surrounding an individual, which in our case was 101 x 101 cells with 25 m x 25 m resolution. Each of the <span class="math inline">\(n\)</span> spatial covariates (i.e., NDVI, slope, etc.), is usually referred to as a ‘channel’.</p>
 <p>The convolutional layer transforms this stack of spatial layers into a new three-dimensional tensor, <span class="math inline">\(\mathbf{O}\)</span>, with dimensions <span class="math inline">\((d, d, F)\)</span> through the application of <span class="math inline">\(F\)</span> unique convolution filters (also called kernels) that are learned in neural network training. As convolution layers can be considered to transform the inputs covariates and ‘extract features’ from them, the resulting layers denoted by <span class="math inline">\(F\)</span> are often called ‘feature maps’ (see Figures below). Each filter can be represented as a <span class="math inline">\((2w + 1) \times (2w + 1) \times n\)</span> tensor of weights and we denote the collection of these filters as <span class="math inline">\(\mathbf{W}^{(1)}, \dots, \mathbf{W}^{(F)}\)</span>.</p>
 <p>The hyper-parameters <span class="math inline">\(w\)</span> (the spatial width and height in pixels of the filter) and <span class="math inline">\(F\)</span> are user-specified, and in our application were set as <span class="math inline">\(w = 1\)</span> and <span class="math inline">\(F = 4\)</span> in all cases except in the final convolutional layer that had <span class="math inline">\(F = 1\)</span> to aggregate the preceding feature maps into the final habitat selection map. For <span class="math inline">\(w = 1\)</span>, each filter can be thought of as consisting of <span class="math inline">\(n\)</span> convolution filters of dimension <span class="math inline">\(3 \times 3\)</span>. Applying filter <span class="math inline">\(f \in \{ 1, \dots, F \}\)</span>, results in a <span class="math inline">\(d \times d\)</span> matrix, <span class="math inline">\(\mathbf{O}^{(f)}\)</span>, with elements</p>
@@ -325,15 +345,6 @@ window.Quarto = {
 \]</span></p>
 <p>where we take <span class="math inline">\(\mathbf{Q}_{i, j, z} = 0\)</span> for any index for which one or more of the following is true: <span class="math inline">\(i &lt; 1\)</span>, <span class="math inline">\(i &gt; d_i\)</span>, <span class="math inline">\(j &lt; 1\)</span>, or <span class="math inline">\(j &gt; d_j\)</span>. The parameter <span class="math inline">\(b_f\)</span> denotes the added bias parameter (a scalar that is analogous to an intercept in a regression model) for each filter and that is also learned during training. The function <span class="math inline">\(\sigma(\cdot)\)</span> is an activation function that is applied element-wise to its argument. For our model, the activation function was the rectified linear unit (ReLU), defined as <span class="math inline">\(\text{ReLU}(x) = \max(0, x)\)</span>.</p>
 <p>The output tensor of the two-dimensional convolutional layer is the tensor created by combining each of the matrices <span class="math inline">\(\mathbf{O}^{(1)}, \dots, \mathbf{O}^{(F)}\)</span> along a third dimension. The elements of <span class="math inline">\(\mathbf{O}\)</span> can therefore be written as <span class="math inline">\(\mathbf{O}_{i, j, k} = \mathbf{O}^{(k)}_{i, j}\)</span>. Ultimately, each two-dimensional convolutional layer introduces <span class="math inline">\(F[(2w + 1)(2w + 1) n + 1]\)</span> parameters to the model that must be learned from the training data.</p>
-</section>
-<section id="additional-resources-for-convolutional-layers" class="level2">
-<h2 class="anchored" data-anchor-id="additional-resources-for-convolutional-layers">Additional resources for convolutional layers</h2>
-<p><a href="https://poloclub.github.io/cnn-explainer/">CNN explainer</a></p>
-<section id="animations" class="level3">
-<h3 class="anchored" data-anchor-id="animations">Animations</h3>
-<p><a href="https://animatedai.github.io/">Animated AI</a><br>
-<a href="https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html">https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html</a></p>
-</section>
 </section>
 </section>
 <section id="fully-connected-layers" class="level1">
@@ -346,8 +357,8 @@ window.Quarto = {
 </figure>
 </div>
 <p>In our case we used fully-connected layers in the movement subnetwork to process the outputs of the convolutional layers into movement parameters than defined our movement kernel.</p>
-<section id="the-maths-1" class="level2">
-<h2 class="anchored" data-anchor-id="the-maths-1">The Maths</h2>
+<section id="the-math-1" class="level2">
+<h2 class="anchored" data-anchor-id="the-math-1">The Math</h2>
 <p>A fully connected layer in the neural network, maps an input vector <span class="math inline">\(\boldsymbol{u}\)</span> of length <span class="math inline">\(n_u\)</span> to an output vector <span class="math inline">\(\boldsymbol{o}\)</span> of length <span class="math inline">\(n_o\)</span> using <span class="math display">\[
 \mathbf{o} = \sigma(\mathbf{W} \mathbf{u} + \mathbf{b}),
 \]</span></p>
@@ -357,15 +368,32 @@ window.Quarto = {
 </section>
 <section id="max-pooling" class="level1">
 <h1>Max Pooling</h1>
-</section>
-<section id="activation-functions" class="level1">
-<h1>Activation Functions</h1>
-</section>
-<section id="loss-functions" class="level1">
-<h1>Loss Functions</h1>
-</section>
-<section id="backpropagation-and-model-training" class="level1">
-<h1>Backpropagation and Model Training</h1>
+<p>Max pooling is an operation that is often used in convolutional neural networks to reduce dimensionality and condense information. Here we present a typical way that max pooling is applied in practice (and how it is applied in our model). The max pooling operation is best thought of as a function that accepts an <span class="math inline">\(a \times a\)</span> matrix, <span class="math inline">\(\mathbf{A}\)</span>, as input and outputs an <span class="math inline">\(a^{\star} \times a^{\star}\)</span> matrix <span class="math inline">\(\mathbf{A}^{\star}\)</span>, where <span class="math inline">\(a^{\star} = \frac{a}{k}\)</span>. For simplicity here, we assume that <span class="math inline">\(\frac{a}{k}\)</span> is integer-valued, but where this is not the case, the dimensions of the matrix <span class="math inline">\(\mathbf{A}\)</span> can be modified using “padding” to augment the matrix with additional rows and columns at it’s edges.</p>
+<p>We refer to <span class="math inline">\(k\)</span> as the kernel-width in the max pooling operation and use this to partition the matrix <span class="math inline">\(\mathbf{A}\)</span> as</p>
+<p><span class="math display">\[\mathbf{A} = \left(\begin{array}{cccc}
+\mathbf{A}_{1, 1} &amp; \mathbf{A}_{1, 2}  &amp; \dots &amp; \mathbf{A}_{1, a^{\star}}  \\  
+\mathbf{A}_{2, 1} &amp; \mathbf{A}_{2, 2} &amp; \dots &amp; \mathbf{A}_{2, a^{\star}} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\mathbf{A}_{a^{\star}, 1} &amp; \mathbf{A}_{a^{\star}, 2} &amp; \dots &amp; \mathbf{A}_{a^{\star}, a^{\star}}
+\end{array}\right),\]</span></p>
+<p>where each sub-matrix <span class="math inline">\(\mathbf{A}_{i, j}\)</span> <span class="math inline">\((i, j \in \{1, \dots, a^{\star} \})\)</span> is of dimension <span class="math inline">\(k \times k\)</span>. The output of the max pooling operation is the matrix <span class="math inline">\(\mathbf{A}^{\star}\)</span> which we define as</p>
+<p><span class="math display">\[\mathbf{A}^{\star} = \left(\begin{array}{cccc}
+\max(\mathbf{A}_{1, 1}) &amp; \max(\mathbf{A}_{1, 2})  &amp; \dots &amp; \max(\mathbf{A}_{1, a^{\star}})  \\  
+\max(\mathbf{A}_{2, 1}) &amp; \max(\mathbf{A}_{2, 2}) &amp; \dots &amp; \max(\mathbf{A}_{2, a^{\star}}) \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\max(\mathbf{A}_{a^{\star}, 1}) &amp; \max(\mathbf{A}_{a^{\star}, 2}) &amp; \dots &amp; \max(\mathbf{A}_{a^{\star}, a^{\star}})
+\end{array}\right).\]</span></p>
+<p>Max pooling can therefore be seen as simultaneously reducing the dimension of a matrix by a factor of <span class="math inline">\(k\)</span>, and highlighting the extremes of the input feature matrix <span class="math inline">\(\mathbf{A}\)</span> over space.</p>
+<p>In practice, max pooling operations often follow two-dimensional convolutional blocks in a neural network model. Where the convolutional blocks have more than one filter, the input to the max pooling operation will actually be an <span class="math inline">\(a \times a \times F\)</span> tensor (a three-dimensional array), where <span class="math inline">\(F\)</span> is the number of filters that are learned by the model in each convolutional layer. In this case, the max pooling operation described above is simply applied independently to each of <span class="math inline">\(F\)</span> matrices of size <span class="math inline">\(a \times a\)</span> and each of the <span class="math inline">\(a^{\star} \times a^{\star}\)</span> sub-matrices are stacked to create a <span class="math inline">\(a^{\star} \times a^{\star} \times f\)</span> tensor that is passed to the next layer in the network (often another convolutional layer).</p>
+<!-- # Activation Functions
+
+
+
+# Loss Functions
+
+
+
+# Backpropagation and Model Training -->
 
 
 </section>

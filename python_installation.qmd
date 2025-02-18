@@ -1,5 +1,5 @@
 ---
-title: "Setting up Python and the deepSSF code"
+title: "Setting up Python and using the deepSSF code"
 format: html
 ---
 
