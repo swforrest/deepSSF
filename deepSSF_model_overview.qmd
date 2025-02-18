@@ -8,9 +8,6 @@ author:
     affiliation: Queensland University of Technology, CSIRO
     email: "scottwforrest@gmail.com"
 date: today
-# categories: [Quarto, R] # self-defined categories
-citation: 
-  url: https://swforrest.github.io/deepSSF/deepSSF_model_overview.html
 bibliography: references.bib
 ---
 
@@ -18,23 +15,23 @@ If you haven't already, I recommend checking out the [Step Selection Intuition](
 
 As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we kept the general structure of step selection functions (SSFs) [@Fortin2005-zw; @Forester2009-bg, @Signer2019-fi], but replaced the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers. 
 
-To use deep learning in this context, we can again imagine separating out the habitat selection and the movement processes. This allows us to replace both the log-linear habitat selection component and the estimation of the movement parameters with deep learning components.
-
 The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.
 
 # Model architecture
 
-There are two subnetworks: a habitat selection and a movement process subnetwork.
+To be analogous to SSFs, there are two subnetworks representing two processes of animal movement: a habitat selection and a movement process subnetwork.
 
 ## Inputs
 Both subnetworks receive the same inputs, which are spatial layers such as environmental covariates, scalar covariates such as the hour, the day of the year (yday, also called 'ordinal' or 'Julian' day), and the movement process also receives the bearing of the previous step. The periodic components (i.e. hour and yday) are decomposed into sine and cosine components to wrap continuously as a period, before being converted into spatial layers with constant values so they can be processed by the convolutional layer. To ensure that the turning angles are relative to the previous step, the bearing of the previous step is added directly to the predicted mean ($\mu$) parameters of von Mises distributions. 
 
 ![](figures/model_diagram_inputs.png)
 
+This gives us a stack of local covariates which we can pass to the subnetworks.
+
 
 ## Habitat selection subnetwork
 
-For the habitat selection process, we need to go from our spatial covariates to a habitat selection probability surface. We can do this using convolutional layers, which process spatial information and transform it into something else. 
+For the habitat selection process, we need to go from our spatial covariates to a habitat selection probability surface. We can do this using convolutional layers, which use convolution filters to process spatial information and transform it into something else. 
 
 Firstly, we set the target of the model (what the model is trying to predict) to be where the next step is, we do this by extracting the habitat selection probability at the location of the next step. When the model makes more accurate predictions, these values will be higher. The model will then try to increase the probability at the locations of the observed next steps (by minimising the negative-log of this value). 
 
@@ -85,9 +82,9 @@ As the model learns it starts to pick out certain features of the landscape that
 
 
 ## Generating trajectories
-The process of actually generating trajectories is the same as what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) tab: 
+The process of generating trajectories is the same as what we showed in the [Step Selection Intuition](step_selection_intuition.qmd) tab: 
 
-We have some starting location, the local layers for that point are extracted and run through the model which generates the next-step probability surface, and a step is sampled according to these probability values. 
+We have some starting location, the local layers for that point are extracted and run through the model, which generates the next-step probability surface, and a step is sampled according to these probability values. 
 
 Here's an animation of what that looks like for when the model has been trained on Sentinel-2 data:
 

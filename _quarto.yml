@@ -5,6 +5,7 @@ project:
 
 website:
   title: "deepSSF"
+  page-navigation: true
   navbar:
     # background: "#FCAB64"
     left:

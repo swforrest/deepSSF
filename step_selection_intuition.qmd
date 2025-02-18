@@ -89,5 +89,7 @@ Although, a promising approach for including temporal dynamics and interactions 
 
 # deepSSF
 
-Head to the [deepSSF Model Overview](deepSSF_model_overview.qmd) tab for how we set up the model and an overview of the deepSSF model in more detail.
+When we formulate the problem in this way, with explicit processes of movement and habitat selection, it starts to become easier to see how we might use different modelling approaches. From the spatial (and temporal) covariates we need to quantify a relationship to the animal's observed locations, indicating what resources are likely to be selected, and we need to parameterise a movement kernel from the observed data.
+
+We show how we do this in the [deepSSF Model Overview](deepSSF_model_overview.qmd) tab, where we provide an overview of the deepSSF model in more detail.
 

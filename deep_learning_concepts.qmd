@@ -18,30 +18,32 @@ To help understand how the deepSSF model represents animal movement, we show som
 
 There are numerous courses, books and tutorials online that are excellent for getting started with deep learning, many of them free. I've provided a couple that I've found helpful below, or have been recommended, but there are many, many more.
 
-### Online courses for deep learning
-**Learn PyTorch for Deep Learning: Zero to Mastery** :https://www.learnpytorch.io/
+# Additional Resources
+
+## Online courses for deep learning
+**Learn PyTorch for Deep Learning: Zero to Mastery**: [https://www.learnpytorch.io/](https://www.learnpytorch.io/)
 - I found this resource very useful for getting started with deep learning and PyTorch, and it is accompanied by 25 hours of [YouTube videos](https://www.youtube.com/watch?v=Z_ikDlimN6A)!
 
-**PyTorch Tutorials**: https://pytorch.org/tutorials/
+**PyTorch Tutorials**: [https://pytorch.org/tutorials/](https://pytorch.org/tutorials/)
 - Helpful for getting started with PyTorch, although not as detailed as the course above.
 
-**DeepLearning.AI Courses and other Resources**: https://www.deeplearning.ai/
+**DeepLearning.AI Courses and other Resources**: [https://www.deeplearning.ai/](https://www.deeplearning.ai/)
 - I haven't tried these personally but I have heard they are good. 
 
-### Excellent videos for developing an intuition about the mechanics of deep learning
-**3Blue1Brown's Neural Network YoutTube Series** :https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=_v1iHPWA8VeecsP0
+## Excellent videos for developing an intuition about the mechanics of deep learning
+**3Blue1Brown's Neural Network YoutTube Series**: [https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=_v1iHPWA8VeecsP0](https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=_v1iHPWA8VeecsP0)
 - Grant Sanderson's (creator of the 3Blue1Brown channel) YouTube videos are beautiful and extremely informative, particularly for visualising complex processes such as deep learning. The YouTube series on neural networks include an introduction to neural networks (essentially just the fully-connected layers described below), gradient descent, backpropagation, LLMs and more.
 
-### Free books
-**Dive into Deep Learning**: https://d2l.ai/index.html 
-- Interactive deep learning book with code, math, and discussions
+## Free books
+**Dive into Deep Learning**: [https://d2l.ai/index.html](https://d2l.ai/index.html)  
+- Interactive deep learning book with code, math, and discussions  
 - Implemented with PyTorch, NumPy/MXNet, JAX, and TensorFlow
 
-**Understanding Deep Learning**: https://udlbook.github.io/udlbook/
+**Understanding Deep Learning**: [https://udlbook.github.io/udlbook/](https://udlbook.github.io/udlbook/)  
 - Free PDF download
 
-**Probabilistic Machine Learning: An Introduction**: https://probml.github.io/pml-book/book1.html
-- This 'introduction' is still over 800 pages long, but the 'ProbML' book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It's quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks.
+**Probabilistic Machine Learning: An Introduction**: [https://probml.github.io/pml-book/book1.html](https://probml.github.io/pml-book/book1.html)  
+- This 'introduction' is still over 800 pages long, but the 'ProbML' book is an introduction to probabilistic machine learning more generally, which includes probability theory, statistics theory, regression models and more, before getting into deep learning. It's quite a mathematical entry, but it clearly highlights the links between typical statistical models and techniques with deep learning models, such as neural networks.  
 - Click the download draft button for a copy
 
 # Convolutional Layers
@@ -49,9 +51,9 @@ There are numerous courses, books and tutorials online that are excellent for ge
 A convolutional layer applies a series of learned convolution filters across the spatial dimensions of the input, producing feature maps that highlight important patterns or structures. This operation preserves spatial hierarchies within the data and allows the network to capture local dependencies. The processing elements of convolutional layers are therefore the convolution filters.
 
 ### Helpful resources for convolutional layers
-[CNN explainer](https://poloclub.github.io/cnn-explainer/): An interactive visualisation of convolution filters and activation functions
-[Animated AI](https://animatedai.github.io/): Animations over depth (for when we have multiple channels, such as different spatial layers)
-[https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html](https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html): 2D animations (i.e., for a single channel)
+[CNN explainer](https://poloclub.github.io/cnn-explainer/): An interactive visualisation of convolution filters and activation functions  
+[Animated AI](https://animatedai.github.io/): Animations over depth (for when we have multiple channels, such as different spatial layers)  
+[https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html](https://hannibunny.github.io/mlbook/neuralnetworks/convolutionDemos.html): 2D animations (i.e., for a single channel)  
 
 ## Convolution filters
 

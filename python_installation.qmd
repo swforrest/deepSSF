@@ -46,7 +46,7 @@ Most of these packages can be installed with `conda install -c conda-forge <pack
 
 When you have VS Code (or similar) up and running, create the folder that you want to work in (i.e. for saving scripts and saving plots etc). Or, if you don't have a folder yet and want to use a [GitHub](https://github.com/) repository, then I suggest creating a repository and 'Cloning' it to your local computer. This will provide you with a folder to work in, and you can push the files directly to GitHub (just make sure anything you don't want pushed to GitHub is listed in the `.gitignore` file).
 
-**Note: this folder should be different to your conda environment!** The conda environment is Python and your packages are stored (which seems to work better when its close to your computer's root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn't need to close to the root of your computer, for instance I have mine in a OneDrive folder.
+**Note: this folder should be different to your conda environment!** The conda environment is where Python and your packages are stored (which seems to work better when its close to your computer's root directory), and the working directory is where you store you data, scripts and outputs, and may be linked to a GitHub repository. This working directory doesn't need to close to the root of your computer, for instance I have mine in a OneDrive folder.
 
 ![](figures/vscode_startup.png)
 
