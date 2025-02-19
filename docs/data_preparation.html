@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-18">
+<meta name="dcterms.date" content="2025-02-19">
 
 <title>Data Preparation – deepSSF</title>
 <style>
@@ -194,8 +194,14 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#scripts" id="toc-scripts" class="nav-link active" data-scroll-target="#scripts">Scripts</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -226,7 +232,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 18, 2025</p>
+      <p class="date">February 19, 2025</p>
     </div>
   </div>
   
@@ -239,13 +245,31 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>To train the deepSSF model, we need to crop out local layers for each of our covariates at every observed step in the trajectory. These local layers must be centred on the current step (as the movement kernel is centred on the centre cell), and the next step becomes our ‘target’.</p>
+<p>An example for a single step may look something like the image below, where we have a local covariate that is 101 x 101 cells (an odd number so we have a central cell) that are 25 m x 25 m each, resulting in a map that is 2525 m x 2525 m. This is a distance of 1262.5 m to the nearest edge from the central cell, which covers about 97% of the observed step lengths.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_covs.png" class="img-fluid figure-img"></p>
+<figcaption>The current location of the individual is in the exact centre cell</figcaption>
+</figure>
+</div>
+<p>What we are trying to predict, or the ‘target’, is the location of the next step, which might look something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_target.png" class="img-fluid figure-img"></p>
+<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location</figcaption>
+</figure>
+</div>
+<p>Therefore, for each step we need the cropped out ‘local’ layers, which are 101 x 101 cells with the current location in the centre, and the target, which is the location of the next step. Once we have those for every step we are ready to start training the deep learning model. We also want the temporal covariates, but these we just save in a dataframe, which we turn into grids for training during the <a href="./Python/deepSSF_train.html">deepSSF_train</a> scripts.</p>
 <p>We save the local spatial layers as one stack per covariate, with a layer for each step. So if we had layers for NDVI and slope that we wanted to use as covariates, and there were 1,000 steps in the trajectory, we would save a raster stack object for NDVI with 1,000 layers, one for slope with 1,000 layers, and then another stack with 1,000 layers for the target (which has values of 0 everywhere except at the location of the next step, which is 1).</p>
 <p>When we import these raster stacks into Python we turn them into NumPy arrays and then turn them into PyTorch tensors (which are required for training the model using PyTorch), and stack the covariates together along a different dimension that represents each of the covariates, ready for training.</p>
 <p>Another option is to save every local layers for each covariate separately, and have the filenames stored in a dataframe, with a column for each of the covariates. This setup is a more common approach for importing image data for training deep learning models, and we may opt for this in future applications of the approach, particularly when there is more data as the raster objects can be quite large.</p>
+<section id="scripts" class="level1">
+<h1>Scripts</h1>
 <p>There is a script for preparing the data using ‘derived’ covariates (NDVI, canopy cover, herbaceous vegetation and slope), and a script for preparing data using Sentinel-2 imagery, which has 12 Sentinel-2 bands, as well as slope. We could have cropped out the local layers for all of the covariates (derived + Sentinel-2) in a single script, although each one takes a while to run, so we thought it best to keep them separate in case all layers aren’t needed (it should be straightforward to add in your own layers).</p>
 <p>Both of the data preparation scripts are written in R.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

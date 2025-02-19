@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-18">
+<meta name="dcterms.date" content="2025-02-19">
 
 <title>deepSSF Model Overview – deepSSF</title>
 <style>
@@ -301,7 +301,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 18, 2025</p>
+      <p class="date">February 19, 2025</p>
     </div>
   </div>
   
@@ -316,6 +316,23 @@ window.Quarto = {
 <p>If you haven’t already, I recommend checking out the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for how we set up the deepSSF model.</p>
 <p>As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we kept the general structure of step selection functions (SSFs) <span class="citation" data-cites="Fortin2005-zw Forester2009-bg">Signer, Fieberg, and Avgar (<a href="#ref-Signer2019-fi" role="doc-biblioref">2019</a>)</span>, but replaced the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers.</p>
 <p>The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.</p>
+<p>Essentially, we have some set of covariates, which for the deepSSF case we need to crop out ‘<strong>local</strong>’ layers that are 101 x 101 cells (at 25 m each), which cover around 97% of the observed step lengths.</p>
+<p>An example for a single step may look something like the image below, where the <em>current location is in the central cell</em>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_covs.png" class="img-fluid figure-img"></p>
+<figcaption>The current location of the individual is in the exact centre cell</figcaption>
+</figure>
+</div>
+<p>What we are trying to predict, or the ‘target’, is the <em>location of the next step</em>, which might look something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_target.png" class="img-fluid figure-img"></p>
+<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location</figcaption>
+</figure>
+</div>
+<p>The way that we do this is essentially the same as was described in the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab - we want to maximise the probability of where the next step is going to be based on the underlying habitat covariates (replacing the RSF-like component), and generate a movement kernel that replicates the observed movement dynamics, which also means giving a high probability weight to where the next steps were.</p>
+<p>Similarly to the SSF approach, we have dinstinct but interacting ‘submodels’ for the habitat selection and the movement processes, which we call ‘subnetworks’, as they are parts of the full network (we use the term network, which is often used to describe neural networks, and model interchangeably). One is constrained to be responsible only for the habitat selection, by doing the same transformation equally across each local layer using convolutional layers, and the other is constrained to be responsible only for the movement, as it outputs parameters that describe step length and turning angle distributions, which form the movement kernel.</p>
 <section id="model-architecture" class="level1">
 <h1>Model architecture</h1>
 <p>To be analogous to SSFs, there are two subnetworks representing two processes of animal movement: a habitat selection and a movement process subnetwork.</p>

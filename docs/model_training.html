@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-18">
+<meta name="dcterms.date" content="2025-02-19">
 
 <title>Model Training – deepSSF</title>
 <style>
@@ -194,8 +194,14 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#scripts" id="toc-scripts" class="nav-link active" data-scroll-target="#scripts">Scripts</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -226,7 +232,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 18, 2025</p>
+      <p class="date">February 19, 2025</p>
     </div>
   </div>
   
@@ -238,11 +244,19 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Here are the scripts for the training the deepSSF model.</p>
+<p>In the tabs to the left are the scripts for the training the deepSSF model.</p>
+<p>The goal of training the model are to use backpropagation to find the parameters of the convolution filters in the habitat network that result in high probability of selection for the underlying covariate values and features, and the parameters of the convolution filters and fully-connected layer parameters that result in a movement kernel that captures the observed movement dynamics. Both of these processes depend on the time of the day and year, which will influence the predictions by their inclusion as covariates.</p>
+<p>Here’s an animation of the model’s predictions for a single step as it trains.</p>
+<p><img src="figures/model_training.gif" class="img-fluid"></p>
+<p>We can see the habitat selection subnetwork starts to give probability weight to certain features as it learns their association to next-steps. We can see this quite clearly with the river feature, which receives progressively less probability (suggesting avoidance) as the training progresses.</p>
+<p>As the model fine-tunes, the habitat selection process becomes more defined in the next-step probabilities.</p>
+<section id="scripts" class="level1">
+<h1>Scripts</h1>
 <p>There is a script for training the deepSSF model using the derived covariates (NDVI, canopy cover, herbaceous vegetation and slope), and one for the Sentinel-2 satellite imagery + slope.</p>
 <p>Both of these scripts are written in Python, and PyTorch is used for training the models.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
