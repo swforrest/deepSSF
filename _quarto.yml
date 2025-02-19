@@ -6,6 +6,9 @@ project:
 website:
   title: "deepSSF"
   page-navigation: true
+  google-analytics: 
+    tracking-id: "G-BYRMN2C7ZE"
+    storage: none
   navbar:
     # background: "#FCAB64"
     left:
