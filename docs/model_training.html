@@ -247,8 +247,27 @@ ul.task-list li input[type="checkbox"] {
 <p>In the tabs to the left are the scripts for the training the deepSSF model.</p>
 <p>The goal of training the model are to use backpropagation to find the parameters of the convolution filters in the habitat network that result in high probability of selection for the underlying covariate values and features, and the parameters of the convolution filters and fully-connected layer parameters that result in a movement kernel that captures the observed movement dynamics. Both of these processes depend on the time of the day and year, which will influence the predictions by their inclusion as covariates.</p>
 <p>Here’s an animation of the model’s predictions for a single step as it trains.</p>
-<p><img src="figures/model_training.gif" class="img-fluid"></p>
-<p>We can see the habitat selection subnetwork starts to give probability weight to certain features as it learns their association to next-steps. We can see this quite clearly with the river feature, which receives progressively less probability (suggesting avoidance) as the training progresses.</p>
+<p>If we have some set of covariates:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_covs.png" class="img-fluid figure-img"></p>
+<figcaption>The current location of the individual is in the exact centre cell</figcaption>
+</figure>
+</div>
+<p>And what we are trying to predict, or the <strong>target</strong>, is the <em>location of the next step</em>, which might look something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_target.png" class="img-fluid figure-img"></p>
+<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures\model_training.gif" class="img-fluid figure-img"></p>
+<figcaption><strong>Note</strong>: the model is being trained on <em>all</em> of the observed data, which are iterated over many times, but we just show a single set of covariates to highlight how the predictions for that set of covariates changes throughout the training process.</figcaption>
+</figure>
+</div>
+<p>All of the parameters start as random values, but as the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.</p>
 <p>As the model fine-tunes, the habitat selection process becomes more defined in the next-step probabilities.</p>
 <section id="scripts" class="level1">
 <h1>Scripts</h1>

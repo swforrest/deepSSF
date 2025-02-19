@@ -17,15 +17,15 @@ As our focus is on prediction, we want a model that is flexible and can represen
 
 The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.
 
-Essentially, we have some set of covariates, which for the deepSSF case we need to crop out '**local**' layers that are 101 x 101 cells (at 25 m each), which cover around 97% of the observed step lengths.
+Essentially, we have some set of covariates, and for the deepSSF model we want to crop out **local** layers of a size that includes most of the observed steps. For the water buffalo we made the local layers 101 x 101 cells (at 25 m each), which cover around 97% of the observed steps (i.e. imagine if you were to plot all of the 'next steps' from the central cell).
 
 An example for a single step may look something like the image below, where the *current location is in the central cell*.
 
 ![The current location of the individual is in the exact centre cell](figures/example_covs.png)
 
-What we are trying to predict, or the 'target', is the *location of the next step*, which might look something like this:
+What we are trying to predict, or the **target**, is the *location of the next step*, which might look something like this:
 
-![The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location](figures/example_target.png)
+![The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell](figures/example_target.png)
 
 The way that we do this is essentially the same as was described in the [Step Selection Intuition](step_selection_intuition.qmd) tab - we want to maximise the probability of where the next step is going to be based on the underlying habitat covariates (replacing the RSF-like component), and generate a movement kernel that replicates the observed movement dynamics, which also means giving a high probability weight to where the next steps were.
 
@@ -71,7 +71,7 @@ We can then turn these into the two-dimensional movement kernel:
 
 Because we can make the movement subnetwork output any number of parameters (it doesn't know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a 'weight' parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a $\mu$, $\kappa$ and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.
 
-![](figures/model_diagram_move.png)
+![The bearing of hte previous step is added to the $\mu$ parameters of the turning angle distributions, as we are just estimating the deviation from the current bearing. This previous bearing is shown in the movement probability surface with the black arrow and the $\theta$ symobol.](figures/model_diagram_move.png)
 
 
 ## Full model
@@ -90,9 +90,17 @@ Therefore, if the model predicts let's say movement parameter values that result
 
 We can see what the model looks like during training by taking a single set of input covariates, and generating predictions after every epoch (complete iteration through the training data). 
 
-![](figures\model_training.gif)
+Here are the set of covariates again:
 
-As the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
+![The current location of the individual is in the exact centre cell](figures/example_covs.png)
+
+And what we are trying to predict, or the **target**, is the *location of the next step*, which might look something like this:
+
+![The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell](figures/example_target.png)
+
+![**Note**: the model is being trained on *all* of the observed data, which are iterated over many times, but we just show a single set of covariates to highlight how the predictions for that set of covariates changes throughout the training process.](figures\model_training.gif)
+
+All of the parameters start as random values, but as the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
 
 
 ## Generating trajectories

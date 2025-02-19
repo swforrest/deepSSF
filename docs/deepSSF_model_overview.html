@@ -316,7 +316,7 @@ window.Quarto = {
 <p>If you haven’t already, I recommend checking out the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab, which should hopefully provide some intuition about step selection and step selection functions (SSFs), which is the foundation for how we set up the deepSSF model.</p>
 <p>As our focus is on prediction, we want a model that is flexible and can represent the complicated movement and habitat selection behaviour of our species. For this we kept the general structure of step selection functions (SSFs) <span class="citation" data-cites="Fortin2005-zw Forester2009-bg">Signer, Fieberg, and Avgar (<a href="#ref-Signer2019-fi" role="doc-biblioref">2019</a>)</span>, but replaced the conditional logistic regression habitat selection and movement components with deep learning components such as convolutional layers and fully-connected layers.</p>
 <p>The inputs and outputs of the deepSSF model are essentially the same as for SSFs (although by using convolutional layers we can input spatial layers directly rather than having to randomly sample availability), it is just that the model that encodes the relationship between the GPS data, the habitat, and time are more flexible. This has benefits for predictability, but some costs for interpretability. Be we kept the deepSSF model relatively simple (compared to most deep learning models), and by separating the movement and habitat selection processes, we still have some explainability, but it is different than interpreting the coefficients from an SSF.</p>
-<p>Essentially, we have some set of covariates, which for the deepSSF case we need to crop out ‘<strong>local</strong>’ layers that are 101 x 101 cells (at 25 m each), which cover around 97% of the observed step lengths.</p>
+<p>Essentially, we have some set of covariates, and for the deepSSF model we want to crop out <strong>local</strong> layers of a size that includes most of the observed steps. For the water buffalo we made the local layers 101 x 101 cells (at 25 m each), which cover around 97% of the observed steps (i.e.&nbsp;imagine if you were to plot all of the ‘next steps’ from the central cell).</p>
 <p>An example for a single step may look something like the image below, where the <em>current location is in the central cell</em>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -324,11 +324,11 @@ window.Quarto = {
 <figcaption>The current location of the individual is in the exact centre cell</figcaption>
 </figure>
 </div>
-<p>What we are trying to predict, or the ‘target’, is the <em>location of the next step</em>, which might look something like this:</p>
+<p>What we are trying to predict, or the <strong>target</strong>, is the <em>location of the next step</em>, which might look something like this:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/example_target.png" class="img-fluid figure-img"></p>
-<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location</figcaption>
+<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell</figcaption>
 </figure>
 </div>
 <p>The way that we do this is essentially the same as was described in the <a href="./step_selection_intuition.html">Step Selection Intuition</a> tab - we want to maximise the probability of where the next step is going to be based on the underlying habitat covariates (replacing the RSF-like component), and generate a movement kernel that replicates the observed movement dynamics, which also means giving a high probability weight to where the next steps were.</p>
@@ -359,7 +359,12 @@ window.Quarto = {
 <p>We can then turn these into the two-dimensional movement kernel:</p>
 <p><img src="figures\params_move_kernel.png" class="img-fluid"></p>
 <p>Because we can make the movement subnetwork output any number of parameters (it doesn’t know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a ‘weight’ parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\kappa\)</span> and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.</p>
-<p><img src="figures/model_diagram_move.png" class="img-fluid"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/model_diagram_move.png" class="img-fluid figure-img"></p>
+<figcaption>The bearing of hte previous step is added to the <span class="math inline">\(\mu\)</span> parameters of the turning angle distributions, as we are just estimating the deviation from the current bearing. This previous bearing is shown in the movement probability surface with the black arrow and the <span class="math inline">\(\theta\)</span> symobol.</figcaption>
+</figure>
+</div>
 </section>
 <section id="full-model" class="level2">
 <h2 class="anchored" data-anchor-id="full-model">Full model</h2>
@@ -372,8 +377,27 @@ window.Quarto = {
 <p>This is where the loss function comes in. Our loss function is the probability value at the actual location of the next step. We want to maximise the probability values at the location of the next step, so we take the log of the probability value and make it negative (i.e., the negative-log-likelihood), and then minimise that, thereby maximising the next-step probability.</p>
 <p>Therefore, if the model predicts let’s say movement parameter values that result in a low probability value at the location of the next step, the model should update its weights to move towards higher probability values. It therefore needs to know which direction to adjust the weights, and by how much. It does this by using the gradient of the loss function with respect to the weights, through a process called ‘backpropagation’. I won’t go into detail here but I suggest you check out the <a href="https://www.youtube.com/watch?v=Ilg3gGewQ5U&amp;list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&amp;index=3">3Blue1Brown video</a> that covers backpropagation, as well as the rest of the ‘Neural networks’ series - his videos are fantastic!</p>
 <p>We can see what the model looks like during training by taking a single set of input covariates, and generating predictions after every epoch (complete iteration through the training data).</p>
-<p><img src="figures\model_training.gif" class="img-fluid"></p>
-<p>As the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.</p>
+<p>Here are the set of covariates again:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_covs.png" class="img-fluid figure-img"></p>
+<figcaption>The current location of the individual is in the exact centre cell</figcaption>
+</figure>
+</div>
+<p>And what we are trying to predict, or the <strong>target</strong>, is the <em>location of the next step</em>, which might look something like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/example_target.png" class="img-fluid figure-img"></p>
+<figcaption>The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures\model_training.gif" class="img-fluid figure-img"></p>
+<figcaption><strong>Note</strong>: the model is being trained on <em>all</em> of the observed data, which are iterated over many times, but we just show a single set of covariates to highlight how the predictions for that set of covariates changes throughout the training process.</figcaption>
+</figure>
+</div>
+<p>All of the parameters start as random values, but as the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.</p>
 </section>
 <section id="generating-trajectories" class="level2">
 <h2 class="anchored" data-anchor-id="generating-trajectories">Generating trajectories</h2>
