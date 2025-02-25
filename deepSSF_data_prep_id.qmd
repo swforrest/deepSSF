@@ -120,6 +120,8 @@ buffalo_all %>%
 
 ## Read in the environmental covariates
 
+These environmental covariates can be downloaded from Zenodo at [https://zenodo.org/records/13856750](https://zenodo.org/records/13856750) in the directory `mapping/cropped rasters/`. 
+
 ```{r}
 
 ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")

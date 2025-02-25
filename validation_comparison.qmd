@@ -226,7 +226,154 @@ validation_deepssf_s2_long <- validation_deepssf_s2_all %>%
 
 # Compare the probabilities
 
-## Combine the data frames
+## Combine the wide data frames
+
+### Keep only the relevant columns
+
+```{r}
+
+validation_ssf_clean <- validation_ssf_all %>% 
+  dplyr::select(c(id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
+                  prob_habitat_ssf_0p, prob_habitat_ssf_2p, 
+                  prob_movement_ssf_0p, prob_movement_ssf_2p,
+                  prob_next_step_ssf_0p, prob_next_step_ssf_2p))
+
+validation_deepssf_clean <- validation_deepssf_all %>%
+  mutate(habitat_deepSSF = habitat_probs,
+         movement_deepSSF = move_probs,
+         next_step_deepSSF = next_step_probs,
+         .keep = "none")
+
+validation_deepssf_s2_clean <- validation_deepssf_s2_all %>%
+  mutate(habitat_deepSSF_S2 = habitat_probs,
+         movement_deepSSF_S2 = move_probs,
+         next_step_deepSSF_S2 = next_step_probs,
+         .keep = "none")
+
+```
+
+### Combine the data frames
+
+```{r}
+
+validation_all <- bind_cols(validation_ssf_clean,
+                            validation_deepssf_clean,
+                            validation_deepssf_s2_clean)
+
+```
+
+## Split in habitat selection, movement and next step probabilities
+
+### Function to get the maximum probability
+
+```{r}
+
+get_max_column <- function(df) {
+  # Create a new column with the name of the column containing the max value for each row
+  df$max_column <- apply(df, 1, function(row) {
+    # Find the column name with the maximum value
+    col_names <- names(df)
+    max_col_index <- which.max(row)
+    return(col_names[max_col_index])
+  })
+  
+  return(df)
+}
+
+```
+
+# Calculate which was the maximum probability for each row
+
+## Habitat selection
+
+```{r}
+
+validation_habitat <- validation_all %>% 
+  dplyr::select(
+    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
+    # grep("habitat", colnames(validation_all)),
+    # prob_habitat_ssf_0p,
+    prob_habitat_ssf_2p,
+    habitat_deepSSF,
+    # habitat_deepSSF_S2
+    ) 
+
+validation_habitat_prop <- get_max_column(validation_habitat)
+
+max_column_counts <- table(validation_habitat_prop$max_column)
+max_column_proportions <- prop.table(max_column_counts)
+
+summary_df <- data.frame(
+  column = names(max_column_counts),
+  count = as.numeric(max_column_counts),
+  proportion = as.numeric(max_column_proportions)
+)
+
+summary_df
+
+```
+
+## Movement
+
+```{r}
+
+validation_movement <- validation_all %>% 
+  dplyr::select(
+    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
+    # grep("movement", colnames(validation_all)),
+    # prob_movement_ssf_0p,
+    prob_movement_ssf_2p,
+    movement_deepSSF,
+    # movement_deepSSF_S2
+    ) 
+
+validation_movement_prop <- get_max_column(validation_movement)
+
+max_column_counts <- table(validation_movement_prop$max_column)
+max_column_proportions <- prop.table(max_column_counts)
+
+summary_df <- data.frame(
+  column = names(max_column_counts),
+  count = as.numeric(max_column_counts),
+  proportion = as.numeric(max_column_proportions)
+)
+
+summary_df
+
+```
+
+## Next-step
+
+```{r}
+
+validation_next_step <- validation_all %>% 
+  dplyr::select(
+    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
+    # grep("next_step", colnames(validation_all)),
+    # prob_next_step_ssf_0p,
+    prob_next_step_ssf_2p,
+    next_step_deepSSF,
+    # next_step_deepSSF_S2
+    ) 
+
+validation_next_step_prop <- get_max_column(validation_next_step)
+
+max_column_counts <- table(validation_next_step_prop$max_column)
+max_column_proportions <- prop.table(max_column_counts)
+
+summary_df <- data.frame(
+  column = names(max_column_counts),
+  count = as.numeric(max_column_counts),
+  proportion = as.numeric(max_column_proportions)
+)
+
+summary_df
+
+```
+
+
+
+## Combine the lengthened data frames
 
 ```{r}
 
