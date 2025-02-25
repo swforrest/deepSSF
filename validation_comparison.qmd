@@ -288,14 +288,14 @@ get_max_column <- function(df) {
 
 ```{r}
 
-validation_habitat <- validation_all %>% 
+validation_habitat <- validation_all %>% filter(!id == 2005) %>% 
   dplyr::select(
     # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
     # grep("habitat", colnames(validation_all)),
-    # prob_habitat_ssf_0p,
-    prob_habitat_ssf_2p,
-    habitat_deepSSF,
-    # habitat_deepSSF_S2
+    prob_habitat_ssf_0p,
+    # prob_habitat_ssf_2p,
+    # habitat_deepSSF,
+    habitat_deepSSF_S2
     ) 
 
 validation_habitat_prop <- get_max_column(validation_habitat)
