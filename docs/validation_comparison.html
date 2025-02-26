@@ -714,12 +714,12 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>validation_habitat <span class="ot">&lt;-</span> validation_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>id <span class="sc">==</span> <span class="dv">2005</span>) <span class="sc">%&gt;%</span> </span>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>validation_habitat <span class="ot">&lt;-</span> validation_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="dv">2005</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb26-2"><a href="#cb26-2"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
 <span id="cb26-3"><a href="#cb26-3"></a>    <span class="co"># id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,</span></span>
 <span id="cb26-4"><a href="#cb26-4"></a>    <span class="co"># grep("habitat", colnames(validation_all)),</span></span>
-<span id="cb26-5"><a href="#cb26-5"></a>    prob_habitat_ssf_0p,</span>
-<span id="cb26-6"><a href="#cb26-6"></a>    <span class="co"># prob_habitat_ssf_2p,</span></span>
+<span id="cb26-5"><a href="#cb26-5"></a>    <span class="co"># prob_habitat_ssf_0p,</span></span>
+<span id="cb26-6"><a href="#cb26-6"></a>    prob_habitat_ssf_2p,</span>
 <span id="cb26-7"><a href="#cb26-7"></a>    <span class="co"># habitat_deepSSF,</span></span>
 <span id="cb26-8"><a href="#cb26-8"></a>    habitat_deepSSF_S2</span>
 <span id="cb26-9"><a href="#cb26-9"></a>    ) </span>
@@ -740,7 +740,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["column"],"name":[1],"type":["chr"],"align":["left"]},{"label":["count"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["proportion"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"habitat_deepSSF_S2","2":"41622","3":"0.4453551"},{"1":"prob_habitat_ssf_0p","2":"51836","3":"0.5546449"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["column"],"name":[1],"type":["chr"],"align":["left"]},{"label":["count"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["proportion"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"habitat_deepSSF_S2","2":"6888","3":"0.6819802"},{"1":"prob_habitat_ssf_2p","2":"3212","3":"0.3180198"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -4277,12 +4277,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb78-302"><a href="#cb78-302"></a><span class="fu">## Habitat selection</span></span>
 <span id="cb78-303"><a href="#cb78-303"></a></span>
 <span id="cb78-306"><a href="#cb78-306"></a><span class="in">```{r}</span></span>
-<span id="cb78-307"><a href="#cb78-307"></a>validation_habitat <span class="ot">&lt;-</span> validation_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>id <span class="sc">==</span> <span class="dv">2005</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb78-307"><a href="#cb78-307"></a>validation_habitat <span class="ot">&lt;-</span> validation_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="dv">2005</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb78-308"><a href="#cb78-308"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
 <span id="cb78-309"><a href="#cb78-309"></a>    <span class="co"># id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,</span></span>
 <span id="cb78-310"><a href="#cb78-310"></a>    <span class="co"># grep("habitat", colnames(validation_all)),</span></span>
-<span id="cb78-311"><a href="#cb78-311"></a>    prob_habitat_ssf_0p,</span>
-<span id="cb78-312"><a href="#cb78-312"></a>    <span class="co"># prob_habitat_ssf_2p,</span></span>
+<span id="cb78-311"><a href="#cb78-311"></a>    <span class="co"># prob_habitat_ssf_0p,</span></span>
+<span id="cb78-312"><a href="#cb78-312"></a>    prob_habitat_ssf_2p,</span>
 <span id="cb78-313"><a href="#cb78-313"></a>    <span class="co"># habitat_deepSSF,</span></span>
 <span id="cb78-314"><a href="#cb78-314"></a>    habitat_deepSSF_S2</span>
 <span id="cb78-315"><a href="#cb78-315"></a>    ) </span>
