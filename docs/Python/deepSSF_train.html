@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-25">
+<meta name="dcterms.date" content="2025-02-26">
 
 <title>deepSSF Training – deepSSF</title>
 <style>
@@ -406,7 +406,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 25, 2025</p>
+      <p class="date">February 26, 2025</p>
     </div>
   </div>
   
@@ -1040,7 +1040,7 @@ Labels batch shape: torch.Size([32, 101, 101])</code></pre>
 <p>A block is modular component of a neural network, in our case defined as a Python class (type of object with certain functionality described by its definition) inheriting from <code>torch.nn.Module</code> in PyTorch. A block encapsulates a sequence of operations, including layers (such as fully connected layers or convolutional layers) and activation functions, to process input data. Each block has a forward method (i.e.&nbsp;instructions) that defines the data flow through the network during inference or training.</p>
 <section id="convolutional-block-for-the-habitat-selection-subnetwork" class="level2">
 <h2 class="anchored" data-anchor-id="convolutional-block-for-the-habitat-selection-subnetwork">Convolutional block for the habitat selection subnetwork</h2>
-<p>This block is a convolutional layer that takes in the spatial covariates (including the layers created from the scalar values such as time), goes through a series of convolution operations amd ReLU activation functions and outputs a feature map, which is the habitat selection probability surface.</p>
+<p>This block is a convolutional layer that takes in the spatial covariates (including the layers created from the scalar values such as time), goes through a series of convolution operations and ReLU activation functions and outputs a feature map, which is the habitat selection probability surface.</p>
 <p><img src="../figures/model_diagram_hab.png" class="img-fluid" style="width:50.0%"></p>
 <div id="cell-49" class="cell" data-execution_count="26">
 <details open="" class="code-fold">
@@ -1192,7 +1192,7 @@ Labels batch shape: torch.Size([32, 101, 101])</code></pre>
 <section id="what-the-block-does" class="level3">
 <h3 class="anchored" data-anchor-id="what-the-block-does">What the block does</h3>
 <p>This block is a bit longer and more involved, but there are no parameters in here that need to be learned (estimated). It is just a series of operations that are applied to the movement parameters to convert them to a probability distribution.</p>
-<p>This block takes in the movement parameters and converts them to a probability distribution. This essentially just applies the appropriate density functions using the parameter values predicted by the movement blocks, which in our case is a finite mixture of Gamma distributions nad a finite mixture of von Mises distributions.</p>
+<p>This block takes in the movement parameters and converts them to a probability distribution. This essentially just applies the appropriate density functions using the parameter values predicted by the movement blocks, which in our case is a finite mixture of Gamma distributions and a finite mixture of von Mises distributions.</p>
 <p>The formulation of predicting parameters and converting them to a movement kernel ensures that the movement kernel is very flexible, and can be any combination of distributions, which need not all be the same (e.g., a step length distribution may be combination of a Gamma and a log-normal distribution).</p>
 </section>
 <section id="constraints" class="level3">
