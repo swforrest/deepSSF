@@ -1,11 +1,6 @@
 ---
 title: "deepSSF Data Prep"
-author:
-  - name: Scott Forrest
-    url: https://swforrest.github.io/
-    orcid: 0000-0001-9529-0108
-    affiliation: Queensland University of Technology, CSIRO
-    email: "scottwforrest@gmail.com"
+author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
   cache: false
@@ -120,8 +115,6 @@ buffalo_all %>%
 
 ## Read in the environmental covariates
 
-These environmental covariates can be downloaded from Zenodo at [https://zenodo.org/records/13856750](https://zenodo.org/records/13856750) in the directory `mapping/cropped rasters/`. 
-
 ```{r}
 
 ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
@@ -199,17 +192,21 @@ distance %% res == 0
 buffer <- 1250 + (res/2)
 
 # calculate proportion
-prop_steps <- buffalo_all_steps %>% filter(sl_ < buffer) %>% nrow() / buffalo_all_steps %>% nrow()
-print(paste0("Proportion of steps less than ", buffer, "m: ", round(prop_steps, 4)))
+prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -buffer & 
+                                             x2_ - x1_ < buffer &
+                                             y2_ - y1_ > -buffer & 
+                                             y2_ - y1_ < buffer) %>% 
+  nrow() / buffalo_all_steps %>% nrow()
 
-# distance to the corner
-corner_dist <- sqrt(buffer^2 + buffer^2)
-print(paste0("Distance to the corner: ", round(corner_dist, 2)))
+print(paste0("Proportion of steps less than ", buffer, "m in x or y direction: ", round(prop_steps, 4)))
+
+# maxmimum distance at corner
+max_dist <- sqrt(buffer^2 + buffer^2)
+print(paste0("Maximum distance at corner: ", round(max_dist, 2)))
 
 ```
-In our case 95% of the steps were less than a distance of 1262.5m, which would mean that including 101 x 101 cells (which would be 2525 m x 2525 m) would include at least 95% of the steps. 
 
-Note: as 1262.5 m is the shortest distance to the boundary, and it is further to a corner (which is 1786 m away), which means we will actually be including more than 95% of the steps.
+In our case over 96% of the steps were less than a distance of 1262.5m in either the x or y direction, which would mean that including 101 x 101 cells (which would be 2525 m x 2525 m) would include at least 96% of the steps. As the distance is further to the corner (but still less than the buffer distance in the x and y directions), there will be step lengths longer than the buffer distance (up to 1785 m).
 
 ## Set up the spatial extent of the local covariates
 
