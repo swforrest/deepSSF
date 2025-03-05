@@ -19,6 +19,7 @@ synthetic_local_data/
 synthetic_local_layers/
 synthetic_trajectories/
 data_layers_single/
+SpaceCows/
 *.tif
 *.json
 *.npy
