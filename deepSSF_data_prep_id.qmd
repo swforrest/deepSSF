@@ -166,6 +166,48 @@ head(buffalo_all_steps)
 
 ```
 
+## Prepare and export data for single layer saving (Python script)
+
+We also have another script that saves all local layers as individual npy arrays, which works better when there are many steps per id (to prevent large tif files), and can make things a bit easier for training models with many ids.
+
+```{r}
+
+buffalo_all_steps_save <- buffalo_all_steps %>% mutate(
+  
+  dt_min = round(difftime(t2_, t1_, units = "mins"), 0),
+  dt_hour = round(difftime(t2_, t1_, units = "hours"), 2),
+  
+  # add the minutes as a decimal to the hour, and the hour as a decimal to the day
+  hour_t1 = round(lubridate::hour(t1_) + lubridate::minute(t1_)/60,2),
+  yday_t1 = round(lubridate::yday(t1_) + lubridate::hour(t1_)/24,2),
+  
+  hour_t1_sin1 = sin(2*pi*hour_t1/24),
+  hour_t1_cos1 = cos(2*pi*hour_t1/24),
+  hour_t1_sin2 = sin(4*pi*hour_t1/24),
+  hour_t1_cos2 = cos(4*pi*hour_t1/24),
+  
+  yday_t1_sin1 = sin(2*pi*yday_t1/365.25),
+  yday_t1_cos1 = cos(2*pi*yday_t1/365.25),
+  yday_t1_sin2 = sin(4*pi*yday_t1/365.25),
+  yday_t1_cos2 = cos(4*pi*yday_t1/365.25),
+  
+  # add the minutes as a decimal to the hour, and the hour as a decimal to the day
+  hour_t2 = round(lubridate::hour(t2_) + lubridate::minute(t2_)/60,2),
+  yday_t2 = round(lubridate::yday(t2_) + lubridate::hour(t2_)/24,2),
+  
+  bearing = direction_p,
+  bearing_sin = sin(bearing),
+  bearing_cos = cos(bearing)
+  
+)
+
+buffalo_all_steps_save
+
+buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
+
+```
+
+
 ### Plot step lengths
 
 ```{r}
