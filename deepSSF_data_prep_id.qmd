@@ -166,6 +166,46 @@ head(buffalo_all_steps)
 
 ```
 
+### Plot step lengths and set the buffer distance
+
+```{r}
+
+# plot step lengths
+buffalo_all_steps %>% 
+  filter(sl_ < 2000) %>%
+  ggplot() +
+  geom_density(aes(x = sl_), #, bins = 50
+                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
+  scale_x_continuous("Step length (m)") + #, limits = c(-25, 1250)
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+# proportion of steps less than the buffer distance
+# the distance should be a multiple of the resolution
+distance <- 1250
+
+# check if multiple of the resolution?
+distance %% res == 0
+
+# buffer distance (add the resolution of the cell/2 as we want a centre cell)
+buffer <- distance + (res/2)
+
+# calculate proportion
+prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -distance & 
+                                             x2_ - x1_ < distance &
+                                             y2_ - y1_ > -distance & 
+                                             y2_ - y1_ < distance) %>% 
+  nrow() / buffalo_all_steps %>% nrow()
+
+print(paste0("Proportion of steps less than ", distance, "m in x or y direction: ", round(prop_steps, 4)))
+
+# maxmimum distance at corner
+max_dist <- sqrt(buffer^2 + buffer^2)
+print(paste0("Maximum distance at corner: ", round(max_dist, 2)))
+
+```
+
 ## Prepare and export data for single layer saving (Python script)
 
 We also have another script that saves all local layers as individual npy arrays, which works better when there are many steps per id (to prevent large tif files), and can make things a bit easier for training models with many ids.
@@ -203,48 +243,15 @@ buffalo_all_steps_save <- buffalo_all_steps %>% mutate(
 
 buffalo_all_steps_save
 
+# remove steps that fall outside of the local spatial extent
+buffalo_all_steps_save <- buffalo_all_steps_save %>%
+  filter(x2_ - x1_ > -distance & 
+           x2_ - x1_ < distance &
+           y2_ - y1_ > -distance & 
+           y2_ - y1_ < distance) %>% 
+  drop_na(ta_)
+
 buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
-
-```
-
-
-### Plot step lengths
-
-```{r}
-
-# plot step lengths
-buffalo_all_steps %>% 
-  filter(sl_ < 2000) %>%
-  ggplot() +
-  geom_density(aes(x = sl_), #, bins = 50
-                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
-  scale_x_continuous("Step length (m)") + #, limits = c(-25, 1250)
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-# proportion of steps less than the buffer distance
-# the distance should be a multiple of the resolution
-distance <- 1250
-
-# check if multiple of the resolution?
-distance %% res == 0
-
-# buffer distance (add the resolution of the cell/2 as we want a centre cell)
-buffer <- 1250 + (res/2)
-
-# calculate proportion
-prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -buffer & 
-                                             x2_ - x1_ < buffer &
-                                             y2_ - y1_ > -buffer & 
-                                             y2_ - y1_ < buffer) %>% 
-  nrow() / buffalo_all_steps %>% nrow()
-
-print(paste0("Proportion of steps less than ", buffer, "m in x or y direction: ", round(prop_steps, 4)))
-
-# maxmimum distance at corner
-max_dist <- sqrt(buffer^2 + buffer^2)
-print(paste0("Maximum distance at corner: ", round(max_dist, 2)))
 
 ```
 
@@ -289,7 +296,7 @@ for(i in 1:1) { # select just the first ID
   
   # to use a subset of the data for that individual for testing
   # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:1000)
+  # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
 
   n_samples <- nrow(buffalo_data)
   
@@ -335,34 +342,35 @@ for(i in 1:1) { # select just the first ID
     # with an extent set in the previous chunk
   ) %>% rowwise() %>% mutate(
 
-    # extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
+    # the extent needs to be the same for saving the stack of rasters
+    extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
 
     # NDVI
     ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
     ndvi_cent = list({
       ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
-      # ext(ndvi_cent) <- extent_00centre
+      ext(ndvi_cent) <- extent_00centre
       ndvi_cent
       }),
 
     # herbaceous vegetation
     veg_herby_cent = list({
       veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
-      # ext(veg_herby_cent) <- extent_00centre
+      ext(veg_herby_cent) <- extent_00centre
       veg_herby_cent
       }),
 
     # canopy cover
     canopy_cover_cent = list({
       canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
-      # ext(canopy_cover_cent) <- extent_00centre
+      ext(canopy_cover_cent) <- extent_00centre
       canopy_cover_cent
       }),
 
     # slope
     slope_cent = list({
       slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
-      # ext(slope_cent) <- extent_00centre
+      ext(slope_cent) <- extent_00centre
       slope_cent
       }),
     
@@ -380,7 +388,12 @@ for(i in 1:1) { # select just the first ID
     # pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
     
     points_vect_cent_x2 = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
-    pres_cent_x2 = list(rasterize(points_vect_cent_x2, pres_template, background=0))
+    
+    pres_cent_x2 = list({
+      pres_cent_x2 <- rasterize(points_vect_cent_x2, pres_template, background=0)
+      ext(pres_cent_x2) <- extent_00centre
+      pres_cent_x2
+      })
     
   ) %>% ungroup() # to remove the 'rowwise' class
 
@@ -395,7 +408,7 @@ for(i in 1:1) { # select just the first ID
   # remove the columns that are no longer needed
   buffalo_data_df <- buffalo_data_covs %>%
   dplyr::select(
-    # -extent_00centre,
+    -extent_00centre,
     -ndvi_cent,
     -veg_herby_cent,
     -canopy_cover_cent,
@@ -431,8 +444,8 @@ for(i in 1:1) { # select just the first ID
                        nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
 
-  rast(buffalo_data_covs$pres_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent",
+  rast(buffalo_data_covs$pres_cent_x2) %>%
+    writeRaster(paste0("buffalo_local_layers_id/fixed_buffalo_", buffalo_ids[i], "_pres_cent",
                        nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
                 overwrite = T)
   
@@ -454,7 +467,7 @@ which(is.na(buffalo_data_covs$ta))
 
 ```{r}
 
-n_samples <- 10
+n_samples <- 5
 
 # x1
 for(i in 1:n_samples) {
