@@ -280,7 +280,8 @@ It takes quite a while to run, around 1 hour per individual in our case, so we w
 
 ```{r}
 
-for(i in 1:length(buffalo_ids)) {
+# for(i in 1:length(buffalo_ids)) {
+for(i in 1:1) {
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # all data for that individual
@@ -390,35 +391,35 @@ for(i in 1:length(buffalo_ids)) {
                 -pres_cent
                 )
 
-  # save the data
-  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/website_temp/buffalo_", buffalo_ids[i],
-                                    "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
-
-  # saving the raster objects
-  rast(buffalo_data_covs$ndvi_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
-
-  rast(buffalo_data_covs$veg_herby_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
-
-  rast(buffalo_data_covs$canopy_cover_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
-
-  rast(buffalo_data_covs$slope_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
-
-  rast(buffalo_data_covs$pres_cent) %>%
-    writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
+  # # save the data
+  # write_csv(buffalo_data_df, paste0("buffalo_local_data_id/website_temp/buffalo_", buffalo_ids[i],
+  #                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+  # 
+  # # saving the raster objects
+  # rast(buffalo_data_covs$ndvi_cent) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
+  # 
+  # rast(buffalo_data_covs$veg_herby_cent) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
+  # 
+  # rast(buffalo_data_covs$canopy_cover_cent) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
+  # 
+  # rast(buffalo_data_covs$slope_cent) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
+  # 
+  # rast(buffalo_data_covs$pres_cent) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_pres_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
   
 }
 
