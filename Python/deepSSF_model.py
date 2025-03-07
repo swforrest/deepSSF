@@ -341,7 +341,8 @@ class Params_to_Grid_Block(nn.Module):
 
         # combining both densities to create a mixture distribution using logsumexp
         logsumexp_gamma_corr = torch.max(gamma_density_layer1, gamma_density_layer2)
-        gamma_density_layer = logsumexp_gamma_corr + torch.log(gamma_weight1 * torch.exp(gamma_density_layer1 - logsumexp_gamma_corr) + gamma_weight2 * torch.exp(gamma_density_layer2 - logsumexp_gamma_corr))
+        gamma_density_layer = logsumexp_gamma_corr + torch.log(gamma_weight1 * torch.exp(gamma_density_layer1 - logsumexp_gamma_corr) + 
+                                                               gamma_weight2 * torch.exp(gamma_density_layer2 - logsumexp_gamma_corr))
         # print(torch.sum(gamma_density_layer))
         # print(torch.sum(torch.exp(gamma_density_layer)))
 
