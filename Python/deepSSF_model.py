@@ -261,8 +261,13 @@ class Params_to_Grid_Block(nn.Module):
         self.center = self.image_dim // 2
         y, x = np.indices((self.image_dim, self.image_dim))
         self.distance_layer = torch.from_numpy(np.sqrt((self.pixel_size*(x - self.center))**2 + (self.pixel_size*(y - self.center))**2))
-        # change the centre cell to the average distance from the centre to the edge of the pixel
-        self.distance_layer[self.center, self.center] = 0.56*self.pixel_size # average distance from the centre to the perimeter of the pixel (accounting for longer distances at the corners)
+
+        # average distance from the centre to the perimeter of the pixel (accounting for longer distances at the corners)
+        # self.distance_layer[self.center, self.center] = 0.56*self.pixel_size 
+
+        # average distance from the centre to any point within the pixel
+        # calculated as a double integral of sqrt(x^2 + y^2) dx dy over the area of the pixel
+        self.distance_layer[self.center, self.center] = 0.3826*self.pixel_size 
 
         # determine the bearing of each pixel from the centre of the image
         self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y, x - self.center))
