@@ -175,3 +175,12 @@ def recover_yday(sin_term, cos_term):
     # Convert to day of year
     yday = (365 * theta) / (2 * np.pi) % 365
     return yday
+
+
+# To clear the GPU memory cache
+def clear_memory(device):
+    if device.type == 'cuda':
+        torch.cuda.empty_cache()
+    elif device.type == 'mps':
+        torch.mps.empty_cache()
+    # CPU doesn't need explicit cache clearing
