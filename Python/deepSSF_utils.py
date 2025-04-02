@@ -179,8 +179,9 @@ def recover_yday(sin_term, cos_term):
 
 # To clear the GPU memory cache
 def clear_memory(device):
-    if device.type == 'cuda':
+    # Clear cache based on device
+    if torch.cuda.is_available():
         torch.cuda.empty_cache()
-    elif device.type == 'mps':
+    elif hasattr(torch, 'mps') and torch.mps.is_available():
         torch.mps.empty_cache()
     # CPU doesn't need explicit cache clearing
