@@ -98,7 +98,7 @@ gamma_step_dist_2D <- distance_layer
 # Calculate the gamma density values at the distances from centre
 gamma_step_dist_2D[] <- dgamma(distance_values, 
                                shape = shape, 
-                               scale = scale)
+                               scale = scale) / distance_values
 
 # Plot the gamma distribution
 png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
@@ -107,6 +107,7 @@ dev.off()
 
 # Get the values of the two-dimensional gamma distribution
 step_dist_2D_values <- terra::values(gamma_step_dist_2D)
+# sum(step_dist_2D_values)
 
 # Sample from the two-dimensional gamma distribution
 step_dist_2D_samples <- data.frame(
