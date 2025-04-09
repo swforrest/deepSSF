@@ -74,12 +74,7 @@ class Conv2d_block_spatial(nn.Module):
         # ReLU activation function
         nn.ReLU(),
 
-        # convolutional layer 4
-        nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
-        # ReLU activation function
-        nn.ReLU(),
-
-        # convolutional layer 5, which outputs a single layer, which is the habitat selection map
+        # convolutional layer 4, which outputs a single layer, which is the habitat selection map
         nn.Conv2d(in_channels=self.output_channels, out_channels=1, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding)
 
         )
@@ -134,28 +129,28 @@ class Conv2d_block_toFC(nn.Module):
         # ReLU activation function
         nn.ReLU(),
         # max pooling layer 1 (reduces the spatial dimensions of the data whilst retaining the most important features)
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
 
         # convolutional layer 2
         nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
         # max pooling layer 2
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
 
         # convolutional layer 3
         nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
         # max pooling layer 3
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
 
         # convolutional layer 4
-        nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
+        nn.Conv2d(in_channels=self.output_channels, out_channels=1, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
         # max pooling layer 4
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
 
         # flatten the data to pass through the fully connected layer
         nn.Flatten())
