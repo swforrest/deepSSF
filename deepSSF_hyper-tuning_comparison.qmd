@@ -1,0 +1,89 @@
+---
+title: "deepSSF hyperparameter-tuning results"
+author:
+  - name: Scott Forrest
+    url: https://swforrest.github.io/
+    orcid: 0000-0001-9529-0108
+    affiliation: Queensland University of Technology, CSIRO
+    email: "scottwforrest@gmail.com"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: references.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    # self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+abstract: |
+  In this script we are assessing the results of models that had different values of hyperparameters, 
+  namely the number of convolutional layers and how many convolution filters were within each layer. 
+  We assess the results based on the held-out test set of data, which was not used to fit the models.
+---
+
+## Loading packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("tictoc")
+walk(packages, require, character.only = T)
+
+options(scipen = 999)  # Prevent scientific notation in plots
+options(scipen = 0)  # Reset
+
+```
+
+## Loading data
+
+```{r}
+#| message=FALSE
+
+# Read in the results of the hyperparameter tuning with 1 convolutional layer 
+conv1_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv1.csv") %>% 
+  mutate(num_conv_layers = "1", .before = 1) 
+
+# Read in the results of the hyperparameter tuning with 2 convolutional layers
+conv2_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv2.csv") %>% 
+  mutate(num_conv_layers = "2", .before = 1)
+
+# Read in the results of the hyperparameter tuning with 3 convolutional layers
+conv3_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv3.csv") %>% 
+  mutate(num_conv_layers = "3", .before = 1)
+
+# Read in the results of the hyperparameter tuning with 4 convolutional layers
+conv4_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv4.csv") %>% 
+  mutate(num_conv_layers = "4", .before = 1)
+
+all_results <- bind_rows(conv1_results, conv2_results, conv3_results, conv4_results)
+all_results
+
+```
+
+# Plot the results
+
+```{r}
+
+ggplot() +
+  geom_line(data = all_results, 
+            aes(x = num_conv_filters, y = test_loss, color = num_conv_layers), 
+            size = 1) +
+  theme_bw()
+
+```
+
+
