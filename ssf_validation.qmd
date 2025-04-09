@@ -210,7 +210,7 @@ This scrip takes a long time to run. As we have already calculated the next-step
 ```{r}
 
 # how many samples to illustrate the approach
-n_samples_subset <- 10
+n_samples_subset <- 24
 
 ```
 
@@ -283,7 +283,9 @@ Here's high-level overview of the full chunk below
 ### Select a buffalo's data
 #-------------------------------------------------------------------------
 
-for(k in 1:length(buffalo_id_list)) {
+# for(k in 1:length(buffalo_id_list)) {
+
+for(k in 1:1) {
 
   data_id <- buffalo_id_list[[k]]
   attr(data_id$t_, "tzone") <- "Australia/Queensland"
@@ -447,7 +449,14 @@ for(k in 1:length(buffalo_id_list)) {
       step_log <- habitat_log
       step_log[] <- dgamma(distance_values, 
                            shape = ssf_coefs$shape[[coef_hour]], 
-                           scale = ssf_coefs$scale[[coef_hour]], log = TRUE)
+                           scale = ssf_coefs$scale[[coef_hour]], log = TRUE) - log(distance_values)
+      
+      # normalise the step length probabilities
+      step_log[] <- values(step_log) - max(values(step_log), na.rm = T) - 
+        log(sum(exp(values(step_log) - max(values(step_log), na.rm = T))))
+      # check that it sums to 1
+      print(sum(exp(values(step_log))))
+            
       
       # turning angles
       ta_log <- habitat_log
@@ -458,6 +467,12 @@ for(k in 1:length(buffalo_id_list)) {
                                                        kappa = abs(ssf_coefs$kappa[[coef_hour]]), 
                                                        log = TRUE))
       
+      # normalise the turning angle probabilities
+      ta_log[] <- values(ta_log) - max(values(ta_log), na.rm = T) - 
+        log(sum(exp(values(ta_log) - max(values(ta_log), na.rm = T))))
+      # check that it sums to 1
+      print(sum(exp(values(ta_log))))
+      
       # combine the step and turning angle probabilities
       move_log <- step_log + ta_log
       
@@ -466,7 +481,7 @@ for(k in 1:length(buffalo_id_list)) {
       # convert to normalised probability
       move_pred[] <- exp(values(move_log) - max(values(move_log), na.rm = T)) / 
         sum(exp(values(move_log) - max(values(move_log), na.rm = T)), na.rm = T)
-      # print(sum(values(move_pred)))
+      print(sum(values(move_pred)))
       
       # movement probability value at the next step
       prob_movement <- as.numeric(terra::extract(move_pred, next_step_vect)[2])
@@ -546,3 +561,44 @@ for(k in 1:length(buffalo_id_list)) {
 toc()
 
 ```
+
+
+```{r}
+
+test_data_no_correction <- test_data %>% drop_na(prob_habitat_ssf_0p) %>% 
+  select(t_, 
+         prob_habitat_ssf_0p, prob_habitat_ssf_2p,
+         prob_movement_ssf_0p, prob_movement_ssf_2p,
+         prob_next_step_ssf_0p, prob_next_step_ssf_2p
+         ) %>%
+  mutate(t_ = lubridate::as_datetime(t_)) %>% 
+  pivot_longer(cols = !c(t_),
+             names_to = "model", values_to = "prob")
+
+ggplot() +
+  geom_hline(yintercept = 0.000098, linetype = "dashed") +
+  geom_line(data=test_data_no_correction %>% filter(), 
+            aes(x = t_, y = prob, colour = model)) +
+  theme_bw()
+
+```
+
+```{r}
+
+test_data_correction <- test_data %>% drop_na(prob_habitat_ssf_0p) %>% 
+  select(t_, 
+         prob_habitat_ssf_0p, prob_habitat_ssf_2p,
+         prob_movement_ssf_0p, prob_movement_ssf_2p,
+         prob_next_step_ssf_0p, prob_next_step_ssf_2p
+         ) %>%
+  mutate(t_ = lubridate::as_datetime(t_)) %>% 
+  pivot_longer(cols = !c(t_),
+             names_to = "model", values_to = "prob")
+
+ggplot() +
+  geom_line(data=test_data_correction %>% filter(), 
+            aes(x = t_, y = prob, colour = model)) +
+  theme_bw()
+
+```
+

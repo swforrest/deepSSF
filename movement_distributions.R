@@ -26,7 +26,7 @@ bearing_layer <- rast(bearing_layer)
 
 # Plot the distance and bearing rasters
 png("outputs/movement_distributions/distance_layer.png", width = 1000, height = 750, res = 250)
-terra::plot(distance_layer, main = "Distance from Center")
+terra::plot(distance_layer, main = "Distance from centre")
 dev.off()
 
 png("outputs/movement_distributions/bearing_layer.png", width = 1000, height = 750, res = 250)
@@ -57,6 +57,7 @@ ggplot(movement_data, aes(distance)) +
                      limits = c(0,1250),
                      breaks = seq(0, 1250, by = 250)) +
   scale_y_continuous("Number of cells") +
+  ggtitle("Number of cells with increasing radius") +
   theme_bw()
 
 ggsave("outputs/movement_distributions/movement_data_histogram.png", 
@@ -89,20 +90,19 @@ ggsave("outputs/movement_distributions/1D_gamma_distribution.png",
        width=150, height=90, units="mm", dpi = 300)
 
 
+
 # Get the distance values from the distance layer
 distance_values <- terra::values(distance_layer)
-
 # Use the distance_layer raster as a template
 gamma_step_dist_2D <- distance_layer
-
 # Calculate the gamma density values at the distances from centre
 gamma_step_dist_2D[] <- dgamma(distance_values, 
                                shape = shape, 
-                               scale = scale) / distance_values
+                               scale = scale)
 
 # Plot the gamma distribution
 png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
-plot(gamma_step_dist_2D, main = "2D Gamma Distribution")
+plot(gamma_step_dist_2D, main = "2D gamma distribution")
 dev.off()
 
 # Get the values of the two-dimensional gamma distribution
@@ -131,6 +131,51 @@ ggplot() +
   theme_bw()
 
 ggsave("outputs/movement_distributions/2D_gamma_samples.png", 
+       width=150, height=90, units="mm", dpi = 300)
+
+
+
+
+# Get the distance values from the distance layer
+distance_values <- terra::values(distance_layer)
+# Use the distance_layer raster as a template
+gamma_step_dist_2D_corr <- distance_layer
+# Calculate the gamma density values at the distances from centre
+gamma_step_dist_2D_corr[] <- dgamma(distance_values, 
+                                    shape = shape, 
+                                    scale = scale) / distance_values
+
+# Plot the gamma distribution
+png("outputs/movement_distributions/2D_gamma_layer_corrected.png", width = 1000, height = 750, res = 250)
+plot(gamma_step_dist_2D_corr, main = "Corrected 2D gamma distribution")
+dev.off()
+
+# Get the values of the two-dimensional gamma distribution
+gamma_step_dist_2D_corr_values <- terra::values(gamma_step_dist_2D_corr)
+# sum(step_dist_2D_values)
+
+# Sample from the two-dimensional gamma distribution
+step_dist_2D_corr_samples <- data.frame(
+  "steps" = sample(x = distance_values,
+                   size = 1e5, 
+                   replace = TRUE, 
+                   prob = gamma_step_dist_2D_corr_values))
+
+# Plot the density of the sampled values against the 1D gamma distribution
+ggplot() +
+  geom_line(data = step_dist_1D_df, 
+            aes(x = x, y = y), colour = "black") +
+  geom_density(data = step_dist_2D_corr_samples, 
+               aes(x = steps), 
+               fill = "skyblue", colour = "black",
+               alpha = 0.5) +
+  scale_x_continuous(limits = c(0,1250), breaks = seq(0, 1250, by = 250)) +
+  labs(title = "Samples from corrected 2D gamma distribution",
+       x = "Step length (m)",
+       y = "Density") +
+  theme_bw()
+
+ggsave("outputs/movement_distributions/2D_gamma_only_corrected_samples.png", 
        width=150, height=90, units="mm", dpi = 300)
 
 
