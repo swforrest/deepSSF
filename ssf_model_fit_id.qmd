@@ -155,19 +155,78 @@ To provide some intuition about harmonic regression we have created a walkthroug
 
 ```{r}
 
-months_wet <- c(1:4, 11:12)
 buffalo_ids <- unique(buffalo_data_all$id)
 focal_id <- 2005
 
-# comment and uncomment the relevant lines to get either wet or dry season data
-# buffalo_data <- buffalo_data_all %>% filter(id == focal_id & month %in% months_wet) # wet season
-# buffalo_data <- buffalo_data_all %>% filter(id == focal_id & !month %in% months_wet) # dry season
-
 # all data
-buffalo_data <- buffalo_data_all %>% filter(id == focal_id)
+buffalo_id <- buffalo_data_all %>% filter(id == focal_id)
 
 ```
 
+## Split the data into train/validate/test
+
+This is to match the splitting of data that was used to train/fit the deepSSF model. There we used an 80/10/10 split, with 80% of the data for training, 10% for validation, and 10% for testing.
+
+We will follow that same split here, although the validation set is specific to deep learning (it is used to assess when to reduce the learning rate and stop training), with the 10% test data to be used for the held-out validation dataset.
+
+```{r}
+
+training_split <- 0.8 # 80% of the data will be used for fitting the model
+validation_split <- 0.1 # 10% of the data will be used for validation (which isn't used here)
+test_split <- 0.1 # 10% of the data will be used for testing (model evaluation)
+
+# Calculate the number of samples for each split
+n_samples <- nrow(buffalo_id)
+
+n_train <- floor(training_split * n_samples)
+n_val <- floor(validation_split * n_samples)
+n_test <- n_samples - n_train - n_val  # Ensure they sum to total number of samples
+
+# Get the start and end indices for each split
+train_end <- floor(training_split * n_samples)
+val_end <- floor((training_split + validation_split) * n_samples)
+
+# Generate indices for each split
+train_indices <- 1:train_end
+val_indices <- (train_end + 1):val_end
+test_indices <- (val_end + 1):n_samples
+
+# Create a new column in the data frame to indicate the dataset
+buffalo_id <- buffalo_id %>% mutate(dataset = NA)
+
+# Add which type of dataset the location should be assigned to
+buffalo_id$dataset[train_indices] <- "train"
+buffalo_id$dataset[val_indices] <- "val"
+buffalo_id$dataset[test_indices] <- "test"
+
+# Split the dataset sequentially
+buffalo_data <- buffalo_id[train_indices, ]
+buffalo_data_val <- buffalo_id[val_indices, ]
+buffalo_data_test <- buffalo_id[test_indices, ]
+
+# Print the number of samples in each split
+cat("Number of training samples:   ", nrow(buffalo_data), "\n")
+cat("Number of validation samples: ", nrow(buffalo_data_val), "\n")
+cat("Number of testing samples:    ", nrow(buffalo_data_test), "\n")
+
+# Timeline of buffalo data
+buffalo_id %>% ggplot(aes(x = t1, y = factor(dataset), colour = factor(dataset))) +
+  geom_point(alpha = 0.1) +
+  scale_y_discrete("Buffalo ID") +
+  scale_x_datetime("Date") +
+  scale_colour_viridis_d() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+```
+
+### From Pytorch
+
+There is some loss of samples due to them being larger than the spatial extent, and of course there are no randomly sampled locations
+
+- Number of training samples:  8082
+- Number of validation samples:  1010
+- Number of testing samples:  1011
 
 ::: {.panel-tabset group="model"}
 
@@ -666,9 +725,9 @@ We are fitting a single model to the focal individual.
 ```{r}
 #| label: 0p_model_fit
 
-if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms.rds"))) {
+if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms_80-10-10.rds"))) {
   
-  model_0p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms.rds"))
+  model_0p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms_80-10-10.rds"))
   print("Read existing model")
   
 } else {
@@ -679,7 +738,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_0p_harms.rds"))) 
   toc()
   
   # save model object
-  saveRDS(model_0p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_0p_harms.rds"))
+  saveRDS(model_0p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_0p_harms_80-10-10.rds"))
   
   print("Fitted model")
   beep(sound = 2)
@@ -694,9 +753,9 @@ model_0p_harms
 
 ```{r model fit 1p}
 
-if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms.rds"))) {
+if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms_80-10-10.rds"))) {
   
-  model_1p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms.rds"))
+  model_1p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms_80-10-10.rds"))
   print("Read existing model")
   
 } else {
@@ -707,7 +766,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_1p_harms.rds"))) 
   toc()
   
   # save model object
-  saveRDS(model_1p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_1p_harms.rds"))
+  saveRDS(model_1p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_1p_harms_80-10-10.rds"))
   
   print("Fitted model")
   beep(sound = 2)
@@ -722,9 +781,9 @@ model_1p_harms
 
 ```{r model fit 2p}
 
-if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms.rds"))) {
+if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms_80-10-10.rds"))) {
   
-  model_2p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms.rds"))
+  model_2p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms_80-10-10.rds"))
   print("Read existing model")
   
 } else {
@@ -735,7 +794,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_2p_harms.rds"))) 
   toc()
   
   # save model object
-  saveRDS(model_2p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_2p_harms.rds"))
+  saveRDS(model_2p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_2p_harms_80-10-10.rds"))
   
   print("Fitted model")
   beep(sound = 2)
@@ -750,9 +809,9 @@ model_2p_harms
 
 ```{r model fit 3p}
 
-if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms.rds"))) {
+if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms_80-10-10.rds"))) {
   
-  model_3p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms.rds"))
+  model_3p_harms <- readRDS(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms_80-10-10.rds"))
   print("Read existing model")
   
 } else {
@@ -763,7 +822,7 @@ if(file.exists(paste0("ssf_coefficients/model_id", focal_id, "_3p_harms.rds"))) 
   toc()
   
   # save model object
-  saveRDS(model_3p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_3p_harms.rds"))
+  saveRDS(model_3p_harms, file = paste0("ssf_coefficients/model_id", focal_id, "_3p_harms_80-10-10.rds"))
   
   print("Fitted model")
   beep(sound = 2)
@@ -1350,7 +1409,7 @@ hour_coefs_nat_df_0p <- harmonics_nat_df_0p %>%
 
 # save the coefficients to use in the simulations
 write_csv(hour_coefs_nat_df_0p,
-          paste0("ssf_coefficients/id", focal_id, "_0pDaily_coefs_", Sys.Date(), ".csv"))
+          paste0("ssf_coefficients/id", focal_id, "_0pDaily_coefs_80-10-10_", Sys.Date(), ".csv"))
 
 # turning into a long data frame
 hour_coefs_nat_long_0p <- pivot_longer(hour_coefs_nat_df_0p, 
@@ -1370,7 +1429,7 @@ hour_coefs_nat_df_1p <- harmonics_nat_df_1p %>%
 
 # save the coefficients to use in the simulations
 write_csv(hour_coefs_nat_df_1p,
-          paste0("ssf_coefficients/id", focal_id, "_1pDaily_coefs_",Sys.Date(), ".csv"))
+          paste0("ssf_coefficients/id", focal_id, "_1pDaily_coefs_80-10-10_",Sys.Date(), ".csv"))
 
 # turning into a long data frame
 hour_coefs_nat_long_1p <- pivot_longer(hour_coefs_nat_df_1p, 
@@ -1389,7 +1448,7 @@ hour_coefs_nat_df_2p <- harmonics_nat_df_2p %>%
 
 # save the coefficients to use in the simulations
 write_csv(hour_coefs_nat_df_2p,
-          paste0("ssf_coefficients/id", focal_id, "_2pDaily_coefs_",Sys.Date(), ".csv"))
+          paste0("ssf_coefficients/id", focal_id, "_2pDaily_coefs_80-10-10_",Sys.Date(), ".csv"))
 
 # turning into a long data frame
 hour_coefs_nat_long_2p <- pivot_longer(hour_coefs_nat_df_2p, cols = !1, 
@@ -1408,7 +1467,7 @@ hour_coefs_nat_df_3p <- harmonics_nat_df_3p %>%
 
 # save the coefficients to use in the simulations
 write_csv(hour_coefs_nat_df_3p,
-          paste0("ssf_coefficients/id", focal_id, "_3pDaily_coefs_", Sys.Date(), ".csv"))
+          paste0("ssf_coefficients/id", focal_id, "_3pDaily_coefs_80-10-10_", Sys.Date(), ".csv"))
 
 # turning into a long data frame
 hour_coefs_nat_long_3p <- pivot_longer(hour_coefs_nat_df_3p, cols = !1, 
@@ -2341,7 +2400,7 @@ canopy_quad_1p <- ggplot(data = canopy_fresponse_long,
   geom_contour(aes(z = value), 
                breaks = seq(canopy_contour_increment, 
                             canopy_contour_max, 
-                            -canopy_contour_increment), 
+                            canopy_contour_increment), 
                colour = "black", linewidth = 0.25, linetype = "dashed") +
   geom_contour(aes(z = value),
                breaks = seq(-canopy_contour_increment, 
@@ -2393,7 +2452,7 @@ canopy_quad_2p <- ggplot(data = canopy_fresponse_long,
   geom_contour(aes(z = value), 
                breaks = seq(canopy_contour_increment, 
                             canopy_contour_max, 
-                            -canopy_contour_increment), 
+                            canopy_contour_increment), 
                colour = "black", linewidth = 0.25, linetype = "dashed") +
   geom_contour(aes(z = value),
                breaks = seq(-canopy_contour_increment, 
