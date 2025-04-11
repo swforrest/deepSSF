@@ -166,25 +166,28 @@ class FCN_block_all_movement(nn.Module):
 
         # define the layers - nn.Sequential allows for the definition of layers in a sequential manner
         self.ffn = nn.Sequential(
-            # fully connected layer 1 (the dense_dim_in_all is the number of input features, 
-            # and should match the output of the Conv2d_block_toFC block).
-            # the dense_dim_hidden is the number of neurons in the hidden layer, and doesn't need to be the same as the input features
-            nn.Linear(self.dense_dim_in_all, self.dense_dim_hidden),
-            # dropout layer (helps to reduce overfitting)
-            nn.Dropout(self.dropout),
-            # ReLU activation function
-            nn.ReLU(),
-            # fully connected layer 2
-            # the number of input neurons should match the output from the previous layer
-            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
-            # dropout layer
-            nn.Dropout(self.dropout),
-            # ReLU activation function
-            nn.ReLU(),
+            
+            # # fully connected layer 1 (the dense_dim_in_all is the number of input features, 
+            # # and should match the output of the Conv2d_block_toFC block).
+            # # the dense_dim_hidden is the number of neurons in the hidden layer, and doesn't need to be the same as the input features
+            # nn.Linear(self.dense_dim_in_all, self.dense_dim_hidden),
+            # # dropout layer (helps to reduce overfitting)
+            # nn.Dropout(self.dropout),
+            # # ReLU activation function
+            # nn.ReLU(),
+            
+            # # fully connected layer 2
+            # # the number of input neurons should match the output from the previous layer
+            # nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # # dropout layer
+            # nn.Dropout(self.dropout),
+            # # ReLU activation function
+            # nn.ReLU(),
+            
             # fully connected layer 3
             # the number of input neurons should match the output from the previous layer, 
             # and the number of output neurons should match the number of movement parameters
-            nn.Linear(self.dense_dim_hidden, self.num_movement_params)
+            nn.Linear(self.dense_dim_in_all, self.num_movement_params)
         )
 
     def forward(self, x):
@@ -285,7 +288,7 @@ class Params_to_Grid_Block(nn.Module):
         # Ensure all tensors are on the same device as x
         shape = shape.to(x.device)
         scale = scale.to(x.device)
-        return -1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale
+        return -1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale - torch.log(x)
 
     # log von Mises densities (on the log-scale) for the mixture distribution
     def vonmises_density(self, x, kappa, vm_mu):
