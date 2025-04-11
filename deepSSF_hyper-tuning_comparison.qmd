@@ -54,19 +54,19 @@ options(scipen = 0)  # Reset
 #| message=FALSE
 
 # Read in the results of the hyperparameter tuning with 1 convolutional layer 
-conv1_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv1.csv") %>% 
+conv1_results <- read_csv("Python/outputs/hyper_tuning_results/final_results2_buffalo2005_nconv1.csv") %>% 
   mutate(num_conv_layers = "1", .before = 1) 
 
 # Read in the results of the hyperparameter tuning with 2 convolutional layers
-conv2_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv2.csv") %>% 
+conv2_results <- read_csv("Python/outputs/hyper_tuning_results/final_results2_buffalo2005_nconv2.csv") %>% 
   mutate(num_conv_layers = "2", .before = 1)
 
 # Read in the results of the hyperparameter tuning with 3 convolutional layers
-conv3_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv3.csv") %>% 
+conv3_results <- read_csv("Python/outputs/hyper_tuning_results/final_results2_buffalo2005_nconv3.csv") %>% 
   mutate(num_conv_layers = "3", .before = 1)
 
 # Read in the results of the hyperparameter tuning with 4 convolutional layers
-conv4_results <- read_csv("Python/outputs/hyper_tuning_results/final_results_buffalo2005_nconv4.csv") %>% 
+conv4_results <- read_csv("Python/outputs/hyper_tuning_results/final_results2_buffalo2005_nconv4.csv") %>% 
   mutate(num_conv_layers = "4", .before = 1)
 
 all_results <- bind_rows(conv1_results, conv2_results, conv3_results, conv4_results)

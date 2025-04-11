@@ -171,7 +171,7 @@ Then, when we do our step selection simulations, we can just subset these maps b
 
 ```{r}
 
-model_date <- "2025-01-03"
+model_date <- "2025-04-10"
 focal_id <- 2005
 
 ```
@@ -344,7 +344,7 @@ for(k in 1:1) {
   
   for(j in 1:length(model_harmonics)) {
   
-    ssf_coefs_file_path <- paste0("ssf_coefficients/id", focal_id, "_", model_harmonics[j], "Daily_coefs_", model_date, ".csv")
+    ssf_coefs_file_path <- paste0("ssf_coefficients/id", focal_id, "_", model_harmonics[j], "Daily_coefs_80-10-10_", model_date, ".csv")
     print(ssf_coefs_file_path)
     
     ssf_coefs <- read_csv(ssf_coefs_file_path)
@@ -354,9 +354,9 @@ for(k in 1:1) {
     
     # for the progress bar - uncomment the line depending on if using subset
     # for all data
-    # n <- nrow(test_data)
+    n <- nrow(test_data)
     # for the subset
-    n <- n_samples_subset
+    # n <- n_samples_subset
     
     pb <- progress_bar$new(
       format = "  Progress [:bar] :percent in :elapsed",
@@ -372,10 +372,10 @@ for(k in 1:1) {
     #-------------------------------------------------------------------------
     
     # to calculate the next step probabilities for all samples
-    # for (i in 2:n) {
+    for (i in 2:n) {
     
     # for the subset
-    for (i in 2:(n_samples_subset+1)) {
+    # for (i in 2:(n_samples_subset+1)) {
     
       sample_tm1 <- test_data[i-1, ] # get the step at t - 1 for the bearing of the approaching step
       sample <- test_data[i, ]
@@ -446,6 +446,7 @@ for(k in 1:1) {
       
       # step lengths
       # calculated on the log scale
+      # subtract the log(distance values to account for the change in movement variables - Appendix in paper)
       step_log <- habitat_log
       step_log[] <- dgamma(distance_values, 
                            shape = ssf_coefs$shape[[coef_hour]], 
@@ -455,7 +456,7 @@ for(k in 1:1) {
       step_log[] <- values(step_log) - max(values(step_log), na.rm = T) - 
         log(sum(exp(values(step_log) - max(values(step_log), na.rm = T))))
       # check that it sums to 1
-      print(sum(exp(values(step_log))))
+      # print(sum(exp(values(step_log))))
             
       
       # turning angles
@@ -471,7 +472,7 @@ for(k in 1:1) {
       ta_log[] <- values(ta_log) - max(values(ta_log), na.rm = T) - 
         log(sum(exp(values(ta_log) - max(values(ta_log), na.rm = T))))
       # check that it sums to 1
-      print(sum(exp(values(ta_log))))
+      # print(sum(exp(values(ta_log))))
       
       # combine the step and turning angle probabilities
       move_log <- step_log + ta_log
@@ -481,7 +482,7 @@ for(k in 1:1) {
       # convert to normalised probability
       move_pred[] <- exp(values(move_log) - max(values(move_log), na.rm = T)) / 
         sum(exp(values(move_log) - max(values(move_log), na.rm = T)), na.rm = T)
-      print(sum(values(move_pred)))
+      # print(sum(values(move_pred)))
       
       # movement probability value at the next step
       prob_movement <- as.numeric(terra::extract(move_pred, next_step_vect)[2])
@@ -552,7 +553,7 @@ for(k in 1:1) {
     
   }
   
-  # write.csv(test_data, file = paste0("outputs/next_step_probs_ssf_id", ids[k], "_n_samples", n_samples_subset, "_", Sys.Date(), ".csv"))
+  write.csv(test_data, file = paste0("outputs/next_step_probs_ssf_80-10-10_id", ids[k], "_n_samples", n_samples_subset, "_", Sys.Date(), ".csv"))
   
   gc()
   
@@ -562,26 +563,6 @@ toc()
 
 ```
 
-
-```{r}
-
-test_data_no_correction <- test_data %>% drop_na(prob_habitat_ssf_0p) %>% 
-  select(t_, 
-         prob_habitat_ssf_0p, prob_habitat_ssf_2p,
-         prob_movement_ssf_0p, prob_movement_ssf_2p,
-         prob_next_step_ssf_0p, prob_next_step_ssf_2p
-         ) %>%
-  mutate(t_ = lubridate::as_datetime(t_)) %>% 
-  pivot_longer(cols = !c(t_),
-             names_to = "model", values_to = "prob")
-
-ggplot() +
-  geom_hline(yintercept = 0.000098, linetype = "dashed") +
-  geom_line(data=test_data_no_correction %>% filter(), 
-            aes(x = t_, y = prob, colour = model)) +
-  theme_bw()
-
-```
 
 ```{r}
 
@@ -596,6 +577,23 @@ test_data_correction <- test_data %>% drop_na(prob_habitat_ssf_0p) %>%
              names_to = "model", values_to = "prob")
 
 ggplot() +
+  geom_hline(yintercept = 0.000098, linetype = "dashed") +
+  geom_line(data=test_data_correction %>% filter(), 
+            aes(x = t_, y = prob, colour = model)) +
+  theme_bw()
+
+test_data_correction <- test_data %>% drop_na(prob_habitat_ssf_0p) %>% 
+  select(t_, 
+         prob_habitat_ssf_0p, prob_habitat_ssf_2p
+         # prob_movement_ssf_0p, prob_movement_ssf_2p,
+         # prob_next_step_ssf_0p, prob_next_step_ssf_2p
+         ) %>%
+  mutate(t_ = lubridate::as_datetime(t_)) %>% 
+  pivot_longer(cols = !c(t_),
+             names_to = "model", values_to = "prob")
+
+ggplot() +
+  geom_hline(yintercept = 0.000098, linetype = "dashed") +
   geom_line(data=test_data_correction %>% filter(), 
             aes(x = t_, y = prob, colour = model)) +
   theme_bw()
