@@ -261,156 +261,6 @@ validation_deepssf_s2_long <- validation_deepssf_s2_all %>%
 
 ```
 
-# Compare the probabilities
-
-## Combine the wide data frames
-
-### Keep only the relevant columns
-
-```{r}
-
-validation_ssf_clean <- validation_ssf_all %>% 
-  dplyr::select(c(id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
-                  prob_habitat_ssf_0p, prob_habitat_ssf_2p, 
-                  prob_movement_ssf_0p, prob_movement_ssf_2p,
-                  prob_next_step_ssf_0p, prob_next_step_ssf_2p,
-                  ))
-
-validation_deepssf_clean <- validation_deepssf_all %>%
-  mutate(habitat_deepSSF = habitat_probs,
-         movement_deepSSF = move_probs,
-         next_step_deepSSF = next_step_probs,
-         .keep = "none")
-
-validation_deepssf_s2_clean <- validation_deepssf_s2_all %>%
-  mutate(habitat_deepSSF_S2 = habitat_probs,
-         movement_deepSSF_S2 = move_probs,
-         next_step_deepSSF_S2 = next_step_probs,
-         .keep = "none")
-
-```
-
-### Combine the data frames
-
-```{r}
-
-validation_all <- bind_cols(validation_ssf_clean,
-                            validation_deepssf_clean,
-                            validation_deepssf_s2_clean)
-
-```
-
-## Split in habitat selection, movement and next step probabilities
-
-### Function to get the maximum probability
-
-```{r}
-
-get_max_column <- function(df) {
-  # Create a new column with the name of the column containing the max value for each row
-  df$max_column <- apply(df, 1, function(row) {
-    # Find the column name with the maximum value
-    col_names <- names(df)
-    max_col_index <- which.max(row)
-    return(col_names[max_col_index])
-  })
-  
-  return(df)
-}
-
-```
-
-# Calculate which was the maximum probability for each row
-
-## Habitat selection
-
-```{r}
-
-validation_habitat <- validation_all %>% filter(id == 2005) %>% 
-  dplyr::select(
-    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
-    # grep("habitat", colnames(validation_all)),
-    # prob_habitat_ssf_0p,
-    prob_habitat_ssf_2p,
-    # habitat_deepSSF,
-    habitat_deepSSF_S2
-    ) 
-
-validation_habitat_prop <- get_max_column(validation_habitat)
-
-max_column_counts <- table(validation_habitat_prop$max_column)
-max_column_proportions <- prop.table(max_column_counts)
-
-summary_df <- data.frame(
-  column = names(max_column_counts),
-  count = as.numeric(max_column_counts),
-  proportion = as.numeric(max_column_proportions)
-)
-
-summary_df
-
-```
-
-## Movement
-
-```{r}
-
-validation_movement <- validation_all %>% 
-  dplyr::select(
-    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
-    # grep("movement", colnames(validation_all)),
-    # prob_movement_ssf_0p,
-    prob_movement_ssf_2p,
-    movement_deepSSF,
-    # movement_deepSSF_S2
-    ) 
-
-validation_movement_prop <- get_max_column(validation_movement)
-
-max_column_counts <- table(validation_movement_prop$max_column)
-max_column_proportions <- prop.table(max_column_counts)
-
-summary_df <- data.frame(
-  column = names(max_column_counts),
-  count = as.numeric(max_column_counts),
-  proportion = as.numeric(max_column_proportions)
-)
-
-summary_df
-
-```
-
-## Next-step
-
-```{r}
-
-validation_next_step <- validation_all %>% 
-  dplyr::select(
-    # id, x_, y_, t_, t2_, hour_t1, hour_t2, yday_t1, yday_t2,
-    # grep("next_step", colnames(validation_all)),
-    # prob_next_step_ssf_0p,
-    prob_next_step_ssf_2p,
-    next_step_deepSSF,
-    # next_step_deepSSF_S2
-    ) 
-
-validation_next_step_prop <- get_max_column(validation_next_step)
-
-max_column_counts <- table(validation_next_step_prop$max_column)
-max_column_proportions <- prop.table(max_column_counts)
-
-summary_df <- data.frame(
-  column = names(max_column_counts),
-  count = as.numeric(max_column_counts),
-  proportion = as.numeric(max_column_proportions)
-)
-
-summary_df
-
-```
-
-
-
 ## Combine the lengthened data frames
 
 ```{r}
@@ -418,8 +268,6 @@ summary_df
 validation_all_long <- bind_rows(validation_ssf_long,
                                  validation_deepssf_long,
                                  validation_deepssf_s2_long)
-
-validation_all_long <- validation_all_long %>% filter(value > 0)
 
 ```
 
@@ -481,6 +329,7 @@ validation_all_long <- validation_all_long %>%
 
 # apply the sliding window function
 validation_all_sliding_period <- validation_all_long %>% 
+  group_by(id, model, probability) %>% 
   slide_period_dfr(
     validation_all_long$t2_,
     # specify that we want to split by days (and slide across at daily intervals)
@@ -497,35 +346,6 @@ head(validation_all_sliding_period, 10)
 ```
 
 We can see from the function above that we have the average time, average probability, and quantiles for each overlapping window, for each model and probability surface (habitat, movement and next-step).
-
-## Out-of-sample validation
-
-The above sliding windows are for each individual separately, but we also want to calculate the average and quantiles for all out-of-sample individuals together.
-
-### Calculating mean and quantiles
-
-```{r}
-
-# out-of-sample data - all ids but the focal id
-OOS_data <- validation_all_long %>% 
-  filter(!id == focal_id) %>%
-  group_by(model, probability) %>%
-  arrange(t2_)
-
-validation_all_sliding_period_OOS <- OOS_data %>% 
-  slide_period_dfr(
-    OOS_data$t2_,
-    "day",
-    window_summary,
-    .before = before_after,
-    .after = before_after
-)
-
-head(validation_all_sliding_period_OOS, 10)
-
-```
-
-Now the summaries are calculated for all out-of-sample individuals together.
 
 # Habitat selection across the tracking period
 
@@ -548,12 +368,12 @@ secondary_linewidth <- 0.04
 ggplot() +
   
   # dashed lines containing the SSF probabilities (for zooming into in the paper)
-  geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
-  geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
-                filter(probability == "habitat" &
+                filter(probability == "habitat_scaled" &
                        id == focal_id),
               aes(x = average_time,
                   ymin = q25,
@@ -562,28 +382,9 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>%
-              filter(probability == "habitat" &
-                     !id == focal_id),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "habitat"),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
-  
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "habitat" &
+              filter(probability == "habitat_scaled" &
                      id == focal_id),
             aes(x = average_time, 
                 y = average_prob, 
