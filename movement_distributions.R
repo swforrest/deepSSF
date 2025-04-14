@@ -25,13 +25,13 @@ distance_layer <- rast(distance_layer)
 bearing_layer <- rast(bearing_layer)
 
 # Plot the distance and bearing rasters
-png("outputs/movement_distributions/distance_layer.png", width = 1000, height = 750, res = 250)
+# png("outputs/movement_distributions/distance_layer.png", width = 1000, height = 750, res = 250)
 terra::plot(distance_layer, main = "Distance from centre")
-dev.off()
+# dev.off()
 
-png("outputs/movement_distributions/bearing_layer.png", width = 1000, height = 750, res = 250)
+# png("outputs/movement_distributions/bearing_layer.png", width = 1000, height = 750, res = 250)
 terra::plot(bearing_layer, main = "Bearing")
-dev.off()
+# dev.off()
 
 distance_values <- terra::values(distance_layer)
 bearing_values <- terra::values(bearing_layer)
@@ -60,8 +60,8 @@ ggplot(movement_data, aes(distance)) +
   ggtitle("Number of cells with increasing radius") +
   theme_bw()
 
-ggsave("outputs/movement_distributions/movement_data_histogram.png", 
-       width=150, height=90, units="mm", dpi = 300)
+# ggsave("outputs/movement_distributions/movement_data_histogram.png", 
+#        width=150, height=90, units="mm", dpi = 300)
 
 
 # Step length distribution
@@ -73,21 +73,27 @@ shape = 2
 scale = 100
 
 # Create a sequence of x values (1D) for the gamma distribution
-x_values <- seq(0, 1250, by = 0.1)
+x_1D <- seq(0, 1250, by = 0.1)
 
 # Calculate the gamma density values for the 1D distribution
 step_dist_1D_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale))
+step_dist_1D_power_0.5_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.5)
+step_dist_1D_power_0.25_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.25)
+step_dist_1D_power_0.1_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.1)
 
 # Plot the gamma distribution
-ggplot(step_dist_1D_df) +
-  geom_line(aes(x, y)) +
+ggplot() +
+  geom_line(data = step_dist_1D_df, aes(x, y)) +
+  geom_line(data = step_dist_1D_power_0.5_df, aes(x, y)) +
+  # geom_line(data = step_dist_1D_power_0.25_df, aes(x, y)) +
+  # geom_line(data = step_dist_1D_power_0.1_df, aes(x, y)) +
   labs(title = "Gamma distribution in one dimension",
        x = "Step length (m)",
        y = "Density") +
   theme_bw()
 
-ggsave("outputs/movement_distributions/1D_gamma_distribution.png", 
-       width=150, height=90, units="mm", dpi = 300)
+# ggsave("outputs/movement_distributions/1D_gamma_distribution.png", 
+#        width=150, height=90, units="mm", dpi = 300)
 
 
 
@@ -101,9 +107,9 @@ gamma_step_dist_2D[] <- dgamma(distance_values,
                                scale = scale)
 
 # Plot the gamma distribution
-png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
+# png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
 plot(gamma_step_dist_2D, main = "2D gamma distribution")
-dev.off()
+# dev.off()
 
 # Get the values of the two-dimensional gamma distribution
 step_dist_2D_values <- terra::values(gamma_step_dist_2D)
@@ -130,8 +136,8 @@ ggplot() +
        y = "Density") +
   theme_bw()
 
-ggsave("outputs/movement_distributions/2D_gamma_samples.png", 
-       width=150, height=90, units="mm", dpi = 300)
+# ggsave("outputs/movement_distributions/2D_gamma_samples.png", 
+#        width=150, height=90, units="mm", dpi = 300)
 
 
 

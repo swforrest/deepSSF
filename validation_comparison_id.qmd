@@ -50,16 +50,6 @@ options(scipen = 0)  # Reset
 
 ```
 
-## Script setup
-
-Specify the focal id for selecting the in-sample predictions.
-
-```{r}
-
-focal_id <- 2005
-
-```
-
 # Step selection function probabilities
 
 ## SSF models fitted with and without temporal dynamics
@@ -70,8 +60,8 @@ focal_id <- 2005
 uniform_probs <- 1/(101*101) # uniform probability for each cell
 
 # create vector of GPS data filenames
-validation_ssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_ssf_id") 
-validation_ids <- substr(validation_ssf, 23, 26)
+validation_ssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_ssf_80-10-10_id") 
+validation_ids <- substr(validation_ssf, 32, 35)
 
 # import data
 validation_ssf_list <- vector(mode = "list", length = length(validation_ssf))
@@ -94,7 +84,8 @@ for(i in 1:length(validation_ssf)){
 
 validation_ssf_all <- bind_rows(validation_ssf_list)
 
-validation_ssf_all <- validation_ssf_all %>% group_by(id) %>% 
+validation_ssf_all <- validation_ssf_all %>% 
+  # group_by(id) %>% 
   mutate(
     prob_habitat_ssf_0p_scaled = (prob_habitat_ssf_0p - uniform_probs) / sd(prob_habitat_ssf_0p, na.rm = T),
     prob_movement_ssf_0p_scaled = (prob_movement_ssf_0p - uniform_probs) / sd(prob_movement_ssf_0p, na.rm = T),
@@ -160,46 +151,31 @@ head(validation_ssf_long)
 # deepSSF probabilities
 
 ```{r}
-#| message=FALSE
 
-# create vector of GPS data filenames
-validation_deepssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_TAmix") 
-validation_ids <- substr(validation_deepssf, 25, 28)
+validation_deepssf <- "Python/outputs/model_training/id2005_med_3_2025-04-12/deepSSF_id2005_n10103_2025-04-12.csv"
+validation_ids <- 2005
 
-# import data
-validation_deepssf_list <- vector(mode = "list", length = length(validation_deepssf))
+validation_deepssf_all <- read_csv(validation_deepssf)
 
-for(i in 1:length(validation_deepssf)){
-  validation_deepssf_list[[i]] <-  read_csv(paste("outputs/next_step_validation/",
-                                             validation_deepssf[[i]], 
-                                             sep = ""))
-  
-  # validation_deepssf_list[i]$id <- validation_ids[i]
-  attr(validation_deepssf_list[[i]]$t_, "tzone") <- "Australia/Queensland"
-  attr(validation_deepssf_list[[i]]$t2_, "tzone") <- "Australia/Queensland"
-  
-}
-
-# To check that the data has been imported correctly
-# validation_deepssf_list
-
-validation_deepssf_all <- bind_rows(validation_deepssf_list)
+attr(validation_deepssf_all$t_, "tzone") <- "Australia/Queensland"
+attr(validation_deepssf_all$t2_, "tzone") <- "Australia/Queensland"
 
 validation_deepssf_all <- validation_deepssf_all %>% 
   mutate(
-  habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
-  move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
-  next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
-)
+    habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
+    move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
+    next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
+  )
 
 ```
+
 
 ### Lengthening data frames to stack together for plotting
 
 ```{r}
 
 validation_deepssf_long <- validation_deepssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, year_t2, contains("probs")) %>% 
+  dplyr::select(id, x_, y_, t_, x2_, y2_, t2_, hour_t2, yday_t2, contains("probs")) %>% 
   pivot_longer(cols = contains("probs"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -215,8 +191,8 @@ validation_deepssf_long <- validation_deepssf_all %>%
 #| message=FALSE
 
 # create vector of GPS data filenames
-validation_deepssf_s2 <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_S2") 
-validation_ids <- substr(validation_deepssf_s2, 22, 25)
+validation_deepssf_s2 <- list.files(path = "outputs/next_step_validation/", pattern = "deepSSF_S2_id2005") 
+validation_ids <- substr(validation_deepssf_s2, 14, 17)
 
 # import data
 validation_deepssf_s2_list <- vector(mode = "list", length = length(validation_deepssf_s2))
@@ -238,6 +214,7 @@ for(i in 1:length(validation_deepssf_s2)){
 validation_deepssf_s2_all <- bind_rows(validation_deepssf_s2_list)
 
 validation_deepssf_s2_all <- validation_deepssf_s2_all %>% 
+  # group_by(id) %>%
   mutate(
   habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
   move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
@@ -277,15 +254,10 @@ validation_all_long <- bind_rows(validation_ssf_long,
 
 ```{r}
 
-# Wet season is from November to April
-months_wet <- c(1:4, 11:12)
-
 validation_all_long <- validation_all_long %>% 
-  mutate(sample = ifelse(id == focal_id, "in_sample", "out_sample"),
-         yday_t2_2018 = ifelse(year_t2 == 2018, yday_t2, yday_t2 + 365),
+  mutate(yday_t2_2018 = ifelse(year_t2 == 2018, yday_t2, yday_t2 + 365),
          week_t2 = week(t2_),
-         month_t2 = month(t2_),
-         season = ifelse(month_t2 %in% months_wet, "wet", "dry"))
+         month_t2 = month(t2_))
 
 head(validation_all_long)
 
@@ -373,8 +345,8 @@ ggplot() +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
-                filter(probability == "habitat_scaled" &
-                       id == focal_id),
+                filter(probability == "habitat" &
+                       !model == "deepSSF_S2 "),
               aes(x = average_time,
                   ymin = q25,
                   ymax = q75,
@@ -384,8 +356,8 @@ ggplot() +
   
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "habitat_scaled" &
-                     id == focal_id),
+              filter(probability == "habitat" &
+                       !model == "deepSSF_S2 "),
             aes(x = average_time, 
                 y = average_prob, 
                 colour = model,
@@ -442,27 +414,6 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "habitat" &
-                     !id == focal_id &
-                     grepl("deepSSF", model)),
-            aes(x = average_time, 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "habitat" &
-                     grepl("deepSSF", model)),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
-  
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat" &
@@ -514,27 +465,6 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "habitat",
-                       !id == focal_id,
-                       !grepl("deepSSF", model)),
-            aes(x = average_time, 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "habitat" &
-                     !grepl("deepSSF", model)),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
-  
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "habitat",
@@ -578,6 +508,8 @@ There isn't a clear seasonal trend with the SSF predictions, but in general the 
 
 ## All models
 
+### Mean probability
+
 ```{r}
 
 ggplot() +
@@ -587,34 +519,15 @@ ggplot() +
   geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
-  geom_ribbon(data = validation_all_sliding_period %>%
-                filter(probability == "move" &
-                       id == focal_id),
-              aes(x = average_time,
-                  ymin = q25,
-                  ymax = q75,
-                  fill = model,
-                  group = interaction(id, model)),
-              alpha = ribbon_50_alpha) +
-  
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>%
-              filter(probability == "move" &
-                     !id == focal_id),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "move"),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
+  # geom_ribbon(data = validation_all_sliding_period %>%
+  #               filter(probability == "move" &
+  #                      id == focal_id),
+  #             aes(x = average_time,
+  #                 ymin = q25,
+  #                 ymax = q75,
+  #                 fill = model,
+  #                 group = interaction(id, model)),
+  #             alpha = ribbon_50_alpha) +
   
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
@@ -622,6 +535,59 @@ ggplot() +
                      id == focal_id),
             aes(x = average_time, 
                 y = average_prob,
+                colour = model,
+                group = interaction(id, model)),
+            linewidth = primary_linewidth) +
+  
+  # dashed line for the null probability
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  scale_y_continuous("Probability value") +
+  scale_x_datetime("Date") +
+  theme_bw() +
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(angle = 30, hjust = 1))
+
+# ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
+
+```
+
+### Median
+
+```{r}
+
+ggplot() +
+  
+  # dashed lines containing the SSF probabilities
+  geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # in sample 50% ribbon
+  # geom_ribbon(data = validation_all_sliding_period %>%
+  #               filter(probability == "move" &
+  #                      id == focal_id),
+  #             aes(x = average_time,
+  #                 ymin = q25,
+  #                 ymax = q75,
+  #                 fill = model,
+  #                 group = interaction(id, model)),
+  #             alpha = ribbon_50_alpha) +
+  
+  # in sample mean line
+  geom_line(data = validation_all_sliding_period %>% 
+              filter(probability == "move" &
+                     id == focal_id),
+            aes(x = average_time, 
+                y = q50,
                 colour = model,
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
@@ -674,27 +640,6 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "move" &
-                     !id == focal_id &
-                     grepl("deepSSF", model)),
-            aes(x = average_time, 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "move" &
-                     grepl("deepSSF", model)),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
-  
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move" &
@@ -746,27 +691,6 @@ ggplot() +
                   group = interaction(id, model)),
               alpha = ribbon_50_alpha) +
   
-  # out-of-sample thin line for each individual
-  geom_line(data = validation_all_sliding_period %>% 
-              filter(probability == "move",
-                       !id == focal_id,
-                       !grepl("deepSSF", model)),
-            aes(x = average_time, 
-                y = average_prob, 
-                colour = model,
-                group = interaction(id, model)),
-            linewidth = secondary_linewidth) +
-  
-  # out-of-sample mean line for all individuals
-  geom_line(data = validation_all_sliding_period_OOS %>%
-              filter(probability == "move" &
-                     !grepl("deepSSF", model)),
-            aes(x = average_time,
-                y = average_prob,
-                colour = model),
-            linewidth = OOS_mean_linewidth, 
-            linetype = "dashed") +
-  
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
               filter(probability == "move",
@@ -793,7 +717,7 @@ ggplot() +
                      position = "right") +
   
   scale_x_datetime("Date") +
-  coord_cartesian(ylim = c(0, 9e-3)) +
+  # coord_cartesian(ylim = c(0, 9e-3)) +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))

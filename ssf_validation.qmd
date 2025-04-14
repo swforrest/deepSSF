@@ -553,7 +553,7 @@ for(k in 1:1) {
     
   }
   
-  write.csv(test_data, file = paste0("outputs/next_step_probs_ssf_80-10-10_id", ids[k], "_n_samples", n_samples_subset, "_", Sys.Date(), ".csv"))
+  write.csv(test_data, file = paste0("outputs/next_step_validation/next_step_probs_ssf_80-10-10_id", ids[k], "_n_samples", n_samples_subset, "_", Sys.Date(), ".csv"))
   
   gc()
   
