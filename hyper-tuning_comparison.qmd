@@ -69,8 +69,8 @@ focal_id <- 2005
 
 hypertuning_csvs <- c(
   "Python/outputs/model_training/id2005_small_1_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv",
-  "Python/outputs/model_training/id2005_med_2_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv",
-  "Python/outputs/model_training/id2005_large_1_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv",
+  "Python/outputs/model_training/id2005_med_4_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv",
+  "Python/outputs/model_training/id2005_large_2_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv",
   "Python/outputs/model_training/id2005_large2_1_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv"
 )
 
@@ -325,7 +325,7 @@ ggplot() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_movement_scaled_sliding_", window_width, "days.png"),
+ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_movement_sliding_", window_width, "days.png"),
        width = 150, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -370,7 +370,7 @@ ggplot() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_next-step_scaled_sliding_", window_width, "days.png"),
+ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_next-step_sliding_", window_width, "days.png"),
        width = 150, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -411,6 +411,46 @@ ggplot() +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_quantiles_hourly %>%
+                filter(probability == "habitat_probs"),
+              aes(x = hour_t2,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model),
+              alpha = ribbon_50_alpha) +
+  
+  # in sample mean line
+  geom_line(data = validation_all_quantiles_hourly %>% 
+              filter(probability == "habitat_probs"),
+            aes(x = hour_t2, 
+                y = average_prob, 
+                colour = model),
+            linewidth = primary_linewidth) +
+  
+  # dashed line for the null probability
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
+  
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  
+  scale_y_continuous("Probability value") +
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+  ggtitle("Hourly habitat selection probability") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_habitat_hourly.png"),
+       width = 150, height = 100, units = "mm", dpi = 600)
+
+```
+
+### Scaled probabilities
+
+```{r}
+
+ggplot() +
+  
+  # in sample 50% ribbon
+  geom_ribbon(data = validation_all_quantiles_hourly %>%
                 filter(probability == "habitat_scaled"),
               aes(x = hour_t2,
                   ymin = q25,
@@ -434,7 +474,7 @@ ggplot() +
   
   scale_y_continuous("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
-  ggtitle("Hourly habitat selection probability") +
+  ggtitle("Hourly habitat selection probability (scaled)") +
   theme_bw() +
   theme(legend.position = "bottom")
 
@@ -480,7 +520,7 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_movement_scaled_hourly.png"),
+ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_movement_hourly.png"),
        width = 150, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -524,7 +564,7 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "bottom")
 
-ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_next-step_scaled_hourly.png"),
+ggsave(paste0("outputs/hyper-tuning/deepSSF_hyper-tuning_next-step_hourly.png"),
        width = 150, height = 100, units = "mm", dpi = 600)
 
 ```

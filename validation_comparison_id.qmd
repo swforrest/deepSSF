@@ -59,6 +59,10 @@ options(scipen = 0)  # Reset
 
 uniform_probs <- 1/(101*101) # uniform probability for each cell
 
+n_train <- 0.8
+n_val <- 0.1
+n_test <- 0.1
+
 # create vector of GPS data filenames
 validation_ssf <- list.files(path = "outputs/next_step_validation", pattern = "next_step_probs_ssf_80-10-10_id") 
 validation_ids <- substr(validation_ssf, 32, 35)
@@ -94,6 +98,8 @@ validation_ssf_all <- validation_ssf_all %>%
     prob_movement_ssf_2p_scaled = (prob_movement_ssf_2p - uniform_probs) / sd(prob_movement_ssf_2p, na.rm = T),
     prob_next_step_ssf_2p_scaled = (prob_next_step_ssf_2p - uniform_probs) / sd(prob_next_step_ssf_2p, na.rm = T)
   )
+
+nrow(validation_ssf_all)
 
 ```
 
@@ -152,7 +158,7 @@ head(validation_ssf_long)
 
 ```{r}
 
-validation_deepssf <- "Python/outputs/model_training/id2005_med_2_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv"
+validation_deepssf <- "Python/outputs/model_training/id2005_med_4_2025-04-14/deepSSF_id2005_n10103_2025-04-14.csv"
 validation_ids <- 2005
 
 validation_deepssf_all <- read_csv(validation_deepssf)

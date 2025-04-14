@@ -54,11 +54,11 @@ The habitat selection probability values are from the `deepSSF_landscape_preds.i
 
 # yday 45
 habitat_selection_yday45 <- 
-  read_csv("Python/outputs/landscape_predictions/2005/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv")
+  read_csv("Python/outputs/landscape_predictions/id2005_2025-04-14/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv")
 
 # yday 225
 habitat_selection_yday225 <- 
-  read_csv("Python/outputs/landscape_predictions/2005/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv")
+  read_csv("Python/outputs/landscape_predictions/id2005_2025-04-14/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv")
 
 # filter out the edge cells that were masked
 habitat_selection_yday45 <- habitat_selection_yday45 %>% filter(!NDVI %in% c(Inf, -Inf))
@@ -197,7 +197,7 @@ habitat_selection_yday45_long %>% filter(Hour == 1) %>%
     y = "Habitat selection"
     )
 
-ggsave("outputs/ndvi_habitat_selection_yday45_hour1.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour1.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 habitat_selection_yday45_long %>% filter(Hour == 7) %>%
@@ -213,7 +213,7 @@ habitat_selection_yday45_long %>% filter(Hour == 7) %>%
     y = "Habitat selection"
     )
 
-ggsave("outputs/ndvi_habitat_selection_yday45_hour7.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour7.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 habitat_selection_yday45_long %>% filter(Hour == 12) %>%
@@ -229,7 +229,7 @@ habitat_selection_yday45_long %>% filter(Hour == 12) %>%
     y = "Habitat selection"
     )
 
-ggsave("outputs/ndvi_habitat_selection_yday45_hour12.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour12.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -256,7 +256,7 @@ habitat_selection_yday45_long %>%
     y = "Habitat selection"
     )
 
-ggsave("outputs/ndvi_habitat_selection_yday45_all_hours.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_all_hours.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -286,11 +286,11 @@ ggplot(habitat_selection_yday45_long,
   theme(legend.position = "none")
 
 # for manuscript
-ggsave("outputs/ndvi_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 # for website
-ggsave("outputs/ndvi_habitat_selection_yday45_website.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_website.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -314,11 +314,11 @@ ggplot(habitat_selection_yday225_long,
   theme(legend.position = "none")
 
 # for manuscript
-ggsave("outputs/ndvi_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 # for website
-ggsave("outputs/ndvi_habitat_selection_yday225_website.png", width = 150, height = 90, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday225_website.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -405,7 +405,7 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/canopy_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/canopy_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -426,7 +426,7 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/canopy_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/canopy_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -507,7 +507,7 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/herby_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/herby_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -528,7 +528,7 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/herby_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/herby_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -606,7 +606,7 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/slope_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/slope_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -625,7 +625,7 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("outputs/slope_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/slope_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
