@@ -114,18 +114,23 @@ class Conv2d_block_toFC(nn.Module):
 
         # define the layers - nn.Sequential allows for the definition of layers in a sequential manner
         self.conv2d = nn.Sequential(
+            
         # convolutional layer 1
         nn.Conv2d(in_channels=self.input_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
+        
         # max pooling layer 1 (reduces the spatial dimensions of the data whilst retaining the most important features)
         nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        
         # convolutional layer 2
         nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
+        
         # max pooling layer 2
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        
         # flatten the data to pass through the fully connected layer
         nn.Flatten())
 
@@ -152,7 +157,6 @@ class FCN_block_all_movement(nn.Module):
         self.batch_size = params.batch_size
         self.dense_dim_in_all = params.dense_dim_in_all
         self.dense_dim_hidden = params.dense_dim_hidden
-        self.dense_dim_out = params.dense_dim_out
         self.image_dim = params.image_dim
         self.device = params.device
         self.num_movement_params = params.num_movement_params
@@ -279,7 +283,10 @@ class Params_to_Grid_Block(nn.Module):
         # Ensure all tensors are on the same device as x
         shape = shape.to(x.device)
         scale = scale.to(x.device)
-        return -1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale
+        # return -1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale
+        
+        # to account for change of variables
+        return (-1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale) - torch.log(x)
 
     # log von Mises densities (on the log-scale) for the mixture distribution
     def vonmises_density(self, x, kappa, vm_mu):
@@ -550,11 +557,8 @@ class ModelParams():
         self.dim_in_nonspatial_to_grid = dict_params["dim_in_nonspatial_to_grid"]
         self.dense_dim_in_nonspatial = dict_params["dense_dim_in_nonspatial"]
         self.dense_dim_hidden = dict_params["dense_dim_hidden"]
-        self.dense_dim_out = dict_params["dense_dim_out"]
         self.batch_size = dict_params["batch_size"]
         self.dense_dim_in_all = dict_params["dense_dim_in_all"]
-        self.dense_dim_hidden = dict_params["dense_dim_hidden"]
-        self.dense_dim_out = dict_params["dense_dim_out"]
         self.batch_size = dict_params["batch_size"]
         self.input_channels = dict_params["input_channels"]
         self.output_channels = dict_params["output_channels"]
