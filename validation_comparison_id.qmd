@@ -381,8 +381,8 @@ ggplot() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
-       width = 80, height = 80, units = "mm", dpi = 600)
+# ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
 
