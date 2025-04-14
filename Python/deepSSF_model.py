@@ -129,7 +129,7 @@ class Conv2d_block_toFC(nn.Module):
         nn.ReLU(),
         
         # max pooling layer 2
-        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
         
         # flatten the data to pass through the fully connected layer
         nn.Flatten())
