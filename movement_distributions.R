@@ -73,18 +73,37 @@ shape = 2
 scale = 100
 
 # Create a sequence of x values (1D) for the gamma distribution
-x_1D <- seq(0, 1250, by = 0.1)
+x_1D <- seq(1, 1250, by = 0.1)
 
 # Calculate the gamma density values for the 1D distribution
-step_dist_1D_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale))
-step_dist_1D_power_0.5_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.5)
-step_dist_1D_power_0.25_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.25)
+
+# power 1
+step_dist_1D_df <- data.frame(x = x_1D, 
+                              y = dgamma(x_1D, shape = shape, scale = scale) / 
+                                sum(dgamma(x_1D, shape = shape, scale = scale)))
+
+step_dist_1D_df <- data.frame(x = x_1D, 
+                              y = (dgamma(x_1D, shape = shape, scale = scale) / x_1D)/
+                                sum(dgamma(x_1D, shape = shape, scale = scale) / x_1D))
+
+# power 0.5
+step_dist_1D_power_0.5_df <- data.frame(x = x_1D, 
+                                        y = (dgamma(x_1D, shape = shape, scale = scale)^0.5) / 
+                                               sum(dgamma(x_1D, shape = shape, scale = scale)^0.5))
+
+step_dist_1D_power_0.5_df <- data.frame(x = x_1D, 
+                                        y = ((dgamma(x_1D, shape = shape, scale = scale)^0.5) / x_1D)/
+                                          sum((dgamma(x_1D, shape = shape, scale = scale)^0.5) / x_1D))
+
+
+step_dist_1D_power_0.25_df <- data.frame(x = x_1D, y = (dgamma(x_1D, shape = shape, scale = scale)^0.25)/sum(dgamma(x_1D, shape = shape, scale = scale)^0.25))
+
 step_dist_1D_power_0.1_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape, scale = scale)^0.1)
 
 # Plot the gamma distribution
 ggplot() +
-  geom_line(data = step_dist_1D_df, aes(x, y)) +
-  geom_line(data = step_dist_1D_power_0.5_df, aes(x, y)) +
+  geom_line(data = step_dist_1D_df, aes(x, y), linetype = "dashed") +
+  geom_line(data = step_dist_1D_power_0.5_df, aes(x, y), linetype = "dotdash") +
   # geom_line(data = step_dist_1D_power_0.25_df, aes(x, y)) +
   # geom_line(data = step_dist_1D_power_0.1_df, aes(x, y)) +
   labs(title = "Gamma distribution in one dimension",
@@ -103,8 +122,22 @@ distance_values <- terra::values(distance_layer)
 gamma_step_dist_2D <- distance_layer
 # Calculate the gamma density values at the distances from centre
 gamma_step_dist_2D[] <- dgamma(distance_values, 
-                               shape = shape, 
-                               scale = scale)
+                                shape = shape, 
+                                scale = scale) / sum(dgamma(distance_values, 
+                                                        shape = shape, 
+                                                        scale = scale))
+                         
+gamma_step_dist_2D[] <- (dgamma(distance_values, 
+                                 shape = shape, 
+                                 scale = scale) / distance_values) / sum(dgamma(distance_values, 
+                                                                                      shape = shape, 
+                                                                                      scale = scale) / distance_values)
+
+gamma_step_dist_2D[] <- ((dgamma(distance_values, 
+                                 shape = shape, 
+                                 scale = scale)^0.5) / distance_values) / sum((dgamma(distance_values, 
+                                                                                     shape = shape, 
+                                                                                     scale = scale)^0.5) / distance_values)
 
 # Plot the gamma distribution
 # png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)

@@ -196,36 +196,20 @@ validation_deepssf_long <- validation_deepssf_all %>%
 ```{r}
 #| message=FALSE
 
-# create vector of GPS data filenames
-validation_deepssf_s2 <- list.files(path = "outputs/next_step_validation/", pattern = "deepSSF_S2_id2005") 
-validation_ids <- substr(validation_deepssf_s2, 14, 17)
+validation_deepssf_s2 <- "outputs/next_step_validation/S2/deepSSF_id2005_n10103_2025-04-15.csv"
+validation_ids <- 2005
 
-# import data
-validation_deepssf_s2_list <- vector(mode = "list", length = length(validation_deepssf_s2))
+validation_deepssf_s2_all <- read_csv(validation_deepssf_s2)
 
-for(i in 1:length(validation_deepssf_s2)){
-  validation_deepssf_s2_list[[i]] <-  read_csv(paste("outputs/next_step_validation/",
-                                             validation_deepssf_s2[[i]], 
-                                             sep = ""))
-  
-  # validation_deepssf_s2_list[i]$id <- validation_ids[i]
-  attr(validation_deepssf_s2_list[[i]]$t_, "tzone") <- "Australia/Queensland"
-  attr(validation_deepssf_s2_list[[i]]$t2_, "tzone") <- "Australia/Queensland"
-  
-}
-
-# To check that the data has been imported correctly
-# validation_deepssf_s2_list
-
-validation_deepssf_s2_all <- bind_rows(validation_deepssf_s2_list)
+attr(validation_deepssf_s2_all$t_, "tzone") <- "Australia/Queensland"
+attr(validation_deepssf_s2_all$t2_, "tzone") <- "Australia/Queensland"
 
 validation_deepssf_s2_all <- validation_deepssf_s2_all %>% 
-  # group_by(id) %>%
   mutate(
-  habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
-  move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
-  next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
-)
+    habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
+    move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
+    next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
+  )
 
 ```
 
