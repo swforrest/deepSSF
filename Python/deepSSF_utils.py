@@ -45,7 +45,7 @@ def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform
     # Convert geographic coordinates to pixel coordinates using the inverse transform.
     px, py = ~transform * (x, y)
     
-    # Floor the pixel coordinates to the get the pixel that the location is within.
+    # # Floor the pixel coordinates to the get the pixel that the location is within.
     px, py = int(np.floor(px)), int(np.floor(py))
     
     # Compute half the window size to determine the extent around the central pixel.
