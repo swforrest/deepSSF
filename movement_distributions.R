@@ -82,6 +82,7 @@ step_dist_1D_df <- data.frame(x = x_1D,
                               y = dgamma(x_1D, shape = shape, scale = scale) / 
                                 sum(dgamma(x_1D, shape = shape, scale = scale)))
 
+# divided by distance
 step_dist_1D_df <- data.frame(x = x_1D, 
                               y = (dgamma(x_1D, shape = shape, scale = scale) / x_1D)/
                                 sum(dgamma(x_1D, shape = shape, scale = scale) / x_1D))
@@ -91,9 +92,10 @@ step_dist_1D_power_0.5_df <- data.frame(x = x_1D,
                                         y = (dgamma(x_1D, shape = shape, scale = scale)^0.5) / 
                                                sum(dgamma(x_1D, shape = shape, scale = scale)^0.5))
 
+# divided by distance
 step_dist_1D_power_0.5_df <- data.frame(x = x_1D, 
-                                        y = ((dgamma(x_1D, shape = shape, scale = scale)^0.5) / x_1D)/
-                                          sum((dgamma(x_1D, shape = shape, scale = scale)^0.5) / x_1D))
+                                        y = ((dgamma(x_1D, shape = shape, scale = scale)^2) / x_1D)/
+                                          sum((dgamma(x_1D, shape = shape, scale = scale)^2) / x_1D))
 
 
 step_dist_1D_power_0.25_df <- data.frame(x = x_1D, y = (dgamma(x_1D, shape = shape, scale = scale)^0.25)/sum(dgamma(x_1D, shape = shape, scale = scale)^0.25))
