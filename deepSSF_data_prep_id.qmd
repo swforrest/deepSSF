@@ -184,7 +184,7 @@ buffalo_all_steps %>%
 
 # proportion of steps less than the buffer distance
 # the distance should be a multiple of the resolution
-distance <- 1250
+distance <- 100
 
 # check if multiple of the resolution?
 distance %% res == 0
@@ -293,11 +293,11 @@ for(i in 1:1) { # select just the first ID
 
   buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
   # all data for that individual
-  # buffalo_data <- buffalo_data %>% arrange(t_)
+  buffalo_data <- buffalo_data %>% arrange(t_)
   
   # to use a subset of the data for that individual for testing
   # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:100)
+  # buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:50)
 
   n_samples <- nrow(buffalo_data)
   
@@ -382,18 +382,31 @@ for(i in 1:1) { # select just the first ID
     
     
     points_vect_cent_x1 = list(terra::vect(cbind(x_, y_), type = "points", crs = "EPSG:3112")),
-    pres_cent_x1 = list(rasterize(points_vect_cent_x1, pres_template, background=0)),
     
+    pres_cent_x1 = list({
+      pres_cent_x1 <- rasterize(points_vect_cent_x1, pres_template, background=0)
+      # ext(pres_cent_x1) <- extent_00centre
+      # ext(pres_cent_x1) <- ext(x_min, x_max, y_min, y_max) # should already have this extent
+      pres_cent_x1
+    }),
+    
+    # Recentering method
+    # Can pull locations into different cells
     # rasterised location of the next step - centred on (0,0)
-    # points_vect_cent = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-    # pres_cent = list(rasterize(points_vect_cent, ndvi_cent, background=0)),
+    points_vect_cent_x2_recentred = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
+    pres_cent_x2_recentred = list({
+      pres_cent_x2_recentred <- rasterize(points_vect_cent_x2_recentred, ndvi_cent, background=0)
+      # ext(pres_cent_x2) <- extent_00centre # should already have this extent
+      ext(pres_cent_x2_recentred) <- ext(pres_cent_x1) # to set the natural extent
+      pres_cent_x2_recentred
+      }),
     
-    points_vect_cent_x2 = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
-    
-    pres_cent_x2 = list({
-      pres_cent_x2 <- rasterize(points_vect_cent_x2, pres_template, background=0)
+    # Strict within cell method
+    points_vect_cent_x2_within_cell = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
+    pres_cent_x2_within_cell = list({
+      pres_cent_x2_within_cell <- rasterize(points_vect_cent_x2_within_cell, pres_template, background=0)
       # ext(pres_cent_x2) <- extent_00centre
-      pres_cent_x2
+      pres_cent_x2_within_cell
       })
     
   ) %>% ungroup() # to remove the 'rowwise' class
@@ -417,8 +430,10 @@ for(i in 1:1) { # select just the first ID
     -pres_template,
     -points_vect_cent_x1,
     -pres_cent_x1,
-    -points_vect_cent_x2,
-    -pres_cent_x2)
+    -points_vect_cent_x2_recentred,
+    -pres_cent_x2_recentred,
+    -points_vect_cent_x2_within_cell,
+    -pres_cent_x2_within_cell)
 
   # # save the data
   # write_csv(buffalo_data_df, paste0("buffalo_local_data_id/website_temp/buffalo_", buffalo_ids[i],
@@ -445,10 +460,10 @@ for(i in 1:1) { # select just the first ID
   #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
   #               overwrite = T)
   # 
-  # rast(buffalo_data_covs$pres_cent_x2) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/fixed_buffalo_", buffalo_ids[i], "_pres_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
+  rast(buffalo_data_covs$pres_cent_x2_within_cell) %>%
+    writeRaster(paste0("buffalo_local_layers_id/within_cell_buffalo_", buffalo_ids[i], "_pres_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+                overwrite = T)
   
 }
 
@@ -468,7 +483,7 @@ which(is.na(buffalo_data_covs$ta))
 
 ```{r}
 
-n_samples <- 8
+n_samples <- 5
 
 print("Current step")
 
@@ -481,7 +496,7 @@ print("Next step (target)")
 
 # x2 uncentered
 for(i in 1:n_samples) {
-  print(rowColFromCell(buffalo_data_covs$pres_cent_x2[[i]], which(buffalo_data_covs$pres_cent_x2[[i]][] == 1)))
+  print(rowColFromCell(buffalo_data_covs$pres_cent_x2_within_cell[[i]], which(buffalo_data_covs$pres_cent_x2_within_cell[[i]][] == 1)))
 }
 
 ```
@@ -491,7 +506,7 @@ for(i in 1:n_samples) {
 
 ```{r}
 
-n_plots <- 8
+n_plots <- 5
 
 # NDVI
 walk(buffalo_data_covs$ndvi_cent[1:n_plots], terra::plot)
@@ -509,9 +524,63 @@ walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
 walk(buffalo_data_covs$pres_cent_x1[1:n_plots], terra::plot)
 
 # Target (location of the next step)
-walk(buffalo_data_covs$pres_cent_x2[1:n_plots], terra::plot)
+walk(buffalo_data_covs$pres_cent_x2_within_cell[1:n_plots], terra::plot)
 
 ```
+
+
+```{r}
+
+dummy_extent <- terra::ext(buffalo_data_covs$pres_cent_x1[[1]])
+(dummy_extent[2] - dummy_extent[1])/2 + dummy_extent[1]
+(dummy_extent[4] - dummy_extent[3])/2 + dummy_extent[3]
+
+```
+
+The recentred approach (uses the difference between the (x1, y1) and (x2, y2) locations).
+
+```{r}
+
+for(i in 1:nrow(buffalo_data_covs)) {
+  
+  combo_recentred_df <- as.data.frame(buffalo_data_covs$pres_cent_x1[[i]] + buffalo_data_covs$pres_cent_x2_recentred[[i]], xy = TRUE)
+  
+  plot <- ggplot() +
+    geom_raster(data = combo_recentred_df, aes(x, y, fill = last)) +
+    geom_point(data = buffalo_data_covs[i, ], aes(x = x_, y = y_), colour = "black", size = 2) +
+    geom_point(data = buffalo_data_covs[i, ], aes(x = x2_, y = y2_), colour = "red", size = 2) +
+    coord_fixed() +
+    theme_bw() +
+    theme(legend.position = "none") +
+    ggtitle(paste0("Step ", i))
+  
+  print(plot)
+  
+}
+
+```
+
+```{r}
+
+for(i in 1:nrow(buffalo_data_covs)) {
+  
+  combo_within_cell_df <- as.data.frame(buffalo_data_covs$pres_cent_x1[[i]] + buffalo_data_covs$pres_cent_x2_within_cell[[i]], xy = TRUE)
+  
+  plot <- ggplot() +
+    geom_raster(data = combo_within_cell_df, aes(x, y, fill = last)) +
+    geom_point(data = buffalo_data_covs[i, ], aes(x = x_, y = y_), colour = "black", size = 2) +
+    geom_point(data = buffalo_data_covs[i, ], aes(x = x2_, y = y2_), colour = "red", size = 2) +
+    coord_fixed() +
+    theme_bw() +
+    theme(legend.position = "none") +
+    ggtitle(paste0("Step ", i))
+  
+  print(plot)
+  
+}
+
+```
+
 
 ## To save the object with all of the local covariates
 
