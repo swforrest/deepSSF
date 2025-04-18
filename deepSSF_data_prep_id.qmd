@@ -184,7 +184,7 @@ buffalo_all_steps %>%
 
 # proportion of steps less than the buffer distance
 # the distance should be a multiple of the resolution
-distance <- 100
+distance <- 1250
 
 # check if multiple of the resolution?
 distance %% res == 0
@@ -306,7 +306,7 @@ for(i in 1:1) { # select just the first ID
   buffalo_data_covs <- buffalo_data %>% mutate(
     
     x1_ = x_,
-    y1_ = y_,-
+    y1_ = y_,
     x2_ = lead(x1_, n = hourly_lag, default = NA),
     y2_ = lead(y1_, n = hourly_lag, default = NA),
     x2_cent = x2_ - x1_,
@@ -397,7 +397,7 @@ for(i in 1:1) { # select just the first ID
     pres_cent_x2_recentred = list({
       pres_cent_x2_recentred <- rasterize(points_vect_cent_x2_recentred, ndvi_cent, background=0)
       # ext(pres_cent_x2) <- extent_00centre # should already have this extent
-      ext(pres_cent_x2_recentred) <- ext(pres_cent_x1) # to set the natural extent
+      # ext(pres_cent_x2_recentred) <- ext(pres_cent_x1) # to set the natural extent
       pres_cent_x2_recentred
       }),
     
@@ -405,7 +405,7 @@ for(i in 1:1) { # select just the first ID
     points_vect_cent_x2_within_cell = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
     pres_cent_x2_within_cell = list({
       pres_cent_x2_within_cell <- rasterize(points_vect_cent_x2_within_cell, pres_template, background=0)
-      # ext(pres_cent_x2) <- extent_00centre
+      ext(pres_cent_x2_within_cell) <- extent_00centre
       pres_cent_x2_within_cell
       })
     
