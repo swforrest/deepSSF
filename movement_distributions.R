@@ -69,7 +69,7 @@ ggplot(movement_data, aes(distance)) +
 
 
 # Gamma distribution parameters
-shape = 5
+shape = 1
 scale = 100
 
 # Create a sequence of x values (1D) for the gamma distribution
@@ -81,6 +81,10 @@ x_1D <- seq(1, 1250, by = 0.1)
 step_dist_1D_df <- data.frame(x = x_1D, 
                               y = dgamma(x_1D, shape = shape, scale = scale) / 
                                 sum(dgamma(x_1D, shape = shape, scale = scale)))
+
+# normalising the density
+sum(dgamma(x_1D, shape = shape, scale = scale) / 
+    sum(dgamma(x_1D, shape = shape, scale = scale)))
 
 # divided by distance
 step_dist_1D_df <- data.frame(x = x_1D, 
