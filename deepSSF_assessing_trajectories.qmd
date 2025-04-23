@@ -143,10 +143,10 @@ buffalo_id_subset <- buffalo %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/deepSSF_trajectories/2005", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/model_training/id2005_med_2_2025-04-23/simulations/deepSSF_trajectories/2005/", pattern = "*.csv", full.names = T)
 
 # to filter filenames with any string matching conditions
-sim_data_filenames <- grep("floor_jitter", sim_data_full_list, value = T) #%>% 
+sim_data_filenames <- grep("", sim_data_full_list, value = T) #%>% 
   # grep("3000steps", x = ., value = T) 
 
 # read dataframes as a single dataframe with id identifier
