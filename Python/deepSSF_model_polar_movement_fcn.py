@@ -375,7 +375,7 @@ Duplicate the above block but account for the change of variables when going fro
 """
 class Params_to_Grid_Block_ChV(nn.Module):
     def __init__(self, params):
-        super(Params_to_Grid_Block, self).__init__()
+        super(Params_to_Grid_Block_ChV, self).__init__()
 
         # define the parameters
         self.batch_size = params.batch_size

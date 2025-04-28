@@ -791,8 +791,8 @@ class ConvJointModel(nn.Module):
         # Convolutional block for habitat selection
         self.conv_habitat = Conv2d_block_spatial(params)
 
-        # Convolutional block for movement extraction (output fed into fully connected layers)
-        self.conv_movement = Conv2d_block_toFC(params)
+        # # Convolutional block for movement extraction (output fed into fully connected layers)
+        # self.conv_movement = Conv2d_block_toFC(params)
 
         # Fully connected block for movement
         self.fcn_movement_all = FCN_block_all_movement(params)
@@ -813,11 +813,11 @@ class ConvJointModel(nn.Module):
         # - scalars_to_grid (scalar features needing conversion)
         # - bearing_prev (the bearing from the previous time step, the turning angle is estimated as the deviation from this)
         spatial_data_x = x[0]
-        scalars_to_grid = x[1]
+        scalar_inputs = x[1]
         bearing_prev = x[2]
 
         # Convert scalar data to spatial (grid) form
-        scalar_grids = self.scalar_grid_output(scalars_to_grid)
+        scalar_grids = self.scalar_grid_output(scalar_inputs)
 
         # Combine the original spatial data with the newly generated scalar grids
         all_spatial = torch.cat([spatial_data_x, scalar_grids], dim=1)
@@ -828,10 +828,10 @@ class ConvJointModel(nn.Module):
 
         # MOVEMENT SUBNETWORK
         # Convolutional feature extraction (different architecture for movement)
-        conv_movement = self.conv_movement(all_spatial)
+        # conv_movement = self.conv_movement(all_spatial)
 
         # Fully connected layers for movement (processing both spatial features and any extras)
-        movement_params = self.fcn_movement_all(conv_movement)
+        movement_params = self.fcn_movement_all(scalar_inputs)
 
         return habitat_predictions, movement_params, bearing_prev
 
