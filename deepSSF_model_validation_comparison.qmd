@@ -339,7 +339,7 @@ ggplot() +
   #                    values = c("#E25834", "#000000", "#0096B5", "#26185F"),
   #                   labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  scale_y_continuous("Habitat selecti") +
   scale_x_datetime("Date") +
   theme_bw() +
   theme(legend.position = "bottom",

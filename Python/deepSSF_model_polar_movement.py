@@ -123,13 +123,13 @@ class Conv2d_block_toFC(nn.Module):
         # max pooling layer 1 (reduces the spatial dimensions of the data whilst retaining the most important features)
         nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
         
-        # # convolutional layer 2
-        # nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
-        # # ReLU activation function
-        # nn.ReLU(),
+        # convolutional layer 2
+        nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
+        # ReLU activation function
+        nn.ReLU(),
         
-        # # max pooling layer 2
-        # nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
+        # max pooling layer 2
+        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
         
         # flatten the data to pass through the fully connected layer
         nn.Flatten())
