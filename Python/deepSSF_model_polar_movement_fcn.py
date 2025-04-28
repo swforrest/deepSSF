@@ -167,11 +167,13 @@ class FCN_block_all_movement(nn.Module):
             # fully connected layer 1 (the dense_dim_in_all is the number of input features, 
             # and should match the output of the Conv2d_block_toFC block).
             # the dense_dim_hidden is the number of neurons in the hidden layer, and doesn't need to be the same as the input features
+
             nn.Linear(self.dense_dim_in_all, self.dense_dim_hidden),
             # dropout layer (helps to reduce overfitting)
             nn.Dropout(self.dropout),
             # ReLU activation function
             nn.ReLU(),
+
             # fully connected layer 2
             # the number of input neurons should match the output from the previous layer
             nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
@@ -179,7 +181,16 @@ class FCN_block_all_movement(nn.Module):
             nn.Dropout(self.dropout),
             # ReLU activation function
             nn.ReLU(),
+
             # fully connected layer 3
+            # the number of input neurons should match the output from the previous layer
+            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # dropout layer
+            nn.Dropout(self.dropout),
+            # ReLU activation function
+            nn.ReLU(),
+
+            # fully connected layer 4
             # the number of input neurons should match the output from the previous layer, 
             # and the number of output neurons should match the number of movement parameters
             nn.Linear(self.dense_dim_hidden, self.num_movement_params)
@@ -318,6 +329,7 @@ class Params_to_Grid_Block(nn.Module):
         gamma_shape1 = gamma_shape1.permute(2, 0, 1)
 
         gamma_scale1 = torch.exp(x[:, 1]).unsqueeze(0).unsqueeze(0)
+        gamma_scale1 = gamma_scale1 * 500 # scale parameter is multiplied by 500 to ensure it is in a similar range to the other parameters
         gamma_scale1 = gamma_scale1.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale1 = gamma_scale1.permute(2, 0, 1)
 
@@ -440,6 +452,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         gamma_shape1 = gamma_shape1.permute(2, 0, 1)
 
         gamma_scale1 = torch.exp(x[:, 1]).unsqueeze(0).unsqueeze(0)
+        gamma_scale1 = gamma_scale1 * 500 # scale parameter is multiplied by 500 to ensure it is in a similar range to the other parameters
         gamma_scale1 = gamma_scale1.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale1 = gamma_scale1.permute(2, 0, 1)
 
@@ -536,6 +549,7 @@ class Params_to_Density_Block(nn.Module):
         # and then repeat the parameter value across a grid, such that the density can be calculated at every cell/pixel
         gamma_shape1 = torch.exp(x[:, 0])
         gamma_scale1 = torch.exp(x[:, 1])
+        gamma_scale1 = gamma_scale1 * 500 # scale parameter is multiplied by 500 to ensure it is in a similar range to the other parameters
 
         # calculation of Gamma densities
         gamma_density1 = self.gamma_density(step_length,
