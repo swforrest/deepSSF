@@ -190,7 +190,23 @@ class FCN_block_all_movement(nn.Module):
             # ReLU activation function
             nn.ReLU(),
 
-            # fully connected layer 3
+            # fully connected layer 4
+            # the number of input neurons should match the output from the previous layer
+            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # dropout layer
+            nn.Dropout(self.dropout),
+            # ReLU activation function
+            nn.ReLU(),
+
+            # fully connected layer 5
+            # the number of input neurons should match the output from the previous layer
+            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # dropout layer
+            nn.Dropout(self.dropout),
+            # ReLU activation function
+            nn.ReLU(),
+
+            # fully connected layer 6
             # the number of input neurons should match the output from the previous layer, 
             # and the number of output neurons should match the number of movement parameters
             nn.Linear(self.dense_dim_hidden, self.num_movement_params)
