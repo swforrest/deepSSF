@@ -70,7 +70,7 @@ ggplot(movement_data, aes(distance)) +
 
 # Gamma distribution parameters
 shape = 1
-scale = 100
+scale = 300
 
 # Create a sequence of x values (1D) for the gamma distribution
 x_1D <- seq(1, 1250, by = 0.1)
@@ -78,6 +78,9 @@ x_1D <- seq(1, 1250, by = 0.1)
 # Calculate the gamma density values for the 1D distribution
 
 # power 1
+step_dist_1D_df <- data.frame(x = x_1D, 
+                              y = dgamma(x_1D, shape = shape, scale = scale))
+
 step_dist_1D_df <- data.frame(x = x_1D, 
                               y = dgamma(x_1D, shape = shape, scale = scale) / 
                                 sum(dgamma(x_1D, shape = shape, scale = scale)))
@@ -109,7 +112,7 @@ step_dist_1D_power_0.1_df <- data.frame(x = x_1D, y = dgamma(x_1D, shape = shape
 # Plot the gamma distribution
 ggplot() +
   geom_line(data = step_dist_1D_df, aes(x, y), linetype = "dashed") +
-  geom_line(data = step_dist_1D_power_0.5_df, aes(x, y), linetype = "dotdash") +
+  # geom_line(data = step_dist_1D_power_0.5_df, aes(x, y), linetype = "dotdash") +
   # geom_line(data = step_dist_1D_power_0.25_df, aes(x, y)) +
   # geom_line(data = step_dist_1D_power_0.1_df, aes(x, y)) +
   labs(title = "Gamma distribution in one dimension",
