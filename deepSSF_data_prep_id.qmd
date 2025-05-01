@@ -252,7 +252,7 @@ buffalo_all_steps_save <- buffalo_all_steps_save %>%
            y2_ - y1_ < distance) %>% 
   drop_na(ta_)
 
-buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
+# buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
 
 ```
 
@@ -313,12 +313,31 @@ for(i in 1:1) { # select just the first ID
     y2_cent = y2_ - y1_,
     t2_ = lead(t_, n = hourly_lag, default = NA),
     t_diff = round(difftime(t2_, t_, units = "hours"),0),
-    hour_t1 = lubridate::hour(t_),
-    yday_t1 = lubridate::yday(t_),
-    hour_t2 = lubridate::hour(t2_),
+    
+    # add the minutes as a decimal to the hour, and the hour as a decimal to the day
+    hour_t1 = round(lubridate::hour(t_) + lubridate::minute(t_)/60,2),
+    yday_t1 = round(lubridate::yday(t_) + lubridate::hour(t_)/24,2),
+    
+    hour_t1_sin1 = sin(2*pi*hour_t1/24),
+    hour_t1_cos1 = cos(2*pi*hour_t1/24),
+    hour_t1_sin2 = sin(4*pi*hour_t1/24),
+    hour_t1_cos2 = cos(4*pi*hour_t1/24),
+    hour_t1_sin3 = sin(6*pi*hour_t1/24),
+    hour_t1_cos3 = cos(6*pi*hour_t1/24),
+    
+    yday_t1_sin1 = sin(2*pi*yday_t1/365.25),
+    yday_t1_cos1 = cos(2*pi*yday_t1/365.25),
+    yday_t1_sin2 = sin(4*pi*yday_t1/365.25),
+    yday_t1_cos2 = cos(4*pi*yday_t1/365.25),
+    yday_t1_sin3 = sin(6*pi*yday_t1/365.25),
+    yday_t1_cos3 = cos(6*pi*yday_t1/365.25),
+    
+    # add the minutes as a decimal to the hour, and the hour as a decimal to the day
+    hour_t2 = round(lubridate::hour(t2_) + lubridate::minute(t2_)/60,2),
     hour_t2_sin = sin(2*pi*hour_t2/24),
     hour_t2_cos = cos(2*pi*hour_t2/24),
-    yday_t2 = lubridate::yday(t2_),
+    
+    yday_t2 = round(lubridate::yday(t2_) + lubridate::hour(t2_)/24,2),
     yday_t2_sin = sin(2*pi*yday_t2/365.25),
     yday_t2_cos = cos(2*pi*yday_t2/365.25),
     
@@ -436,8 +455,8 @@ for(i in 1:1) { # select just the first ID
     -pres_cent_x2_within_cell)
 
   # # save the data
-  # write_csv(buffalo_data_df, paste0("buffalo_local_data_id/website_temp/buffalo_", buffalo_ids[i],
-  #                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_temporal_cont_", buffalo_ids[i],
+                                    "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
   # 
   # # saving the raster objects
   # rast(buffalo_data_covs$ndvi_cent) %>%

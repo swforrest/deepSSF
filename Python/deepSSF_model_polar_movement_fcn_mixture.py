@@ -164,10 +164,10 @@ class FCN_block_all_movement(nn.Module):
 
         # define the layers - nn.Sequential allows for the definition of layers in a sequential manner
         self.ffn = nn.Sequential(
+
             # fully connected layer 1 (the dense_dim_in_all is the number of input features, 
             # and should match the output of the Conv2d_block_toFC block).
             # the dense_dim_hidden is the number of neurons in the hidden layer, and doesn't need to be the same as the input features
-
             nn.Linear(self.dense_dim_in_all, self.dense_dim_hidden),
             # dropout layer (helps to reduce overfitting)
             nn.Dropout(self.dropout),
@@ -182,34 +182,37 @@ class FCN_block_all_movement(nn.Module):
             # ReLU activation function
             nn.ReLU(),
 
-            # fully connected layer 3
-            # the number of input neurons should match the output from the previous layer
-            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
-            # dropout layer
-            nn.Dropout(self.dropout),
-            # ReLU activation function
-            nn.ReLU(),
+            # # fully connected layer 3
+            # # the number of input neurons should match the output from the previous layer
+            # nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # # dropout layer
+            # nn.Dropout(self.dropout),
+            # # ReLU activation function
+            # nn.ReLU(),
 
-            # fully connected layer 4
-            # the number of input neurons should match the output from the previous layer
-            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
-            # dropout layer
-            nn.Dropout(self.dropout),
-            # ReLU activation function
-            nn.ReLU(),
+            # # fully connected layer 4
+            # # the number of input neurons should match the output from the previous layer
+            # nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # # dropout layer
+            # nn.Dropout(self.dropout),
+            # # ReLU activation function
+            # nn.ReLU(),
 
-            # fully connected layer 5
-            # the number of input neurons should match the output from the previous layer
-            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
-            # dropout layer
-            nn.Dropout(self.dropout),
-            # ReLU activation function
-            nn.ReLU(),
+            # # fully connected layer 5
+            # # the number of input neurons should match the output from the previous layer
+            # nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # # dropout layer
+            # nn.Dropout(self.dropout),
+            # # ReLU activation function
+            # nn.ReLU(),
 
             # fully connected layer 6
             # the number of input neurons should match the output from the previous layer, 
             # and the number of output neurons should match the number of movement parameters
             nn.Linear(self.dense_dim_hidden, self.num_movement_params)
+
+            # # For linear model ONLY
+            # nn.Linear(self.dense_dim_in_all, self.num_movement_params)
         )
 
     def forward(self, x):
@@ -345,7 +348,8 @@ class Params_to_Grid_Block(nn.Module):
         gamma_scale1 = gamma_scale1.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale1 = gamma_scale1.permute(2, 0, 1)
 
-        gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        gamma_weight1 = x[:, 2].unsqueeze(0).unsqueeze(0)
         gamma_weight1 = gamma_weight1.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight1 = gamma_weight1.permute(2, 0, 1)
 
@@ -359,7 +363,8 @@ class Params_to_Grid_Block(nn.Module):
         gamma_scale2 = gamma_scale2.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale2 = gamma_scale2.permute(2, 0, 1)
 
-        gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        gamma_weight2 = x[:, 5].unsqueeze(0).unsqueeze(0)
         gamma_weight2 = gamma_weight2.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight2 = gamma_weight2.permute(2, 0, 1)
 
@@ -398,7 +403,8 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_kappa1 = vonmises_kappa1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa1 = vonmises_kappa1.permute(2, 0, 1)
 
-        vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight1 = x[:, 8].unsqueeze(0).unsqueeze(0)
         vonmises_weight1 = vonmises_weight1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight1 = vonmises_weight1.permute(2, 0, 1)
 
@@ -414,7 +420,8 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_kappa2 = vonmises_kappa2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa2 = vonmises_kappa2.permute(2, 0, 1)
 
-        vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight2 = x[:, 11].unsqueeze(0).unsqueeze(0)
         vonmises_weight2 = vonmises_weight2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight2 = vonmises_weight2.permute(2, 0, 1)
 
@@ -438,7 +445,7 @@ class Params_to_Grid_Block(nn.Module):
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
         # print(torch.sum(torch.exp(movement_grid)))
 
@@ -516,7 +523,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
         gamma_scale1 = gamma_scale1.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale1 = gamma_scale1.permute(2, 0, 1)
 
-        gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        gamma_weight1 = x[:, 2].unsqueeze(0).unsqueeze(0)
         gamma_weight1 = gamma_weight1.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight1 = gamma_weight1.permute(2, 0, 1)
 
@@ -530,7 +538,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
         gamma_scale2 = gamma_scale2.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale2 = gamma_scale2.permute(2, 0, 1)
 
-        gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        gamma_weight2 = x[:, 5].unsqueeze(0).unsqueeze(0)
         gamma_weight2 = gamma_weight2.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight2 = gamma_weight2.permute(2, 0, 1)
 
@@ -569,7 +578,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
         vonmises_kappa1 = vonmises_kappa1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa1 = vonmises_kappa1.permute(2, 0, 1)
 
-        vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight1 = x[:, 8].unsqueeze(0).unsqueeze(0)
         vonmises_weight1 = vonmises_weight1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight1 = vonmises_weight1.permute(2, 0, 1)
 
@@ -585,7 +595,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
         vonmises_kappa2 = vonmises_kappa2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa2 = vonmises_kappa2.permute(2, 0, 1)
 
-        vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight2 = x[:, 11].unsqueeze(0).unsqueeze(0)
         vonmises_weight2 = vonmises_weight2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight2 = vonmises_weight2.permute(2, 0, 1)
 
@@ -609,7 +620,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
         # print(torch.sum(torch.exp(movement_grid)))
 
@@ -661,13 +672,15 @@ class Params_to_Density_Block(nn.Module):
         # and then repeat the parameter value across a grid, such that the density can be calculated at every cell/pixel
         gamma_shape1 = torch.exp(x[:, 0])
         gamma_scale1 = torch.exp(x[:, 1])
-        gamma_weight1 = torch.exp(x[:, 2])
+        # gamma_weight1 = torch.exp(x[:, 2])
+        gamma_weight1 = x[:, 2]
 
         # parameters of the second mixture distribution
         gamma_shape2 = torch.exp(x[:, 3])
         gamma_scale2 = torch.exp(x[:, 4])
         gamma_scale2 = gamma_scale2 * 500 ### transform the scale parameter so it can be estimated near the same range as the other parameters
-        gamma_weight2 = torch.exp(x[:, 5])
+        # gamma_weight2 = torch.exp(x[:, 5])
+        gamma_weight2 = x[:, 5]
 
         # Apply softmax to the mixture weights to ensure they sum to 1
         gamma_weights = torch.stack([gamma_weight1, gamma_weight2], dim=0)
@@ -707,14 +720,16 @@ class Params_to_Density_Block(nn.Module):
         vonmises_mu1 = bearing_new1
         # parameters of the first von Mises distribution
         vonmises_kappa1 = torch.exp(x[:, 7])
-        vonmises_weight1 = torch.exp(x[:, 8])
+        # vonmises_weight1 = torch.exp(x[:, 8])
+        vonmises_weight1 = x[:, 8]
 
         # vm_mu and weight for the second von Mises distribution
         bearing_new2 = x[:, 9] + bearing[:, 0]
         vonmises_mu2 = bearing_new2
         # parameters of the second von Mises distribution
         vonmises_kappa2 = torch.exp(x[:, 10])
-        vonmises_weight2 = torch.exp(x[:, 11])
+        # vonmises_weight2 = torch.exp(x[:, 11])
+        vonmises_weight2 = x[:, 11]
 
         # Apply softmax to the weights
         vonmises_weights = torch.stack([vonmises_weight1, vonmises_weight2], dim=0)
