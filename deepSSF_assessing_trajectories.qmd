@@ -127,7 +127,7 @@ head(buffalo)
 
 ```{r}
 
-no_subset_locations <- 3000 # to compare to the simulated data
+no_subset_locations <- 1000 # to compare to the simulated data
 
 buffalo_id_subset <- buffalo %>% 
   filter(id == 2005) %>% 
@@ -143,10 +143,10 @@ buffalo_id_subset <- buffalo %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/model_training/id2005_med_cartesian_movement_1_2025-05-04/simulations/deepSSF_trajectories/2005/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/model_training/id2005_med_cartesian_movement_6_2025-05-04/simulations/deepSSF_trajectories/", pattern = "*.csv", full.names = T)
 
 # to filter filenames with any string matching conditions
-sim_data_filenames <- grep("", sim_data_full_list, value = T) #%>% 
+sim_data_filenames <- grep("1000steps", sim_data_full_list, value = T) #%>% 
   # grep("3000steps", x = ., value = T) 
 
 # read dataframes as a single dataframe with id identifier
@@ -243,7 +243,7 @@ ggplot() +
   scale_fill_brewer("ndvi", palette = "Greys", 
                     guide = guide_legend(reverse = TRUE)) +
   
-  geom_path(data = all_data %>% filter(id %in% 1:10),
+  geom_path(data = all_data %>% filter(id %in% 1:50),
             aes(x = x1, y = y1, colour = as.factor(id)), 
             alpha = 0.75, linewidth = 0.25) +
   
