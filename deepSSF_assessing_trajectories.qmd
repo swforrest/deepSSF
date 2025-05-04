@@ -143,7 +143,7 @@ buffalo_id_subset <- buffalo %>%
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/model_training/id2005_med_cartesian_movement_5_2025-05-03/simulations/deepSSF_trajectories/2005/", pattern = "*.csv", full.names = T)
+  list.files("Python/outputs/model_training/id2005_med_cartesian_movement_1_2025-05-04/simulations/deepSSF_trajectories/2005/", pattern = "*.csv", full.names = T)
 
 # to filter filenames with any string matching conditions
 sim_data_filenames <- grep("", sim_data_full_list, value = T) #%>% 
@@ -156,7 +156,7 @@ sim_data_all <- sim_data_filenames %>%
     ...1 = NULL
     )
 
-head(sim_data_all)
+sim_data_all
 
 ```
 
