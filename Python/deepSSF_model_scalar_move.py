@@ -140,7 +140,6 @@ class Conv2d_block_toFC(nn.Module):
         nn.Conv2d(in_channels=self.input_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
-        
         # max pooling layer 1 (reduces the spatial dimensions of the data whilst retaining the most important features)
         nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
         
@@ -148,7 +147,6 @@ class Conv2d_block_toFC(nn.Module):
         nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
-        
         # max pooling layer 2
         nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
         
@@ -203,7 +201,7 @@ class FCN_block_all_movement(nn.Module):
             # ReLU activation function
             nn.ReLU(),
 
-            # fully connected layer 2
+            # fully connected layer 3
             # the number of input neurons should match the output from the previous layer
             nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
             # dropout layer
@@ -211,7 +209,7 @@ class FCN_block_all_movement(nn.Module):
             # ReLU activation function
             nn.ReLU(),
 
-            # fully connected layer 3
+            # fully connected layer final
             # the number of input neurons should match the output from the previous layer,
             # and the number of output neurons should match the number of movement parameters
             nn.Linear(self.dense_dim_hidden, self.num_movement_params)
@@ -694,7 +692,7 @@ class ConvJointModel(nn.Module):
         self.fcn_movement_all = FCN_block_all_movement(params)
 
         # Converts movement distribution parameters into a grid (the 2D movement kernel)
-        self.movement_grid_output = Params_to_Grid_Block(params)
+        self.movement_grid_output = Params_to_Grid_Block_ChV(params)
 
         # Device information from params (e.g., CPU or GPU)
         self.device = params.device
