@@ -293,19 +293,22 @@ class Params_to_Grid_Block(nn.Module):
 
         # create distance and bearing layers
         # determine the distance of each pixel from the centre of the image
-        self.center = self.image_dim // 2 
+        self.center = self.image_dim // 2
         y, x = np.indices((self.image_dim, self.image_dim))
-        self.distance_layer = torch.from_numpy(np.sqrt((self.pixel_size*(x - self.center))**2 + (self.pixel_size*(y - self.center))**2)).float()
+        self.distance_layer = torch.from_numpy(np.sqrt((self.pixel_size*(x - self.center))**2 +
+                                                       (self.pixel_size*(y - self.center))**2)).float()
+        # change the centre cell to the average distance from the centre to the edge of the pixel
 
         # average distance from the centre to the perimeter of the pixel (accounting for longer distances at the corners)
-        # self.distance_layer[self.center, self.center] = 0.56*self.pixel_size 
+        # self.distance_layer[self.center, self.center] = 0.56*self.pixel_size
 
         # average distance from the centre to any point within the pixel
         # calculated as a double integral of sqrt(x^2 + y^2) dx dy over the area of the pixel
-        self.distance_layer[self.center, self.center] = 0.3826*self.pixel_size 
+        self.distance_layer[self.center, self.center] = 0.3826*self.pixel_size
 
         # determine the bearing of each pixel from the centre of the image
-        self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y, x - self.center)).float()
+        self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y,
+                                                         x - self.center)).float()
         self.device = params.device
 
 
@@ -315,8 +318,8 @@ class Params_to_Grid_Block(nn.Module):
         shape = shape.to(x.device)
         scale = scale.to(x.device)
         return -1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale
-        
-        # to account for change of variables
+
+        # # to account for change of variables
         # return (-1*torch.lgamma(shape) -shape*torch.log(scale) + (shape - 1)*torch.log(x) - x/scale) - torch.log(x)
 
     # log von Mises densities (on the log-scale) for the mixture distribution
@@ -331,14 +334,14 @@ class Params_to_Grid_Block(nn.Module):
 
         # parameters of the first mixture distribution
         # x are the outputs from the fully connected layers (vector of movement parameters)
-        # we therefore need to extract the appropriate parameters 
-        # the locations are not specific to any specific parameters, as long as any aren't extracted more than once 
+        # we therefore need to extract the appropriate parameters
+        # the locations are not specific to any specific parameters, as long as any aren't extracted more than once
 
         # Gamma distributions
 
         # pull out the parameters of the first gamma distribution and exponentiate them to ensure they are positive
         # the unsqueeze function adds a new dimension to the tensor
-        # we do this twice to match the dimensions of the distance_layer, 
+        # we do this twice to match the dimensions of the distance_layer,
         # and then repeat the parameter value across a grid, such that the density can be calculated at every cell/pixel
         gamma_shape1 = torch.exp(x[:, 0]).unsqueeze(0).unsqueeze(0)
         gamma_shape1 = gamma_shape1.repeat(self.image_dim, self.image_dim, 1)
@@ -349,7 +352,8 @@ class Params_to_Grid_Block(nn.Module):
         gamma_scale1 = gamma_scale1.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale1 = gamma_scale1.permute(2, 0, 1)
 
-        gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight1 = torch.exp(x[:, 2]).unsqueeze(0).unsqueeze(0)
+        gamma_weight1 = x[:, 2].unsqueeze(0).unsqueeze(0)
         gamma_weight1 = gamma_weight1.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight1 = gamma_weight1.permute(2, 0, 1)
 
@@ -363,7 +367,8 @@ class Params_to_Grid_Block(nn.Module):
         gamma_scale2 = gamma_scale2.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale2 = gamma_scale2.permute(2, 0, 1)
 
-        gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        # gamma_weight1 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        gamma_weight2 = x[:, 5].unsqueeze(0).unsqueeze(0)
         gamma_weight2 = gamma_weight2.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight2 = gamma_weight2.permute(2, 0, 1)
 
@@ -374,15 +379,23 @@ class Params_to_Grid_Block(nn.Module):
         gamma_weight2 = gamma_weights[1]
 
         # calculation of Gamma densities
-        gamma_density_layer1 = self.gamma_density(self.distance_layer, gamma_shape1, gamma_scale1).to(device)
-        gamma_density_layer2 = self.gamma_density(self.distance_layer, gamma_shape2, gamma_scale2).to(device)
+        gamma_density_layer1 = self.gamma_density(self.distance_layer,
+                                                  gamma_shape1,
+                                                  gamma_scale1).to(device)
+
+        gamma_density_layer2 = self.gamma_density(self.distance_layer,
+                                                  gamma_shape2,
+                                                  gamma_scale2).to(device)
 
         # combining both densities to create a mixture distribution using logsumexp
         logsumexp_gamma_corr = torch.max(gamma_density_layer1, gamma_density_layer2)
-        gamma_density_layer = logsumexp_gamma_corr + torch.log(gamma_weight1 * torch.exp(gamma_density_layer1 - logsumexp_gamma_corr) + 
+        gamma_density_layer = logsumexp_gamma_corr + torch.log(gamma_weight1 * torch.exp(gamma_density_layer1 - logsumexp_gamma_corr) +
                                                                gamma_weight2 * torch.exp(gamma_density_layer2 - logsumexp_gamma_corr))
         # print(torch.sum(gamma_density_layer))
-        # print(torch.sum(torch.exp(gamma_density_layer)))
+
+        # Normalise the gamma density layer to sum to 1
+        # gamma_density_layer = gamma_density_layer - torch.logsumexp(gamma_density_layer, dim = (1, 2), keepdim = True)
+        # print(f'Gamma density sum: {torch.sum(torch.exp(gamma_density_layer))}')
 
 
         ## Von Mises Distributions
@@ -402,7 +415,8 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_kappa1 = vonmises_kappa1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa1 = vonmises_kappa1.permute(2, 0, 1)
 
-        vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight1 = torch.exp(x[:, 8]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight1 = x[:, 8].unsqueeze(0).unsqueeze(0)
         vonmises_weight1 = vonmises_weight1.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight1 = vonmises_weight1.permute(2, 0, 1)
 
@@ -418,7 +432,8 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_kappa2 = vonmises_kappa2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa2 = vonmises_kappa2.permute(2, 0, 1)
 
-        vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        # vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight2 = x[:, 11].unsqueeze(0).unsqueeze(0)
         vonmises_weight2 = vonmises_weight2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight2 = vonmises_weight2.permute(2, 0, 1)
 
@@ -429,24 +444,37 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_weight2 = vonmises_weights[1]
 
         # calculation of von Mises densities
-        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer, vonmises_kappa1, vonmises_mu1).to(device)
-        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer, vonmises_kappa2, vonmises_mu2).to(device)
+        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer,
+                                                        vonmises_kappa1,
+                                                        vonmises_mu1).to(device)
+
+        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer,
+                                                        vonmises_kappa2,
+                                                        vonmises_mu2).to(device)
 
         # combining both densities to create a mixture distribution using the logsumexp trick
         logsumexp_vm_corr = torch.max(vonmises_density_layer1, vonmises_density_layer2)
-        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) + vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
+        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) +
+                                                               vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
         # print(torch.sum(vonmises_density_layer))
-        # print(torch.sum(torch.exp(vonmises_density_layer)))
+
+        # Normalise the von Mises density layer to sum to 1
+        # vonmises_density_layer = vonmises_density_layer - torch.logsumexp(vonmises_density_layer, dim = (1, 2), keepdim = True)
+        # print(f'von Mises density sum: {torch.sum(torch.exp(vonmises_density_layer))}')
 
         # combining the two distributions
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
-        # print(torch.sum(torch.exp(movement_grid)))
+        # print(f'Movement density sum: {torch.sum(torch.exp(movement_grid))}')
+
+        # Normalise the movement grid to sum to 1
+        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        # print(f'Movement density normalised sum: {torch.sum(torch.exp(movement_grid))}')
 
         return movement_grid
+
     
 
 """
@@ -612,7 +640,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
         # print(torch.sum(torch.exp(movement_grid)))
 
@@ -687,6 +715,7 @@ class ConvJointModel(nn.Module):
 
         # # Convolutional block for movement extraction (output fed into fully connected layers)
         # self.conv_movement = Conv2d_block_toFC(params)
+
 
         # Fully connected block for movement
         self.fcn_movement_all = FCN_block_all_movement(params)

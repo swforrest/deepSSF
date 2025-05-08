@@ -312,7 +312,7 @@ for(k in 1:1) {
   
   model_harmonics <- c("0p", "2p")
   
-  # test_data <- data_id %>% slice(1:10) # test with a subset of the data
+  # test_data <- data_id %>% slice(1:100) # test with a subset of the data
   test_data <- data_id
 
   
@@ -453,9 +453,10 @@ for(k in 1:1) {
                            scale = ssf_coefs$scale[[coef_hour]], log = TRUE) - log(distance_values)
       
       # normalise the step length probabilities
-      step_log[] <- values(step_log) - max(values(step_log), na.rm = T) - 
-        log(sum(exp(values(step_log) - max(values(step_log), na.rm = T))))
-      # check that it sums to 1
+      # step_log[] <- values(step_log) - max(values(step_log), na.rm = T) - 
+      #   log(sum(exp(values(step_log) - max(values(step_log), na.rm = T))))
+      
+      # check that they sum to 1
       # print(sum(exp(values(step_log))))
             
       
@@ -469,9 +470,10 @@ for(k in 1:1) {
                                                        log = TRUE))
       
       # normalise the turning angle probabilities
-      ta_log[] <- values(ta_log) - max(values(ta_log), na.rm = T) - 
-        log(sum(exp(values(ta_log) - max(values(ta_log), na.rm = T))))
-      # check that it sums to 1
+      # ta_log[] <- values(ta_log) - max(values(ta_log), na.rm = T) - 
+      #   log(sum(exp(values(ta_log) - max(values(ta_log), na.rm = T))))
+      
+      # check that they sum to 1
       # print(sum(exp(values(ta_log))))
       
       # combine the step and turning angle probabilities

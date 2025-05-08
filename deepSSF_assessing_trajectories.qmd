@@ -146,7 +146,7 @@ hist(buffalo_id_subset$time_diff)
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/simulations/deepSSF_trajectories/", pattern = "*.csv", full.names = T)[1:50]
+  list.files("Python/outputs/model_training/id2005_scalar_movement_norm_4_2025-05-08/simulations/deepSSF_trajectories/", pattern = "*.csv", full.names = T)[1:50]
 
 # to filter filenames with any string matching conditions
 sim_data_filenames <- grep("3000steps", sim_data_full_list, value = T) #%>% 

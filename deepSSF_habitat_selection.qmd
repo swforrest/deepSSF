@@ -40,7 +40,7 @@ abstract: |
 #| warning: false
 
 library(tidyverse)
-packages <- c("terra", "beepr", "tictoc", "viridis")
+packages <- c("terra", "beepr", "tictoc", "viridis", "here")
 walk(packages, require, character.only = T)
 
 ```
@@ -52,13 +52,15 @@ The habitat selection probability values are from the `deepSSF_landscape_preds.i
 
 ```{r}
 
+base_dir <- here::here("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions")
+
 # yday 45
 habitat_selection_yday45 <- 
-  read_csv("Python/outputs/landscape_predictions/id2005_2025-04-14/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv")
+  read_csv(paste0(base_dir, "/yday45/id2005_hourly_habitat_suitability_landscape_subset_yday45.csv"))
 
 # yday 225
 habitat_selection_yday225 <- 
-  read_csv("Python/outputs/landscape_predictions/id2005_2025-04-14/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv")
+  read_csv("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/yday225/id2005_hourly_habitat_suitability_landscape_subset_yday225.csv")
 
 # filter out the edge cells that were masked
 habitat_selection_yday45 <- habitat_selection_yday45 %>% filter(!NDVI %in% c(Inf, -Inf))
@@ -197,7 +199,7 @@ habitat_selection_yday45_long %>% filter(Hour == 1) %>%
     y = "Habitat selection"
     )
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour1.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45_hour1.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 habitat_selection_yday45_long %>% filter(Hour == 7) %>%
@@ -213,7 +215,7 @@ habitat_selection_yday45_long %>% filter(Hour == 7) %>%
     y = "Habitat selection"
     )
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour7.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45_hour7.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 habitat_selection_yday45_long %>% filter(Hour == 12) %>%
@@ -229,7 +231,7 @@ habitat_selection_yday45_long %>% filter(Hour == 12) %>%
     y = "Habitat selection"
     )
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_hour12.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45_hour12.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -256,7 +258,7 @@ habitat_selection_yday45_long %>%
     y = "Habitat selection"
     )
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_all_hours.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45_all_hours.png", width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -286,11 +288,13 @@ ggplot(habitat_selection_yday45_long,
   theme(legend.position = "none")
 
 # for manuscript
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45.png", 
+       width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 # for website
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday45_website.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday45_website.png", 
+       width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -314,11 +318,13 @@ ggplot(habitat_selection_yday225_long,
   theme(legend.position = "none")
 
 # for manuscript
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday225.png", 
+       width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 # for website
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/ndvi_habitat_selection_yday225_website.png", width = 150, height = 90, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/ndvi_habitat_selection_yday225_website.png", 
+       width = 150, height = 90, 
        units = "mm", dpi = 300)
 
 ```
@@ -396,16 +402,17 @@ Day of the year = 45 (mid-February)
 ```{r}
 
 ggplot(habitat_selection_yday45_long, 
-       aes(x = Hour, y = Canopy_cover)) +  
+       aes(x = Hour, y = as.factor(Canopy_cover))) +  
   stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,15)) + 
   scale_fill_viridis_c("Mean probability") +  
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
-  scale_y_continuous("Canopy cover (%)") + 
+  scale_y_discrete("Canopy cover (%)") +
   ggtitle(paste0("Prediction values: Day 45")) +
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/canopy_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/canopy_habitat_selection_yday45.png", 
+       width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -417,16 +424,16 @@ There is clearly high selection for open canopy in the middle of the day during 
 ```{r}
 
 ggplot(habitat_selection_yday225_long, 
-       aes(x = Hour, y = Canopy_cover)) +  
+       aes(x = Hour, y = as.factor(Canopy_cover))) +  
   stat_summary_2d(aes(z = Values), fun = mean, bins = c(23,15)) + 
   scale_fill_viridis_c("Mean probability") +  
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +  
-  scale_y_continuous("Canopy cover (%)") + 
+  scale_y_discrete("Canopy cover (%)") +
   ggtitle(paste0("Prediction values: Day 225")) +
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/canopy_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/canopy_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -507,7 +514,7 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/herby_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/herby_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -528,7 +535,7 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/herby_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/herby_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -606,7 +613,7 @@ ggplot(habitat_selection_yday45_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/slope_habitat_selection_yday45.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/slope_habitat_selection_yday45.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```
@@ -625,7 +632,7 @@ ggplot(habitat_selection_yday225_long,
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave("Python/outputs/landscape_predictions/id2005_2025-04-14/slope_habitat_selection_yday225.png", width = 90, height = 75, 
+ggsave("Python/outputs/model_training/id2005_med_scalar_movement_8_2025-05-06/landscape_predictions/slope_habitat_selection_yday225.png", width = 90, height = 75, 
        units = "mm", dpi = 600)
 
 ```

@@ -69,7 +69,7 @@ ggplot(movement_data, aes(distance)) +
 
 
 # Gamma distribution parameters
-shape = 1
+shape = 2
 scale = 300
 
 # Create a sequence of x values (1D) for the gamma distribution
@@ -151,6 +151,7 @@ gamma_step_dist_2D[] <- ((dgamma(distance_values,
 # Plot the gamma distribution
 # png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
 plot(gamma_step_dist_2D, main = "2D gamma distribution")
+sum(gamma_step_dist_2D[])
 # dev.off()
 
 # Get the values of the two-dimensional gamma distribution
@@ -310,3 +311,86 @@ hist(step_dist_2D_samples, probability = TRUE, breaks = 50)
 
 
 
+
+
+
+#### Gamma density ####
+
+# Get the distance values from the distance layer
+distance_values <- terra::values(distance_layer)
+# Use the distance_layer raster as a template
+gamma_step_dist_2D <- distance_layer
+# Calculate the gamma density values at the distances from centre
+gamma_step_dist_2D[] <- dgamma(distance_values, 
+                               shape = shape, 
+                               scale = scale) #/ sum(dgamma(distance_values, 
+                                                           shape = shape, 
+                                                           scale = scale))
+
+# Plot the gamma distribution
+# png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)
+plot(gamma_step_dist_2D, main = "2D gamma distribution")
+sum(gamma_step_dist_2D[])
+
+
+
+
+#### von Mises density ####
+
+# von Mises density function
+dvonmises <- function(x, mu, kappa) {
+  return(exp(kappa * cos(x - mu)) / (2 * pi * besselI(kappa, nu = 0)))
+}
+
+# Testing the von Mises density
+dvonmises(0, mu = 0, kappa = 0.5)
+
+# Create a sequence of x values (1D) for the von Mises distribution
+x_angles_1D <- seq(-pi, pi, by = 0.01)
+# Calculate the von Mises density values for the 1D distribution
+vonMises_dist_1D_df <- data.frame(x = x_angles_1D, 
+                                   y = dvonmises(x_1D, mu = 0, kappa = 0.5))
+
+# Plot the von Mises distribution
+ggplot(vonMises_dist_1D_df, aes(x = x, y = y)) +
+  geom_line() +
+  labs(title = "Von Mises Distribution",
+       x = "x",
+       y = "Density") +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  theme_bw()
+
+
+# Two dimensions
+terra::plot(bearing_layer, main = "Bearing")
+vonMises_dist_2D <- bearing_layer
+
+vonMises_dist_2D[] <- dvonmises(bearing_values, mu = 0, kappa = 0.5)# / sum(dvonmises(bearing_values, mu = 0, kappa = 0.5))
+
+# Plot the von Mises distribution
+# png("outputs/movement_distributions/2D_vonMises_layer.png", width = 1000, height = 750, res = 250)
+plot(vonMises_dist_2D, main = "2D von Mises distribution")
+sum(vonMises_dist_2D[])
+# dev.off()
+
+
+
+#### Combine the distributions ####
+
+# Combine the gamma and von Mises distributions
+combined_2D <- gamma_step_dist_2D * vonMises_dist_2D
+
+# Plot the combined distribution
+# png("outputs/movement_distributions/combined_2D_layer.png", width = 1000, height = 750, res = 250)
+plot(combined_2D, main = "Combined 2D distribution")
+sum(combined_2D[])
+# dev.off()
+
+# Combine with normalisation
+combined_2D_norm <- combined_2D / sum(combined_2D[])
+
+# Plot the combined distribution
+# png("outputs/movement_distributions/combined_2D_layer_normalised.png", width = 1000, height = 750, res = 250)
+plot(combined_2D_norm, main = "Combined 2D distribution normalised")
+sum(combined_2D_norm[])
+# dev.off()
