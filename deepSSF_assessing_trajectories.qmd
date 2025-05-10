@@ -363,7 +363,7 @@ turning_angles_stationary <- ggplot() +
 
 turning_angles_stationary
 
-ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/turning_angles.png"), width=150, height=80, units="mm", dpi = 600)
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/turning_angles.png"), width=120, height=80, units="mm", dpi = 600)
 
 ```
 
