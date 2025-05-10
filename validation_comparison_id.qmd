@@ -42,7 +42,7 @@ abstract: |
 #| warning=FALSE
 
 library(tidyverse)
-packages <- c("slider")
+packages <- c("slider", "ggridges")
 walk(packages, require, character.only = T)
 
 options(scipen = 999)  # Prevent scientific notation in plots
@@ -90,27 +90,87 @@ for(i in 1:length(validation_ssf)){
 
 validation_ssf_all <- bind_rows(validation_ssf_list)
 
-validation_ssf_all <- validation_ssf_all %>% 
-  # group_by(id) %>% 
-  mutate(
-    prob_habitat_ssf_0p_scaled = (prob_habitat_ssf_0p - uniform_probs) / sd(prob_habitat_ssf_0p, na.rm = T),
-    prob_movement_ssf_0p_scaled = (prob_movement_ssf_0p - uniform_probs) / sd(prob_movement_ssf_0p, na.rm = T),
-    prob_next_step_ssf_0p_scaled = (prob_next_step_ssf_0p - uniform_probs) / sd(prob_next_step_ssf_0p, na.rm = T),
-    prob_habitat_ssf_2p_scaled = (prob_habitat_ssf_2p - uniform_probs) / sd(prob_habitat_ssf_2p, na.rm = T),
-    prob_movement_ssf_2p_scaled = (prob_movement_ssf_2p - uniform_probs) / sd(prob_movement_ssf_2p, na.rm = T),
-    prob_next_step_ssf_2p_scaled = (prob_next_step_ssf_2p - uniform_probs) / sd(prob_next_step_ssf_2p, na.rm = T)
-  )
-
 nrow(validation_ssf_all)
 
 ```
+
+### Determine times for train/val/test splits
+
+```{r}
+
+# The training data were the first 80%, the validation data were the next 10% and the test were final 10%
+train_samples <- nrow(validation_ssf_all) * 0.8
+val_test_samples <- nrow(validation_ssf_all) * 0.1
+
+# For plotting
+train_val_split <- validation_ssf_all[test_samples,]$t_
+val_test_split <- validation_ssf_all[train_samples + val_test_samples,]$t_
+
+# For plotting where example locations were taken from
+example_location_A <- validation_ssf_all[1011,]$t_
+example_location_B <- validation_ssf_all[3970,]$t_
+
+```
+
+## Split the data into train/validate/test
+
+This is to match the splitting of data that was used to train/fit the deepSSF model. There we used an 80/10/10 split, with 80% of the data for training, 10% for validation, and 10% for testing.
+
+We will follow that same split here, although the validation set is specific to deep learning (it is used to assess when to reduce the learning rate and stop training), with the 10% test data to be used for the held-out validation dataset.
+
+```{r}
+
+training_split <- 0.8 # 80% of the data will be used for fitting the model
+validation_split <- 0.1 # 10% of the data will be used for validation (which isn't used here)
+test_split <- 0.1 # 10% of the data will be used for testing (model evaluation)
+
+# Calculate the number of samples for each split
+n_samples <- nrow(validation_ssf_all)
+
+n_train <- floor(training_split * n_samples)
+n_val <- floor(validation_split * n_samples)
+n_test <- n_samples - n_train - n_val  # Ensure they sum to total number of samples
+
+# Print the number of samples in each split
+cat("Number of training samples:   ", n_train, "\n")
+cat("Number of validation samples: ", n_val, "\n")
+cat("Number of testing samples:    ", n_test, "\n")
+
+# Get the start and end indices for each split
+train_end <- floor(training_split * n_samples)
+val_end <- floor((training_split + validation_split) * n_samples)
+
+# Generate indices for each split
+train_indices <- 1:train_end
+val_indices <- (train_end + 1):val_end
+test_indices <- (val_end + 1):n_samples
+
+# Create a new column in the data frame to indicate the dataset
+validation_ssf_all <- validation_ssf_all %>% mutate(dataset = NA)
+
+# Add which type of dataset the location should be assigned to
+validation_ssf_all$dataset[train_indices] <- "train"
+validation_ssf_all$dataset[val_indices] <- "val"
+validation_ssf_all$dataset[test_indices] <- "test"
+
+# Timeline of buffalo data
+validation_ssf_all %>% ggplot(aes(x = t_, y = factor(dataset), colour = factor(dataset))) +
+  geom_point(alpha = 0.1) +
+  scale_y_discrete("Buffalo ID") +
+  scale_x_datetime("Date") +
+  scale_colour_viridis_d() +
+  theme_bw() +
+  theme(legend.position = "none")
+
+```
+
 
 ### Lengthening data frames to stack together for plotting
 
 ```{r}
 
 validation_ssf_move <- validation_ssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_movement")) %>% 
+  dplyr::select(dataset, id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_movement")) %>% 
   pivot_longer(cols = contains("movement"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -123,7 +183,7 @@ validation_ssf_move <- validation_ssf_all %>%
   select(-is_scaled)
 
 validation_ssf_habitat <- validation_ssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_habitat")) %>% 
+  dplyr::select(dataset, id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_habitat")) %>% 
   pivot_longer(cols = contains("habitat"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -136,7 +196,7 @@ validation_ssf_habitat <- validation_ssf_all %>%
   select(-is_scaled)
 
 validation_ssf_next_step <- validation_ssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_next_step")) %>% 
+  dplyr::select(dataset, id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("prob_next_step")) %>% 
   pivot_longer(cols = contains("next_step"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -160,7 +220,7 @@ head(validation_ssf_long)
 
 ```{r}
 
-validation_deepssf <- "Python/outputs/model_training/id2005_scalar_movement_ChV_1_2025-05-08/deepSSF_id2005_n10103.csv"
+validation_deepssf <- "Python/outputs/model_training/id2005_med_CNN_movement_2_2025-05-10/deepSSF_id2005_n10103.csv"
 validation_ids <- 2005
 
 validation_deepssf_all <- read_csv(validation_deepssf)
@@ -168,12 +228,13 @@ validation_deepssf_all <- read_csv(validation_deepssf)
 attr(validation_deepssf_all$t_, "tzone") <- "Australia/Queensland"
 attr(validation_deepssf_all$t2_, "tzone") <- "Australia/Queensland"
 
-validation_deepssf_all <- validation_deepssf_all %>% 
-  mutate(
-    habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
-    move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
-    next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
-  )
+# Create a new column in the data frame to indicate the dataset
+validation_deepssf_all <- validation_deepssf_all %>% mutate(dataset = NA)
+
+# Add which type of dataset the location should be assigned to
+validation_deepssf_all$dataset[train_indices] <- "train"
+validation_deepssf_all$dataset[val_indices] <- "val"
+validation_deepssf_all$dataset[test_indices] <- "test"
 
 ```
 
@@ -183,7 +244,7 @@ validation_deepssf_all <- validation_deepssf_all %>%
 ```{r}
 
 validation_deepssf_long <- validation_deepssf_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("probs")) %>% 
+  dplyr::select(dataset, id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("probs")) %>% 
   pivot_longer(cols = contains("probs"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -206,12 +267,13 @@ validation_deepssf_s2_all <- read_csv(validation_deepssf_s2)
 attr(validation_deepssf_s2_all$t_, "tzone") <- "Australia/Queensland"
 attr(validation_deepssf_s2_all$t2_, "tzone") <- "Australia/Queensland"
 
-validation_deepssf_s2_all <- validation_deepssf_s2_all %>% 
-  mutate(
-    habitat_probs_scaled = (habitat_probs - uniform_probs) / sd(habitat_probs, na.rm = T),
-    move_probs_scaled = (move_probs - uniform_probs) / sd(move_probs, na.rm = T),
-    next_step_probs_scaled = (next_step_probs - uniform_probs) / sd(next_step_probs, na.rm = T)
-  )
+# Create a new column in the data frame to indicate the dataset
+validation_deepssf_s2_all <- validation_deepssf_s2_all %>% mutate(dataset = NA)
+
+# Add which type of dataset the location should be assigned to
+validation_deepssf_s2_all$dataset[train_indices] <- "train"
+validation_deepssf_s2_all$dataset[val_indices] <- "val"
+validation_deepssf_s2_all$dataset[test_indices] <- "test"
 
 ```
 
@@ -220,7 +282,7 @@ validation_deepssf_s2_all <- validation_deepssf_s2_all %>%
 ```{r}
 
 validation_deepssf_s2_long <- validation_deepssf_s2_all %>% 
-  dplyr::select(id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("probs")) %>% 
+  dplyr::select(dataset, id, x_, y_, t_, x2_, y2_, hour_t1, yday_t1, contains("probs")) %>% 
   pivot_longer(cols = contains("probs"),
                names_to = "full_name",
                values_to = "value") %>% 
@@ -243,7 +305,24 @@ validation_all_long <- validation_all_long %>% mutate(hour_t1 = round(hour_t1, 0
 
 ```
 
+## Calculate average probability and proportion above uniform probability
 
+```{r}
+
+# calculate the proportion of probabilities above and below the uniform probability
+validation_all_summaries <- validation_all_long %>% 
+  group_by(dataset, probability, model) %>% 
+  summarise(
+    average_prob = mean(value, na.rm = T),
+    sd_prob = sd(value, na.rm = T),
+    se_prob = sd(value, na.rm = T)/sqrt(n()),
+    proportion_above_uniform_prob = sum(value > uniform_prob, na.rm = T)/n(),
+    proportion_below_uniform_prob = sum(value < uniform_prob, na.rm = T)/n()) %>% 
+  ungroup()
+
+validation_all_summaries
+
+```
 
 ## Prepare data frame for plotting
 
@@ -307,6 +386,9 @@ validation_all_sliding_period <- validation_all_long %>%
     .after = before_after
 )
 
+validation_all_long <- validation_all_long %>% ungroup()
+validation_all_sliding_period <- validation_all_sliding_period %>% ungroup()
+
 head(validation_all_sliding_period, 10)
 
 ```
@@ -326,7 +408,7 @@ We also show the 'null' probability, i.e. if the selection was completely random
 # if there were uniform probabilities (i.e. no selection)
 uniform_prob <- 1/(101*101)
 
-ribbon_50_alpha <- 0.2
+ribbon_50_alpha <- 0.1
 primary_linewidth <- 0.5
 OOS_mean_linewidth <- 0.5
 secondary_linewidth <- 0.04
@@ -336,6 +418,82 @@ ggplot() +
   # dashed lines containing the SSF probabilities (for zooming into in the paper)
   # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
+  
+  # dashed lines for the example locations
+  geom_vline(xintercept = example_location_A, linetype = "dashed", linewidth = 0.5, colour = "grey") +
+  geom_vline(xintercept = example_location_B, linetype = "dashed", linewidth = 0.5, colour = "grey") +
+  
+  # in sample 50% ribbon
+  geom_ribbon(data = validation_all_sliding_period %>%
+                filter(probability == "habitat"),
+              aes(x = average_time,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model,
+                  group = interaction(id, model)),
+              alpha = ribbon_50_alpha) +
+  
+  # # quantile line
+  # geom_line(data = validation_all_sliding_period %>% 
+  #             filter(probability == "habitat"),
+  #           aes(x = average_time, 
+  #               y = q975, 
+  #               colour = model,
+  #               group = interaction(id, model)),
+  #           linewidth = secondary_linewidth, linetype = "dashed") +
+  
+  # in sample mean line
+  geom_line(data = validation_all_sliding_period %>% 
+              filter(probability == "habitat" &
+                       !model == "deepSSF_S2 "),
+            aes(x = average_time, 
+                y = average_prob, 
+                colour = model,
+                group = interaction(id, model)),
+            linewidth = primary_linewidth) +
+  
+  # dashed line for the null probability
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Habitat selection", 
+                labels = scales::label_number()) +
+  scale_x_datetime("Date") +
+  ggtitle("Rolling mean habitat selection probability") +
+  theme_bw() +
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(angle = 30, hjust = 1))
+
+ggsave(paste0("outputs/validation_all_sliding_title_", window_width, "days_",  Sys.Date(), ".png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
+
+```
+
+### Median
+
+```{r}
+
+ggplot() +
+  
+  # dashed lines containing the SSF probabilities (for zooming into in the paper)
+  # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
@@ -353,13 +511,13 @@ ggplot() +
               filter(probability == "habitat" &
                        !model == "deepSSF_S2 "),
             aes(x = average_time, 
-                y = average_prob, 
+                y = q50, 
                 colour = model,
                 group = interaction(id, model)),
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
@@ -369,14 +527,70 @@ ggplot() +
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Habitat selection", 
+                labels = scales::label_number()) +
+  ggtitle("Rolling median habitat selection probability") +
   scale_x_datetime("Date") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-# ggsave(paste0("outputs/validation_all_sliding_", window_width, "days.png"),
-#        width = 80, height = 80, units = "mm", dpi = 600)
+ggsave(paste0("outputs/validation_all_habitat_sliding_median_", window_width, "days_",  Sys.Date(), ".png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
+
+```
+
+# Density of probabilities
+
+```{r}
+
+lower_truncation_vals <- validation_all_long %>% 
+  group_by(probability) %>% summarise(
+    q01 = quantile(value, probs = 0.01, na.rm = T),
+    q99 = quantile(value, probs = 0.99, na.rm = T))
+
+lower_habitat <- lower_truncation_vals %>% filter(probability == "habitat") %>% pull(q01)
+upper_habitat <- lower_truncation_vals %>% filter(probability == "habitat") %>% pull(q99)
+
+```
+
+## Plot density of probabilities
+
+```{r}
+
+# To reverse the factor levels for model
+validation_all_long <- validation_all_long %>%
+  mutate(model_F = factor(model, 
+                        levels = c("deepSSF", "deepSSF_S2", "ssf_0p", "ssf_2p"),
+                        labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")))
+
+ggplot() +
+  
+  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  
+  geom_density_ridges(data = validation_all_long %>%
+                 filter(probability == "habitat" & value > lower_habitat & value < upper_habitat),
+               aes(x = value, y = model_F, fill = model_F, colour = model_F),
+               alpha = 0.15, scale = 3, quantile_lines = TRUE, quantiles = 2) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_x_log10("Habitat selection", 
+                labels = scales::label_number()) +
+  scale_y_discrete("") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.margin = margin(t = 0.1, r = 0.65, b = 0.15, l = 0, unit = "cm"))
+
+ggsave(paste0("outputs/validation_deepSSF_SSF_densities_",  Sys.Date(), ".png"),
+       width = 80, height = 60, units = "mm", dpi = 600, scale = 1.25)
 
 ```
 
@@ -395,6 +609,10 @@ ggplot() +
   # # dashed lines containing the SSF probabilities (for zooming into in the paper)
   # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
@@ -420,7 +638,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000"),
@@ -430,7 +648,8 @@ ggplot() +
                      values = c("#E25834", "#000000"),
                     labels = c("deepSSF", "deepSSF S2")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
   scale_x_datetime("Date") +
   theme_bw() +
   theme(legend.position = "bottom",
@@ -446,6 +665,10 @@ ggplot() +
 ```{r}
 
 ggplot() +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
@@ -471,7 +694,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#0096B5", "#26185F"),
@@ -512,6 +735,10 @@ ggplot() +
   # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
+  
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "move" &
@@ -534,7 +761,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
@@ -544,14 +771,64 @@ ggplot() +
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Movement probability") +
   scale_x_datetime("Date") +
+  ggtitle("Rolling mean movement probability") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-# ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
-#        width = 80, height = 80, units = "mm", dpi = 600)
+ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
+
+```
+
+# Density of probabilities
+
+```{r}
+
+lower_movement <- lower_truncation_vals %>% filter(probability == "move") %>% pull(q01)
+upper_movement <- lower_truncation_vals %>% filter(probability == "move") %>% pull(q99)
+
+```
+
+## Plot density of probabilities
+
+```{r}
+
+# To reverse the factor levels for model
+validation_all_long <- validation_all_long %>%
+  mutate(model_F = factor(model, 
+                        levels = c("deepSSF", "deepSSF_S2", "ssf_0p", "ssf_2p"),
+                        labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")))
+
+ggplot() +
+  
+  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  
+  geom_density_ridges(data = validation_all_long %>%
+                 filter(probability == "move" & value > lower_habitat & value < upper_habitat),
+               aes(x = value, y = model_F, fill = model_F, colour = model_F),
+               alpha = 0.15, scale = 2, quantile_lines = TRUE, quantiles = 2) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_x_log10("Movement probability", 
+                labels = scales::label_number()) +
+  scale_y_discrete("") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.margin = margin(t = 0.1, r = 0.65, b = 0.15, l = 0, unit = "cm"))
+
+ggsave(paste0("outputs/validation_deepSSF_SSF_densities_move_",  Sys.Date(), ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600, scale = 1.25)
 
 ```
 
@@ -565,16 +842,20 @@ ggplot() +
   # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
+  
   # # in sample 50% ribbon
-  # geom_ribbon(data = validation_all_sliding_period %>%
-  #               filter(probability == "move" &
-  #                      id == focal_id),
-  #             aes(x = average_time,
-  #                 ymin = q25,
-  #                 ymax = q75,
-  #                 fill = model,
-  #                 group = interaction(id, model)),
-  #             alpha = ribbon_50_alpha) +
+  geom_ribbon(data = validation_all_sliding_period %>%
+                filter(probability == "move" &
+                       id == focal_id),
+              aes(x = average_time,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model,
+                  group = interaction(id, model)),
+              alpha = ribbon_50_alpha) +
   
   # in sample mean line
   geom_line(data = validation_all_sliding_period %>% 
@@ -587,7 +868,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
@@ -597,14 +878,16 @@ ggplot() +
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Movement probability") +
   scale_x_datetime("Date") +
+  ggtitle("Rolling median movement probability") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-# ggsave(paste0("outputs/validation_all_move_sliding_", window_width, "days.png"),
-#        width = 80, height = 80, units = "mm", dpi = 600)
+ggsave(paste0("outputs/validation_all_move_median_sliding_", window_width, "days.png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
 
 ```
 
@@ -621,6 +904,10 @@ ggplot() +
   # # dashed lines containing the SSF probabilities
   # geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 9e-3, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
@@ -646,7 +933,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000"),
@@ -673,6 +960,10 @@ ggplot() +
 
 ggplot() +
   
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
+  
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "move",
@@ -697,7 +988,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#0096B5", "#26185F"),
@@ -737,6 +1028,10 @@ ggplot() +
   # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
+  
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "next_step" &
@@ -759,7 +1054,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
@@ -769,14 +1064,123 @@ ggplot() +
                      values = c("#E25834", "#000000", "#0096B5", "#26185F"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Next-step probability") +
   scale_x_datetime("Date") +
+  ggtitle("Rolling mean next-step probability") +
   theme_bw() +
   theme(legend.position = "bottom",
     axis.text.x = element_text(angle = 30, hjust = 1))
 
-# ggsave(paste0("outputs/validation_all_next_step_sliding_", window_width, "days.png"),
-#        width = 80, height = 80, units = "mm", dpi = 600)
+ggsave(paste0("outputs/validation_all_next_step_sliding_", window_width, "days.png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
+
+```
+
+# Density of probabilities
+
+```{r}
+
+lower_next_step <- lower_truncation_vals %>% filter(probability == "next_step") %>% pull(q01)
+upper_next_step <- lower_truncation_vals %>% filter(probability == "next_step") %>% pull(q99)
+
+```
+
+## Plot density of probabilities
+
+```{r}
+
+# To reverse the factor levels for model
+validation_all_long <- validation_all_long %>%
+  mutate(model_F = factor(model, 
+                        levels = c("deepSSF", "deepSSF_S2", "ssf_0p", "ssf_2p"),
+                        labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")))
+
+ggplot() +
+  
+  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  
+  geom_density_ridges(data = validation_all_long %>%
+                 filter(probability == "next_step" & value > lower_habitat & value < upper_habitat),
+               aes(x = value, y = model_F, fill = model_F, colour = model_F),
+               alpha = 0.15, scale = 2, quantile_lines = TRUE, quantiles = 2) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "iSSF", "iSSF 2p")) +
+  
+  scale_x_log10("Next step probability", 
+                labels = scales::label_number()) +
+  scale_y_discrete("") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.margin = margin(t = 0.1, r = 0.65, b = 0.15, l = 0, unit = "cm"))
+
+ggsave(paste0("outputs/validation_deepSSF_SSF_densities_next_step_",  Sys.Date(), ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600, scale = 1.25)
+
+```
+
+### Median
+
+```{r}
+
+ggplot() +
+  
+  # # dashed lines containing the SSF probabilities
+  # geom_hline(yintercept = 0.6e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 1.5e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.5) +
+  
+  # # in sample 50% ribbon
+  geom_ribbon(data = validation_all_sliding_period %>%
+                filter(probability == "next_step" &
+                       id == focal_id),
+              aes(x = average_time,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model,
+                  group = interaction(id, model)),
+              alpha = ribbon_50_alpha) +
+  
+  # in sample mean line
+  geom_line(data = validation_all_sliding_period %>% 
+              filter(probability == "next_step" &
+                     id == focal_id),
+            aes(x = average_time, 
+                y = q50,
+                colour = model,
+                group = interaction(id, model)),
+            linewidth = primary_linewidth) +
+  
+  # dashed line for the null probability
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#E25834", "#000000", "#0096B5", "#26185F"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
+  scale_x_datetime("Date") +
+  ggtitle("Rolling median next-step probability") +
+  theme_bw() +
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(angle = 30, hjust = 1))
+
+ggsave(paste0("outputs/validation_all_next_step_median_sliding_", window_width, "days.png"),
+       width = 160, height = 100, units = "mm", dpi = 600, scale = 1.25)
 
 ```
 
@@ -789,6 +1193,10 @@ ggplot() +
   # # dashed lines containing the SSF probability values
   # geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
   # geom_hline(yintercept = 9e-3, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
   
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
@@ -814,7 +1222,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#E25834", "#000000"),
@@ -841,6 +1249,10 @@ ggplot() +
 
 ggplot() +
   
+  # dashed lines for train/val/test
+  geom_vline(xintercept = train_val_split, linetype = "dashed", linewidth = 0.25) +
+  geom_vline(xintercept = val_test_split, linetype = "dashed", linewidth = 0.25) +
+  
   # in sample 50% ribbon
   geom_ribbon(data = validation_all_sliding_period %>%
                 filter(probability == "next_step",
@@ -865,7 +1277,7 @@ ggplot() +
             linewidth = primary_linewidth) +
   
   # dashed line for the null probability
-  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.15) +
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   scale_fill_manual(name = "Model",
                      values = c("#0096B5", "#26185F"),
@@ -901,6 +1313,7 @@ Here we just show the hourly probabilities across the whole tracking period, but
 
 # grouping by each individual, model and hour of the day
 validation_all_quantiles_hourly <- validation_all_long %>% 
+  filter(hour_t1 < 24) %>%
   group_by(id, model, probability, hour_t1) %>% 
   summarise(average_prob = mean(value, na.rm = T),
             sd_prob = sd(value, na.rm = T),
@@ -959,13 +1372,15 @@ ggplot() +
                      values = c("#AF3602", "#000000", "#0096B5", "#26185F"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Habitat selection", 
+                labels = scales::label_number()) +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
   theme_bw() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 
-# ggsave(paste0("outputs/validation_all_hourly.png"),
-#        width = 80, height = 80, units = "mm", dpi = 600)
+ggsave(paste0("outputs/validation_all_hourly_",  Sys.Date(), ".png"),
+       width = 80, height = 60, units = "mm", dpi = 600, scale = 1.25)
 
 ```
 
@@ -1017,7 +1432,8 @@ ggplot() +
                      values = c("#E25834", "#000000"),
                     labels = c("deepSSF", "deepSSF S2")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
   scale_x_continuous("Hour", seq(0,24,6)) +
   # coord_cartesian(ylim = c(0, 4e-4)) +
   theme_bw() +
@@ -1127,7 +1543,60 @@ ggplot() +
                      values = c("#AF3602", "#000000", "#0096B5", "#000000"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+# ggsave(paste0("outputs/validation_all_move_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
+
+```
+
+Median
+
+```{r}
+
+ggplot() +
+  
+  # dashed lines containing the SSF probabilities
+  # geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 3e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # in sample 50% ribbon
+  geom_ribbon(data = validation_all_quantiles_hourly %>%
+                filter(probability == "move",
+                       id == focal_id),
+              aes(x = hour_t1,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model,
+                  group = interaction(id, model)),
+              alpha = ribbon_50_alpha) +
+  
+  # in sample mean line
+  geom_line(data = validation_all_quantiles_hourly %>% 
+              filter(probability == "move",
+                     id == focal_id),
+            aes(x = hour_t1, 
+                y = q50, 
+                colour = model,
+                group = interaction(id, model)),
+            linewidth = 0.35) +
+  
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#AF3602", "#000000", "#0096B5", "#000000"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#AF3602", "#000000", "#0096B5", "#000000"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
   theme_bw() +
   theme(legend.position = "bottom")
@@ -1294,7 +1763,61 @@ ggplot() +
                      values = c("#AF3602", "#000000", "#0096B5", "#000000"),
                     labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
   
-  scale_y_continuous("Probability value") +
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
+  scale_x_continuous("Hour", breaks = seq(0,24,6)) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+# ggsave(paste0("outputs/validation_all_next_step_hourly.png"),
+#        width = 80, height = 80, units = "mm", dpi = 600)
+
+```
+
+Median
+
+```{r}
+
+ggplot() +
+  
+  # dashed lines containing the SSF probabilities
+  # geom_hline(yintercept = 0, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  # geom_hline(yintercept = 3e-4, alpha = 0.25, linetype = "dashed", linewidth = 0.25) +
+  
+  # in sample 50% ribbon
+  geom_ribbon(data = validation_all_quantiles_hourly %>%
+                filter(probability == "next_step",
+                       id == focal_id),
+              aes(x = hour_t1,
+                  ymin = q25,
+                  ymax = q75,
+                  fill = model,
+                  group = interaction(id, model)),
+              alpha = ribbon_50_alpha) +
+  
+  # in sample mean line
+  geom_line(data = validation_all_quantiles_hourly %>% 
+              filter(probability == "next_step",
+                     id == focal_id),
+            aes(x = hour_t1, 
+                y = q50, 
+                colour = model,
+                group = interaction(id, model)),
+            linewidth = 0.35) +
+  
+  # dashed line for uniform probability
+  geom_hline(yintercept = uniform_prob, linetype = "dashed", linewidth = 0.25) +
+  
+  scale_fill_manual(name = "Model",
+                     values = c("#AF3602", "#000000", "#0096B5", "#000000"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  scale_color_manual(name = "Model",
+                     values = c("#AF3602", "#000000", "#0096B5", "#000000"),
+                    labels = c("deepSSF", "deepSSF S2", "SSF", "SSF 2p")) +
+  
+  # scale_y_continuous("Probability value") +
+  scale_y_log10("Probability value") +
   scale_x_continuous("Hour", breaks = seq(0,24,6)) +
   theme_bw() +
   theme(legend.position = "bottom")
@@ -1410,5 +1933,7 @@ ggplot() +
 #        width = 80, height = 80, units = "mm", dpi = 600)
 
 ```
+
+
 
 

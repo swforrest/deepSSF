@@ -372,7 +372,12 @@ for(k in 1:1) {
     #-------------------------------------------------------------------------
     
     # to calculate the next step probabilities for all samples
-    for (i in 2:n) {
+    # for (i in 2:n) {
+      
+    sample_plot <- 3970
+      
+    for (i in sample_plot:(sample_plot+10)) {
+    # for (i in sample_plot:sample_plot) {
     
     # for the subset
     # for (i in 2:(n_samples_subset+1)) {
@@ -524,24 +529,52 @@ for(k in 1:1) {
       test_data[i, paste0("prob_next_step_ssf_", model_harmonics[j])] <- prob_next_step
       
       # plot a few local covariates and the predictions for the focal buffalo
-      if(k == 1 & i < 7){
+      # if(k == 1 & i < 7){
+      if(k == 1){
         
+        print(sample)
+        
+        png(paste0("outputs/next_step_validation/ndvi_step_", i, ".png"),
+        width = 800, height = 750, res = 150)
         plot(ndvi_sample, main = "NDVI")
-        plot(canopy_sample, main = "Canopy cover")
-        plot(veg_herby_sample, main = "Herbaceous vegetation")
-        plot(slope_sample, main = "Slope")
+        dev.off()
         
-        plot(terra::mask(habitat_log, next_step_vect, inverse = T), 
-             main = paste0("Habitat selection log-probability - Model ", model_harmonics[j]))
+        png(paste0("outputs/next_step_validation/canopy_", i, ".png"),
+        width = 800, height = 750, res = 150)
+        plot(canopy_sample, main = "Canopy cover")
+        dev.off()
+        
+        png(paste0("outputs/next_step_validation/herby_", i, ".png"),
+        width = 800, height = 750, res = 150)
+        plot(veg_herby_sample, main = "Herbaceous vegetation")
+        dev.off()
+        
+        png(paste0("outputs/next_step_validation/slope_", i, ".png"),
+        width = 800, height = 750, res = 150)
+        plot(slope_sample, main = "Slope")
+        dev.off()
+        
+        
+        png(paste0("outputs/next_step_validation/habitat_log_step_", i, "_model_", j, ".png"),
+        width = 800, height = 750, res = 150)
+        plot(terra::mask(log(habitat_pred), next_step_vect, inverse = T), 
+             main = paste0("Habitat selection (log) - Model ", model_harmonics[j]))
         # plot(habitat_pred)
+        dev.off()
+        
+        png(paste0("outputs/next_step_validation/habitat_step_", i, "_model_", j, ".png"),
+        width = 800, height = 750, res = 150)
+        plot(terra::mask(habitat_pred, next_step_vect, inverse = T), 
+             main = paste0("Habitat selection - Model ", model_harmonics[j]))
+        dev.off()
         
         # plot(step_log, main = "")
         # plot(ta_log, main = "")
-        plot(terra::mask(move_log, next_step_vect, inverse = T), 
+        plot(terra::mask(log(move_pred), next_step_vect, inverse = T), 
              main = paste0("Movement log-probability - Model ", model_harmonics[j]))
         # plot(move_pred)
         
-        plot(terra::mask(next_step_log, next_step_vect, inverse = T), 
+        plot(terra::mask(log(next_step_pred), next_step_vect, inverse = T), 
              main = paste0("Next-step log-probability - Model ", model_harmonics[j]))
         # plot(next_step_pred)
         
@@ -555,7 +588,7 @@ for(k in 1:1) {
     
   }
   
-  write.csv(test_data, file = paste0("outputs/next_step_validation/next_step_probs_ssf_80-10-10_id", ids[k], "_n_samples", n_samples_subset, "_", Sys.Date(), ".csv"))
+  # write.csv(test_data, file = paste0("outputs/next_step_validation/next_step_probs_ssf_80-10-10_id", ids[k], "_n_samples", n, "_", Sys.Date(), ".csv"))
   
   gc()
   

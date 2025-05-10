@@ -418,7 +418,7 @@ class Params_to_Grid_Block(nn.Module):
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
         # print(torch.sum(torch.exp(movement_grid)))
 
@@ -588,7 +588,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         movement_grid = gamma_density_layer + vonmises_density_layer # Gamma and von Mises densities are on the log-scale
 
         # normalise (on the log-scale using the log-sum-exp trick) before combining with the habitat predictions
-        # movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
+        movement_grid = movement_grid - torch.logsumexp(movement_grid, dim = (1, 2), keepdim = True)
         # print('Movement grid norm ', torch.sum(movement_grid))
         # print(torch.sum(torch.exp(movement_grid)))
 

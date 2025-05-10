@@ -135,7 +135,7 @@ buffalo_id_subset <- buffalo %>%
   arrange(t1) |>  
   slice(1:no_subset_locations)
 
-hist(buffalo_id_subset$time_diff)
+# hist(buffalo_id_subset$time_diff)
 
 ```
 
@@ -144,12 +144,17 @@ hist(buffalo_id_subset$time_diff)
 ```{r}
 #| message=FALSE
 
+# deepSSF model folder
+deepSSF_dir <- "id2005_med_CNN_movement_2_2025-05-10"
+
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
-  list.files("Python/outputs/model_training/id2005_scalar_movement_norm_4_2025-05-08/simulations/deepSSF_trajectories/", pattern = "*.csv", full.names = T)[1:50]
+  list.files(paste0("Python/outputs/model_training/",deepSSF_dir,"/simulations/deepSSF_trajectories/"), pattern = "*.csv", full.names = T)[1:50]
+
+length(sim_data_full_list)
 
 # to filter filenames with any string matching conditions
-sim_data_filenames <- grep("3000steps", sim_data_full_list, value = T) #%>% 
+sim_data_filenames <- grep("", sim_data_full_list, value = T) #%>% 
   # grep("3000steps", x = ., value = T) 
 
 # read dataframes as a single dataframe with id identifier
@@ -283,7 +288,7 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "none")
 
-ggsave(paste0("outputs/simulated_trajectories.png"), width=150, height=150, units="mm", dpi = 600)
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/simulated_trajectories.png"), width=150, height=150, units="mm", dpi = 600)
 
 ```
 
@@ -295,7 +300,12 @@ The skyblue density plot represents the observed data and the orange density plo
 
 ```{r}
 
-ggplot() +
+cell_widths <- data.frame(x = c(0, 12.5, seq(37.5, 1785, by = 25)), y = 0)
+
+step_lengths_stationary <- ggplot() +
+  # geom_vline(data = cell_widths,
+  #            aes(xintercept = x), 
+  #            colour = "black", linetype = "dashed", alpha = 0.5) +
   geom_density(data = all_data %>% filter(id == 2005),
                  aes(x = sl),
                  fill = "skyblue", colour = "skyblue", alpha = 0.5) +
@@ -306,13 +316,20 @@ ggplot() +
   scale_y_continuous("Density") +
   theme_bw()
 
+step_lengths_stationary
+
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/step_lengths.png"), width=150, height=80, units="mm", dpi = 600)
+
 ```
 
 ## Log step lengths
 
 ```{r}
 
-ggplot() +
+step_lengths_log <- ggplot() +
+  geom_vline(data = cell_widths,
+             aes(xintercept = x), 
+             colour = "black", linetype = "dashed", alpha = 0.5) +
   geom_density(data = all_data %>% filter(id == 2005),
                  aes(x = sl),
                  fill = "skyblue", colour = "skyblue", alpha = 0.5) +
@@ -323,13 +340,17 @@ ggplot() +
   scale_y_continuous("Density") +
   theme_bw()
 
+step_lengths_log
+
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/log_sl.png"), width=150, height=80, units="mm", dpi = 600)
+
 ```
 
 ## Turning angles
 
 ```{r}
 
-ggplot() +
+turning_angles_stationary <- ggplot() +
   geom_density(data = all_data %>% filter(id == 2005),
                  aes(x = ta),
                  fill = "skyblue", colour = "skyblue", alpha = 0.5) +
@@ -339,6 +360,10 @@ ggplot() +
   scale_x_continuous("Turning angle (radians)") +
   scale_y_continuous("Density") +
   theme_bw()
+
+turning_angles_stationary
+
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/turning_angles.png"), width=150, height=80, units="mm", dpi = 600)
 
 ```
 
@@ -489,6 +514,7 @@ This is the plotting approach that we used in the paper.
 
 ```{r}
 
+# for all observed and simulated data
 hourly_summary_quantiles <- hourly_habitat_long %>% 
   dplyr::group_by(Data, hour_t1, variable) %>% 
   summarise(n = n(), 
@@ -596,6 +622,12 @@ hourly_path_sl_plot <- ggplot() +
               aes(x = hour_t1, ymin = q25, ymax = q75, fill = Data),
               alpha = ribbon_50_alpha) +
   
+  geom_path(data = hourly_habitat_long %>% filter(id < 10) %>% 
+              filter(!Data == "Buffalo" & variable == "step_length_mean"),
+                 aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+  
   geom_path(data = hourly_habitat_long %>% 
               filter(Data == "Buffalo" & variable == "step_length_mean"),
                  aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
@@ -668,6 +700,14 @@ hourly_path_ndvi_plot <- ggplot() +
               aes(x = hour_t1, ymin = q25, ymax = q75, fill = Data),
               alpha = ribbon_50_alpha) +
   
+  
+  geom_path(data = hourly_habitat_long %>% filter(id < 10) %>% 
+              filter(!Data == "Buffalo" & variable == "ndvi_mean"),
+                 aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+  
+  
   geom_path(data = hourly_habitat_long %>% 
               filter(Data == "Buffalo" & variable == "ndvi_mean"),
                  aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
@@ -738,6 +778,12 @@ hourly_path_canopy_plot <- ggplot() +
                 filter(!Data == "Buffalo" & variable == "canopy_mean"),
               aes(x = hour_t1, ymin = q25, ymax = q75, fill = Data),
               alpha = ribbon_50_alpha) +
+  
+  geom_path(data = hourly_habitat_long %>% filter(id < 10) %>% 
+              filter(!Data == "Buffalo" & variable == "canopy_mean"),
+                 aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
   
   geom_path(data = hourly_habitat_long %>% 
               filter(Data == "Buffalo" & variable == "canopy_mean"), 
@@ -810,6 +856,12 @@ hourly_path_herby_plot <- ggplot() +
               aes(x = hour_t1, ymin = q25, ymax = q75, fill = Data),
               alpha = ribbon_50_alpha) +
   
+  geom_path(data = hourly_habitat_long %>% filter(id < 10) %>% 
+              filter(!Data == "Buffalo" & variable == "herby_mean"),
+                 aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+  
   geom_path(data = hourly_habitat_long %>% 
               filter(Data == "Buffalo" & variable == "herby_mean"), 
                  aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)), 
@@ -881,6 +933,12 @@ hourly_path_slope_plot <- ggplot() +
               aes(x = hour_t1, ymin = q25, ymax = q75, fill = Data),
               alpha = ribbon_50_alpha) +
   
+  geom_path(data = hourly_habitat_long %>% filter(id < 10) %>% 
+              filter(!Data == "Buffalo" & variable == "slope_mean"),
+                 aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)),
+                 alpha = buff_path_alpha,
+              linewidth = buff_path_linewidth) +
+  
   geom_path(data = hourly_habitat_long %>% 
               filter(Data == "Buffalo" & variable == "slope_mean"), 
                  aes(x = hour_t1, y = value, colour = Data, group = interaction(id, Data)), 
@@ -924,6 +982,26 @@ hourly_path_slope_plot
 
 ## Combining the hourly plots
 
+```{r}
+
+ggarrange(step_lengths_stationary,
+          
+          step_lengths_log,
+
+          # hourly_path_herby_plot,
+          # 
+          # hourly_path_canopy_plot +
+          #   theme(axis.title.y = element_blank()),
+
+          labels = c("A", "B"),
+          ncol = 1, nrow = 2,
+          legend = "bottom",
+          common.legend = TRUE)
+
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/step_lengths_stat_log.png"), width=170, height=150, units="mm", dpi = 600)
+
+```
+
 ### Step lengths instead of slope
 
 ```{r}
@@ -948,7 +1026,7 @@ ggarrange(hourly_path_sl_plot +
           legend = "bottom",
           common.legend = TRUE)
 
-ggsave(paste0("outputs/hourly_summaries_step.png"), width=180, height=150, units="mm", dpi = 600)
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/hourly_summaries_step.png"), width=180, height=150, units="mm", dpi = 600)
 
 ```
 
@@ -976,7 +1054,7 @@ ggarrange(hourly_path_ndvi_plot +
           legend = "bottom",
           common.legend = TRUE)
 
-# ggsave(paste0("outputs/hourly_summaries.png"), width=180, height=150, units="mm", dpi = 1000)
+ggsave(paste0("Python/outputs/model_training/",deepSSF_dir,"/hourly_summaries.png"), width=180, height=150, units="mm", dpi = 600)
 
 ```
 

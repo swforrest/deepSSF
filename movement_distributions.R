@@ -25,13 +25,13 @@ distance_layer <- rast(distance_layer)
 bearing_layer <- rast(bearing_layer)
 
 # Plot the distance and bearing rasters
-# png("outputs/movement_distributions/distance_layer.png", width = 1000, height = 750, res = 250)
+png("outputs/movement_distributions/distance_layer.png", width = 1000, height = 750, res = 250)
 terra::plot(distance_layer, main = "Distance from centre")
-# dev.off()
+dev.off()
 
-# png("outputs/movement_distributions/bearing_layer.png", width = 1000, height = 750, res = 250)
+png("outputs/movement_distributions/bearing_layer.png", width = 1000, height = 750, res = 250)
 terra::plot(bearing_layer, main = "Bearing")
-# dev.off()
+dev.off()
 
 distance_values <- terra::values(distance_layer)
 bearing_values <- terra::values(bearing_layer)
