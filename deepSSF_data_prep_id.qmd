@@ -450,7 +450,7 @@ for(i in 1:1) { # select just the first ID
     -points_vect_cent_x1,
     -pres_cent_x1,
     -points_vect_cent_x2_recentred,
-    -pres_cent_x2_recentred,
+    # -pres_cent_x2_recentred,
     -points_vect_cent_x2_within_cell,
     -pres_cent_x2_within_cell)
 
@@ -478,7 +478,12 @@ for(i in 1:1) { # select just the first ID
   #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent",
   #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
   #               overwrite = T)
-  # 
+  
+  rast(buffalo_data_covs$pres_cent_x2_recentred) %>%
+    writeRaster(paste0("buffalo_local_layers_id/recentred_buffalo_", buffalo_ids[i], "_pres_cent",
+                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+                overwrite = T)
+
   rast(buffalo_data_covs$pres_cent_x2_within_cell) %>%
     writeRaster(paste0("buffalo_local_layers_id/within_cell_buffalo_", buffalo_ids[i], "_pres_cent",
                        nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
@@ -511,14 +516,215 @@ for(i in 1:n_samples) {
   print(rowColFromCell(buffalo_data_covs$pres_cent_x1[[i]], which(buffalo_data_covs$pres_cent_x1[[i]][] == 1)))
 }
 
-print("Next step (target)")
+print("Next step (target) recentered")
 
-# x2 uncentered
+# x2 recentered
+for(i in 1:n_samples) {
+  print(rowColFromCell(buffalo_data_covs$pres_cent_x2_recentred[[i]], which(buffalo_data_covs$pres_cent_x2_recentred[[i]][] == 1)))
+}
+
+print("Next step (target) within cell")
+
+# x2 centered
 for(i in 1:n_samples) {
   print(rowColFromCell(buffalo_data_covs$pres_cent_x2_within_cell[[i]], which(buffalo_data_covs$pres_cent_x2_within_cell[[i]][] == 1)))
 }
 
 ```
+
+## Checking the distribution of next-steps after the discretisation
+
+```{r}
+
+original_target <- rast("buffalo_local_layers_id/buffalo_2005_pres_cent101x101_lag_1hr_n10297.tif")
+fixed_target <- rast("buffalo_local_layers_id/fixed_buffalo_2005_pres_cent101x101_lag_1hr_n10297.tif")
+
+# fixed_target <- rast("buffalo_local_layers_id/within_cell_buffalo_2005_pres_cent101x101_lag_1hr_n100.tif")
+
+```
+
+```{r}
+
+n_samples <- nlyr(original_target)
+# n_samples <- 100
+
+print("Uncorrected target")
+
+x_vals <- rep(NA, n_samples)
+y_vals <- rep(NA, n_samples)
+distance <- rep(NA, n_samples)
+
+# x2 uncentered
+tic()
+for(i in 1:n_samples) {
+  
+  # plot(original_target[[i]])
+  
+  # print(rowColFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
+  # print(xyFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
+  
+  xy <- xyFromCell(original_target[[i]], which(original_target[[i]][] == 1))
+  
+  x_vals[i] <- xy[1]
+  y_vals[i] <- xy[2]
+  
+  distance[i] <- sqrt((x_vals[i])^2 + (y_vals[i])^2)
+  
+}
+toc()
+
+```
+
+### Do the same for the corrected target
+
+```{r}
+
+n_samples <- nlyr(fixed_target)
+# n_samples <- 97
+
+print("Corrected target")
+
+x_vals_corr <- rep(NA, n_samples)
+y_vals_corr <- rep(NA, n_samples)
+distance_corr <- rep(NA, n_samples)
+
+# x2 centered
+tic()
+for(i in 1:n_samples) {
+  
+  # plot(original_target[[i]])
+  # print(rowColfromCell(original_target[[i]], which(original_target[[i]][] == 1)))
+  # print(xyFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
+  xy <- xyFromCell(fixed_target[[i]], which(fixed_target[[i]][] == 1))
+  
+  x_vals_corr[i] <- xy[1]
+  y_vals_corr[i] <- xy[2]
+  
+  distance_corr[i] <- sqrt((x_vals_corr[i])^2 + (y_vals_corr[i])^2)
+  
+}
+toc()
+
+distance[1:100] == distance_corr[1:100]
+
+```
+
+
+### Check the discretised distribution against the observed data
+
+```{r}
+
+buffalo_data <- read_csv("buffalo_local_data_id/buffalo_temporal_cont_2005_data_df_lag_1hr_n10297.csv")
+buffalo_data$discrete_sl_uncorr <- distance
+buffalo_data$discrete_sl_corr <- distance_corr
+
+```
+
+## Checking the observed distribution of small steps 
+
+```{r}
+
+buffalo_data %>% 
+  filter(discrete_sl_corr == 0) %>% 
+  summarise(mean_sl = mean(sl, na.rm = T),
+            median_sl = median(sl, na.rm = T))
+
+buffalo_data %>% 
+  filter(discrete_sl_uncorr == 0) %>% 
+  ggplot() +
+  geom_density(aes(x = sl), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
+  scale_x_continuous("Step length (m)") +
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+```
+
+
+```{r}
+
+buffalo_data <- buffalo_data %>% mutate(
+  discrete_sl_uncorr = ifelse(discrete_sl_uncorr == 0, 10, discrete_sl_uncorr),
+  discrete_sl_uncorr_jitter = discrete_sl_uncorr + rnorm(nrow(buffalo_data), 0, 6.5),
+  # discrete_sl_uncorr_jitter = discrete_sl_uncorr + runif(nrow(buffalo_data), 0, 25),
+  
+  discrete_sl_corr = ifelse(discrete_sl_corr == 0, 10, discrete_sl_corr),
+  discrete_sl_corr_jitter = discrete_sl_corr + rnorm(nrow(buffalo_data), 0, 6.5),
+  # discrete_sl_corr_jitter = discrete_sl_corr + runif(nrow(buffalo_data), 0, 25)
+)
+
+```
+
+
+```{r}
+
+# fixed centre cell adjustment
+buffalo_data %>% 
+  filter(sl < 2000) %>%
+  ggplot() +
+  geom_density(aes(x = sl), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_uncorr),
+                 fill = "purple", colour = "purple", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_corr),
+                 fill = "orange", colour = "orange", alpha = 0.25) +
+  scale_x_continuous("Step length (m)") +
+  # scale_x_log10("Step length (m)") + 
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+# jitter for every cell
+buffalo_data %>% 
+  filter(discrete_sl_uncorr < 2000) %>%
+  ggplot() +
+  geom_density(aes(x = sl), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_uncorr_jitter), 
+                 fill = "purple", colour = "purple", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_corr_jitter), 
+                 fill = "orange", colour = "orange", alpha = 0.25) +
+  scale_x_continuous("Step length (m)") +
+  # scale_x_log10("Step length (m)") + 
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+# fixed centre cell adjustment
+buffalo_data %>% 
+  filter(discrete_sl_uncorr < 2000) %>%
+  ggplot() +
+  geom_density(aes(x = sl), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_uncorr), 
+                 fill = "purple", colour = "purple", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_corr), 
+                 fill = "orange", colour = "orange", alpha = 0.25) +
+  # scale_x_continuous("Step length (m)") + 
+  scale_x_log10("Step length (m)") +
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+# jitter for every cell
+buffalo_data %>% 
+  filter(discrete_sl_uncorr < 2000) %>%
+  ggplot() +
+  geom_density(aes(x = sl), 
+                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_uncorr_jitter), 
+                 fill = "purple", colour = "purple", alpha = 0.25) +
+  geom_density(aes(x = discrete_sl_corr_jitter), 
+                 fill = "orange", colour = "orange", alpha = 0.25) +
+  # scale_x_continuous("Step length (m)") + 
+  scale_x_log10("Step length (m)") +
+  scale_y_continuous("Density") +
+  ggtitle("Step lengths") +
+  theme_classic()
+
+```
+
 
 
 ## Plot a subset of the local covariates
