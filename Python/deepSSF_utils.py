@@ -173,7 +173,7 @@ def recover_yday(sin_term, cos_term):
     # Calculate the angle theta
     theta = np.arctan2(sin_term, cos_term)
     # Convert to day of year
-    yday = (365 * theta) / (2 * np.pi) % 365
+    yday = (365.25 * theta) / (2 * np.pi) % 365.25
     return yday
 
 
@@ -185,3 +185,41 @@ def clear_memory(device):
     elif hasattr(torch, 'mps') and torch.mps.is_available():
         torch.mps.empty_cache()
     # CPU doesn't need explicit cache clearing
+
+
+# Example sorting by the epoch number
+def extract_index(filename):
+    # Extract the epoch number from the filename
+    # Adjust the extraction based on your naming pattern
+    import re
+    match = re.search(r'index(\d+)_', filename)
+    if match:
+        return int(match.group(1))
+    return 0
+
+def create_gif(image_folder, output_filename, fps=10):
+    """
+    Creates a GIF from a sequence of images in a folder.
+
+    Parameters:
+    - image_folder: Path to the folder containing images
+    - output_filename: Name of the output GIF file
+    - duration: Duration of each frame in seconds
+    """
+    # Get all png files in the specified folder, sorted by name
+    images = sorted(glob.glob(os.path.join(image_folder, '*.png')), key=extract_index)
+
+    # Check if any images were found
+    if not images:
+        print(f"No images found in {image_folder}")
+        return
+
+    # Read all images
+    frames = [imageio.imread(image) for image in images]
+
+    # Save as GIF
+    imageio.mimsave(output_filename, frames, fps=fps, loop=0)
+
+    display(Image(filename=output_filename))
+
+    print(f"GIF created successfully: {output_filename}")

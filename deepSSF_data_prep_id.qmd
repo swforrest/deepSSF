@@ -215,7 +215,7 @@ We also have another script that saves all local layers as individual npy arrays
 
 buffalo_all_steps_save <- buffalo_all_steps %>% mutate(
   
-  dt_min = round(difftime(t2_, t1_, units = "mins"), 0),
+  dt_minute = round(difftime(t2_, t1_, units = "mins"), 0),
   dt_hour = round(difftime(t2_, t1_, units = "hours"), 2),
   
   # add the minutes as a decimal to the hour, and the hour as a decimal to the day
@@ -252,7 +252,9 @@ buffalo_all_steps_save <- buffalo_all_steps_save %>%
            y2_ - y1_ < distance) %>% 
   drop_na(ta_)
 
-# buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
+buffalo_all_steps_save
+
+buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
 
 ```
 
@@ -297,7 +299,7 @@ for(i in 1:1) { # select just the first ID
   
   # to use a subset of the data for that individual for testing
   # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:100)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
 
   n_samples <- nrow(buffalo_data)
   
@@ -455,8 +457,8 @@ for(i in 1:1) { # select just the first ID
     -pres_cent_x2_within_cell)
 
   # # save the data
-  write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_temporal_cont_", buffalo_ids[i],
-                                    "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
+  # write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_temporal_cont_", buffalo_ids[i],
+  #                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
   # 
   # # saving the raster objects
   # rast(buffalo_data_covs$ndvi_cent) %>%
@@ -479,15 +481,16 @@ for(i in 1:1) { # select just the first ID
   #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
   #               overwrite = T)
   
-  rast(buffalo_data_covs$pres_cent_x2_recentred) %>%
-    writeRaster(paste0("buffalo_local_layers_id/recentred_buffalo_", buffalo_ids[i], "_pres_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
+  
+  # rast(buffalo_data_covs$pres_cent_x2_recentred) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/recentred_buffalo_", buffalo_ids[i], "_pres_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
 
-  rast(buffalo_data_covs$pres_cent_x2_within_cell) %>%
-    writeRaster(paste0("buffalo_local_layers_id/within_cell_buffalo_", buffalo_ids[i], "_pres_cent",
-                       nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-                overwrite = T)
+  # rast(buffalo_data_covs$pres_cent_x2_within_cell) %>%
+  #   writeRaster(paste0("buffalo_local_layers_id/within_cell_buffalo_", buffalo_ids[i], "_pres_cent",
+  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
+  #               overwrite = T)
   
 }
 
@@ -507,7 +510,7 @@ which(is.na(buffalo_data_covs$ta))
 
 ```{r}
 
-n_samples <- 5
+n_samples <- 8
 
 print("Current step")
 

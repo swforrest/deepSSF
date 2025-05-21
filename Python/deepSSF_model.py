@@ -595,6 +595,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         return movement_grid
 
 
+
 """
 ## Scalar to grid block
 
@@ -779,3 +780,4 @@ class ModelParams():
 #                "dropout": 0.1, #the proportion of nodes that are dropped out in the dropout layers
 #                "device": device
 #                }
+

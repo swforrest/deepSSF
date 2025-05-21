@@ -130,10 +130,10 @@ head(buffalo)
 
 no_subset_locations <- 3000 # to compare to the simulated data
 
-buffalo_id_subset <- buffalo %>% 
-  filter(id == 2005) %>% 
-  arrange(t1) |>  
-  slice(1:no_subset_locations)
+buffalo_id_subset <- buffalo #%>% 
+  # filter(id == 2005) %>% 
+  # arrange(t1) %>%  
+  # slice(1:no_subset_locations)
 
 # hist(buffalo_id_subset$time_diff)
 
@@ -145,7 +145,7 @@ buffalo_id_subset <- buffalo %>%
 #| message=FALSE
 
 # deepSSF model folder
-deepSSF_dir <- "id2005_med_CNN_movement_corr_target_ChV_1_2025-05-14"
+deepSSF_dir <- "djelk_derived_covs_CNN_move_7_2025-05-20"
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 
