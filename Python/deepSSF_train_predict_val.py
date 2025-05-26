@@ -52,7 +52,8 @@ import sys
 # else:
 
 # Local environment setup
-base_path = '..'
+# base_path = '/Users/scottforrest/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/PhD - Scott Forrest/GIT/deepSSF/'
+base_path = ''
 print("Running in local environment")
 
 # Now you can use base_path regardless of environment
@@ -71,8 +72,6 @@ import torch.nn as nn                                   # Neural network modules
 import os                                               # Operating system utilities
 import glob                                             # Pattern matching
 import pandas as pd                                     # Data manipulation
-import imageio.v2 as imageio                            # Image manipulation - for creating GIFs
-from IPython.display import Image, display              # For plotting GIFs
 import rasterio                                         # Raster data handling
 from datetime import datetime, timedelta                # Date/time utilities
 from tqdm import tqdm                                   # Progress bar
@@ -93,6 +92,8 @@ today_date = datetime.today().strftime('%Y-%m-%d')
 # Set random seed for reproducibility
 # seed = 42
 
+# print(glob.glob)
+
 # Set the device to be used (GPU or CPU)
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 print(f"Using {device} device")
@@ -106,12 +107,13 @@ if torch.backends.mps.is_available():
 ### Create a directory for the model training 
 
 # Count existing directories with similar pattern
-pattern = f'{base_path}/Python/outputs/model_training/djelk_derived_covs_CNN_move_*_{today_date}'
+pattern = os.path.join(base_path, f'Python/outputs/model_training/djelk_derived_covs_CNN_4L8F_move_*_{today_date}')
+print(f"Pattern for existing directories: {pattern}")
 existing_dirs = glob.glob(pattern)
 dir_index = len(existing_dirs) + 1
 
 # Create directory with index
-output_dir = f'{base_path}/Python/outputs/model_training/djelk_derived_covs_CNN_move_{dir_index}_{today_date}'
+output_dir = os.path.join(base_path, f'Python/outputs/model_training/djelk_derived_covs_CNN_4L8F_move_{dir_index}_{today_date}')
 os.makedirs(output_dir, exist_ok=True)
 
 print(f"Created directory: {output_dir}")
@@ -265,8 +267,8 @@ params_dict = {"batch_size": batch_size, #number of samples in each batch
                "dropout": 0.1, #the proportion of nodes that are dropped out in the dropout layers
 
                # hyperparameters that change the model architecture
-               "output_channels": 4, #number of convolution filters to learn
-               "output_channels_movement": 4, #number of convolution filters to learn for the movement kernel
+               "output_channels": 8, #number of convolution filters to learn
+               "output_channels_movement": 8, #number of convolution filters to learn for the movement kernel
                "dense_dim_hidden": 128, #number of nodes in the hidden layers
 
                # this will be updated below
@@ -612,7 +614,7 @@ for t in range(epochs):
     filename_covs = f'{output_dir}/training_images/training_epoch_index{t}_yday{yday_t2_integer}_hour{hour_t2_integer}_bearing{bearing_degrees}.png'
     plt.tight_layout()
     plt.savefig(filename_covs, dpi=300) # creates inconsistent image sizes >>> , bbox_inches='tight'
-    plt.show()
+    #plt.show()
     plt.close()  # Close the figure to free memory
 
     # Plot the difference in the loss of each component between epochs
@@ -629,7 +631,7 @@ for t in range(epochs):
     plt.legend()
     # plt.tight_layout()
     plt.savefig(filename_diff, dpi=300) # creates inconsistent image sizes >>> , bbox_inches='tight'
-    plt.show()
+    #plt.show()
     plt.close()  # Close the figure to free memory
 
 print("Done!")
@@ -754,7 +756,7 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()  # Show legend to distinguish lines
 plt.savefig(filename_loss, dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 ### Test the model on the sample covariates
@@ -792,7 +794,7 @@ fig.colorbar(im4, ax=axs[1, 1])
 filename_covs = f'{output_dir}/sample{iteration_index}_yday{yday_t2_integer}_hour{hour_t2_integer}_bearing{bearing_degrees}.png'
 plt.tight_layout()
 plt.savefig(filename_covs, dpi=300, bbox_inches='tight') # if we want to save the figure
-plt.show()
+#plt.show()
 plt.close()  # Close the figure to free memory
 
 
@@ -851,7 +853,7 @@ plt.imshow(hab_density_mask)
 plt.colorbar()
 plt.title('Habitat selection probability (log)')
 plt.savefig(f'{output_dir}/hab_{iteration_index}_log_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 # -------------------------------------------------------------------------
@@ -861,7 +863,7 @@ plt.imshow(hab_density_exp_mask)
 plt.colorbar()
 plt.title('Habitat selection probability')
 plt.savefig(f'{output_dir}/hab_{iteration_index}_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 # -------------------------------------------------------------------------
@@ -885,7 +887,7 @@ plt.imshow(move_density_mask)
 plt.colorbar()
 plt.title('Movement probability (log)')
 plt.savefig(f'{output_dir}/move_{iteration_index}_log_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 # -------------------------------------------------------------------------
@@ -895,7 +897,7 @@ plt.imshow(move_density_exp_mask)
 plt.colorbar()
 plt.title('Movement probability')
 plt.savefig(f'{output_dir}/move_{iteration_index}_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 # -------------------------------------------------------------------------
@@ -923,7 +925,7 @@ plt.imshow(step_density_mask)
 plt.colorbar()
 plt.title('Next-step probability (log)')
 plt.savefig(f'{output_dir}/step_{iteration_index}_log_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 # -------------------------------------------------------------------------
@@ -933,7 +935,7 @@ plt.imshow(step_density_exp_norm_mask)
 plt.colorbar()
 plt.title('Next-step probability')
 plt.savefig(f'{output_dir}/step_{iteration_index}_prob.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 plt.close()
 
 
@@ -1005,7 +1007,7 @@ plt.clim(-1, 1) # Set the color limits to match the range of the scalar values (
 plt.text(scalar_maps.shape[2] // 2, scalar_maps.shape[3] // 2,
          f'Value: {round(sample_temporal_covs[0, scalar_index].item(), 2)}',
          ha='center', va='center', color='white', fontsize=12)
-plt.show()
+#plt.show()
 
 covariate_stack = torch.cat([sample_spatial_covs.detach().cpu(), scalar_maps], dim=1)
 print(covariate_stack.shape)
@@ -1069,7 +1071,7 @@ for z in range(num_maps1):
 
     plt.tight_layout()
     plt.savefig(f'{output_dir}/conv_layer1_filters{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
     # -----------------------------------------------------------
@@ -1082,7 +1084,7 @@ for z in range(num_maps1):
     plt.title(f"Layer 1, Feature Map {z+1}")
     # Hide axis if you prefer: plt.axis('off')
     plt.savefig(f'{output_dir}/conv_layer1_feature_map{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
 
@@ -1158,7 +1160,7 @@ for z in range(num_maps2):
 
     plt.tight_layout()
     plt.savefig(f'{output_dir}/conv_layer2_filters{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
     # -----------------------------------------------------------
@@ -1171,7 +1173,7 @@ for z in range(num_maps2):
     plt.title(f"Layer 2, Feature Map {z+1}")
     # Hide axis if you prefer: plt.axis('off')
     plt.savefig(f'{output_dir}/conv_layer2_feature_map{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
 
@@ -1241,7 +1243,7 @@ for z in range(num_maps3):
 
     plt.tight_layout()
     plt.savefig(f'{output_dir}/conv_layer3_filters{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
     # -----------------------------------------------------------
@@ -1254,7 +1256,7 @@ for z in range(num_maps3):
     plt.title(f"Habitat selection log probability")
     # Hide axis if you prefer: plt.axis('off')
     plt.savefig(f'{output_dir}/conv_layer3_feature_map{z}.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
 
@@ -1424,7 +1426,7 @@ plt.ylabel('Density')
 plt.title('Gamma Density Function')
 plt.legend()
 plt.savefig(filename_gamma_distributions, dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 # -------------------------------------------------------------------------
@@ -1459,7 +1461,7 @@ plt.title('Von Mises Density Function')
 # plt.ylim(0, 0.5)  # Set a limit for the y-axis
 plt.legend()
 plt.savefig(filename_vonmises_distributions, dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 
@@ -1580,7 +1582,7 @@ def plot_histogram(data, title, xlabel):
 
     # Save the figure
     plt.savefig(filepath, dpi=300, bbox_inches='tight')
-    plt.show()
+    #plt.show()
     plt.close()  # Close the figure to free memory\
 
 # -----------------------------------------------------------
@@ -1668,13 +1670,13 @@ layer_index = 1
 plt.imshow(ndvi_landscape_norm[layer_index,:,:].numpy())
 plt.colorbar()
 plt.title(f'NDVI layer index {layer_index}')
-plt.show()
+#plt.show()
 
 layer_index = 8
 plt.imshow(ndvi_landscape_norm[layer_index,:,:].numpy())
 plt.colorbar()
 plt.title(f'NDVI layer index {layer_index}')
-plt.show()
+#plt.show()
 
 
 
@@ -1721,7 +1723,7 @@ canopy_landscape_norm = (canopy_landscape_tens - canopy_min) / (canopy_max - can
 plt.imshow(canopy_landscape_norm.numpy())
 plt.colorbar()
 plt.title('Canopy Cover')
-plt.show()
+#plt.show()
 
 
 
@@ -1764,7 +1766,7 @@ herby_landscape_norm = (herby_landscape_tens - herby_min) / (herby_max - herby_m
 # Visualize the normalised herbaceous cover:
 plt.imshow(herby_landscape_norm.numpy())
 plt.colorbar()
-plt.show()
+#plt.show()
 
 
 
@@ -1813,7 +1815,7 @@ slope_landscape_norm = (slope_landscape_tens - slope_min) / (slope_max - slope_m
 # Visualize the slope landscape (note: displaying the original tensor, not the normalised data):
 plt.imshow(slope_landscape_tens.numpy())
 plt.colorbar()
-plt.show()
+#plt.show()
 
 
 
@@ -2196,7 +2198,7 @@ for i in range(1, n_samples):
     filename_covs = f'{output_dir}/prediction_images/id{buffalo_id}_step_index{i+1}_yday{yday}_hour{hour_t2}.png'
     plt.tight_layout()
     plt.savefig(filename_covs, dpi=300)
-    # plt.show()
+    # #plt.show()
     plt.close()  # Close the figure to free memory
 
 
@@ -2238,7 +2240,7 @@ plt.ylabel('Probability')
 plt.title('Habitat Probability')
 plt.legend()  # Add legend to differentiate lines
 plt.savefig(f'{output_dir}/id{buffalo_id}_habitat_probs.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 # Plot the movement probs through time as a line graph
 plt.plot(move_probs[move_probs > 0], color='blue', label='Movement Probabilities')
@@ -2249,7 +2251,7 @@ plt.ylabel('Probability')
 plt.title('Movement Probability')
 plt.legend()  # Add legend to differentiate lines
 plt.savefig(f'{output_dir}/id{buffalo_id}_movement_probs.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 # Plot the next step probs through time as a line graph
 plt.plot(next_step_probs[next_step_probs > 0], color='blue', label='Next Step Probabilities')
@@ -2260,7 +2262,7 @@ plt.ylabel('Probability')
 plt.title('Next Step Probability')
 plt.legend()  # Add legend to differentiate lines
 plt.savefig(f'{output_dir}/id{buffalo_id}_next_step_probs.png', dpi=300, bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 

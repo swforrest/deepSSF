@@ -21,8 +21,11 @@ Usage:
 """
 
 # Import required libraries
-import torch
-import numpy as np
+import torch                                    # PyTorch - for tensor operations and GPU support
+import numpy as np                              # NumPy - for numerical operations and array handling
+import glob                                     # Glob - for file path pattern matching
+import imageio.v2 as imageio                    # Image manipulation - for creating GIFs
+from IPython.display import Image, display      # For plotting GIFs
 
 def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform):
     """

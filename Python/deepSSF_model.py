@@ -72,7 +72,11 @@ class Conv2d_block_spatial(nn.Module):
         nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
         # ReLU activation function
         nn.ReLU(),
-        # convolutional layer 3, which outputs a single layer, which is the habitat selection map
+        # convolutional layer 3
+        nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
+        # ReLU activation function
+        nn.ReLU(),
+        # convolutional layer 4, which outputs a single layer, which is the habitat selection map
         nn.Conv2d(in_channels=self.output_channels, out_channels=1, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding)
         )
 
