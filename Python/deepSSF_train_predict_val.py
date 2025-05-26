@@ -24,7 +24,6 @@ Usage:
 """
 
 
-
 import sys
 
 # # Detect environment
@@ -186,10 +185,13 @@ class buffalo_data(Dataset):
     
     def __getitem__(self, index):
         if self.preload:
+
             # Use preloaded data
             spatial_data_x = self.spatial_data_cache[index]
             target = self.target_cache[index]
+
         else:
+
             # Original disk-loading implementation
             # Get the paths for the .npy files
             ndvi_path = os.path.join(self.npy_base_path, self.data.iloc[index]['ndvi_path'])
@@ -227,7 +229,7 @@ class buffalo_data(Dataset):
 
 ### Load data into dataset
 csv_file = '/Users/scottforrest/deepSSF/buffalo_all_steps_with_paths_n103558_steps.csv'
-dataset = buffalo_data(csv_file)
+dataset = buffalo_data(csv_file, preload=True)
 
 training_split = 0.8
 validation_split = 0.1
@@ -369,7 +371,7 @@ print(f'Output directory: {output_dir}')
 path_save_weights = f'{output_dir}/checkpoint_deepSSF_model.pt'
 print(path_save_weights)
 
-epochs = 150
+epochs = 200
 train_losses = []  # Track training losses across epochs
 val_losses = []   # Track validation losses across epochs
 val_habitat_losses = []  # Track validation habitat losses across epochs
@@ -1615,7 +1617,7 @@ hook_handle.remove()
 
 # Import spatial layers
 # for monthly NDVI
-file_path = f'{base_path}/mapping/cropped rasters/ndvi_monthly.tif'
+file_path = os.path.join(base_path, f'/mapping/cropped rasters/ndvi_monthly.tif')
 
 # read the raster file
 with rasterio.open(file_path) as src:
@@ -1683,7 +1685,7 @@ plt.title(f'NDVI layer index {layer_index}')
 
 
 # Path to the canopy cover raster file
-file_path = f'{base_path}/mapping/cropped rasters/canopy_cover.tif'
+file_path = os.path.join(base_path, f'/mapping/cropped rasters/canopy_cover.tif')
 
 # read the raster file
 with rasterio.open(file_path) as src:
@@ -1728,7 +1730,7 @@ plt.title('Canopy Cover')
 
 
 # Path to the herbaceous vegetation raster file
-file_path = f'{base_path}/mapping/cropped rasters/veg_herby.tif'
+file_path = os.path.join(base_path, f'/mapping/cropped rasters/veg_herby.tif')
 
 # read the raster file
 with rasterio.open(file_path) as src:
@@ -1773,7 +1775,7 @@ plt.colorbar()
 
 
 # Path to the slope raster file
-file_path = f'{base_path}/mapping/cropped rasters/slope.tif'
+file_path = os.path.join(base_path, f'/mapping/cropped rasters/slope.tif')
 
 # read the raster file
 with rasterio.open(file_path) as src:
@@ -1830,7 +1832,7 @@ n_samples = 10297
 
 # Specify the path to CSV file
 # csv_file_path = f'{base_path}/buffalo_local_data_id/buffalo_{buffalo_id}_data_df_lag_1hr_n{n_samples}.csv'
-csv_file_path = f'{base_path}/buffalo_local_data_id/buffalo_temporal_cont_{buffalo_id}_data_df_lag_1hr_n{n_samples}.csv'
+csv_file_path = os.path.join(base_path, f'/buffalo_local_data_id/buffalo_temporal_cont_{buffalo_id}_data_df_lag_1hr_n{n_samples}.csv')
 
 # Read the CSV file into a DataFrame
 buffalo_df = pd.read_csv(csv_file_path)
