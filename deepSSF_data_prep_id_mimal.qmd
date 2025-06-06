@@ -173,7 +173,7 @@ head(buffalo_all_steps)
 
 # plot step lengths
 buffalo_all_steps %>% 
-  filter(sl_ < 2000) %>%
+  filter(sl_ < 5000) %>%
   ggplot() +
   geom_density(aes(x = sl_), #, bins = 50
                  fill = "skyblue", colour = "skyblue", alpha = 0.75) +
@@ -185,7 +185,7 @@ buffalo_all_steps %>%
 
 # proportion of steps less than the buffer distance
 # the distance should be a multiple of the resolution
-distance <- 1250
+distance <- 1500
 
 # check if multiple of the resolution?
 distance %% res == 0

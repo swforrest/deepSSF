@@ -64,7 +64,7 @@ class negativeLogLikeLoss(nn.Module):
         """
 
         habitat_probability_surface = predict[:, :, :, 0] * 1.0
-        movement_probability_surface = predict[:, :, :, 1] * 1.0
+        movement_probability_surface = predict[:, :, :, 1] * 0.0
 
         # Sum the log-densities from the two channels
         predict_prod = habitat_probability_surface + movement_probability_surface
