@@ -30,7 +30,7 @@ import numpy as np
 from torch import nn
 
 # Set the device to be used (GPU or CPU)
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
 """
@@ -83,61 +83,6 @@ class Conv2d_block_spatial(nn.Module):
 
         # output the habitat selection map
         return conv2d_spatial
-    
-
-""""
-## Convolutional block for the movement subnetwork
-
-This block is also convolutional layer, with the same inputs, 
-but this block also has max pooling layers to reduce the spatial 
-resolution of the feature maps whilst preserving the most prominent 
-features in the feature maps, and outputs a 'flattened' feature map. 
-A flattened feature map is a 1D tensor (a vector) that can be used as 
-input to a fully connected layer.
-
-"""
-class Conv2d_block_toFC(nn.Module):
-    def __init__(self, params):
-        super(Conv2d_block_toFC, self).__init__()
-
-        # define the parameters
-        self.batch_size = params.batch_size
-        self.input_channels = params.input_channels
-        self.output_channels = params.output_channels
-        self.kernel_size = params.kernel_size
-        self.stride = params.stride
-        self.kernel_size_mp = params.kernel_size_mp
-        self.stride_mp = params.stride_mp
-        self.padding = params.padding
-        self.image_dim = params.image_dim
-        self.device = params.device
-
-        # define the layers - nn.Sequential allows for the definition of layers in a sequential manner
-        self.conv2d = nn.Sequential(
-            
-        # convolutional layer 1
-        nn.Conv2d(in_channels=self.input_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
-        # ReLU activation function
-        nn.ReLU(),
-        
-        # max pooling layer 1 (reduces the spatial dimensions of the data whilst retaining the most important features)
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
-        
-        # convolutional layer 2
-        nn.Conv2d(in_channels=self.output_channels, out_channels=self.output_channels, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding),
-        # ReLU activation function
-        nn.ReLU(),
-        
-        # max pooling layer 2
-        nn.MaxPool2d(kernel_size=self.kernel_size_mp, stride=self.stride_mp),
-        
-        # flatten the data to pass through the fully connected layer
-        nn.Flatten())
-
-    def forward(self, x):
-
-        # self.conv2d(x) passes the input through the convolutional layers, and outputs a 1D tensor
-        return self.conv2d(x)
 
 
 """
@@ -182,13 +127,13 @@ class FCN_block_all_movement(nn.Module):
             # ReLU activation function
             nn.ReLU(),
 
-            # # fully connected layer 3
-            # # the number of input neurons should match the output from the previous layer
-            # nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
-            # # dropout layer
-            # nn.Dropout(self.dropout),
-            # # ReLU activation function
-            # nn.ReLU(),
+            # fully connected layer 3
+            # the number of input neurons should match the output from the previous layer
+            nn.Linear(self.dense_dim_hidden, self.dense_dim_hidden),
+            # dropout layer
+            nn.Dropout(self.dropout),
+            # ReLU activation function
+            nn.ReLU(),
 
             # # fully connected layer 4
             # # the number of input neurons should match the output from the previous layer
@@ -289,6 +234,7 @@ class Params_to_Grid_Block(nn.Module):
         self.batch_size = params.batch_size
         self.image_dim = params.image_dim
         self.pixel_size = params.pixel_size
+        self.device = params.device
 
         # create distance and bearing layers
         # determine the distance of each pixel from the centre of the image
@@ -305,7 +251,6 @@ class Params_to_Grid_Block(nn.Module):
 
         # determine the bearing of each pixel from the centre of the image
         self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y, x - self.center)).float()
-        self.device = params.device
 
 
     # Gamma densities (on the log-scale) for the mixture distribution
@@ -375,8 +320,8 @@ class Params_to_Grid_Block(nn.Module):
         gamma_weight2 = gamma_weights[1]
 
         # calculation of Gamma densities
-        gamma_density_layer1 = self.gamma_density(self.distance_layer, gamma_shape1, gamma_scale1).to(device)
-        gamma_density_layer2 = self.gamma_density(self.distance_layer, gamma_shape2, gamma_scale2).to(device)
+        gamma_density_layer1 = self.gamma_density(self.distance_layer, gamma_shape1, gamma_scale1).to(self.device)
+        gamma_density_layer2 = self.gamma_density(self.distance_layer, gamma_shape2, gamma_scale2).to(self.device)
 
         # combining both densities to create a mixture distribution using logsumexp
         logsumexp_gamma_corr = torch.max(gamma_density_layer1, gamma_density_layer2)
@@ -432,8 +377,8 @@ class Params_to_Grid_Block(nn.Module):
         vonmises_weight2 = vonmises_weights[1]
 
         # calculation of von Mises densities
-        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer, vonmises_kappa1, vonmises_mu1).to(device)
-        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer, vonmises_kappa2, vonmises_mu2).to(device)
+        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer, vonmises_kappa1, vonmises_mu1).to(self.device)
+        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer, vonmises_kappa2, vonmises_mu2).to(self.device)
 
         # combining both densities to create a mixture distribution using the logsumexp trick
         logsumexp_vm_corr = torch.max(vonmises_density_layer1, vonmises_density_layer2)
@@ -464,12 +409,13 @@ class Params_to_Grid_Block_ChV(nn.Module):
         self.batch_size = params.batch_size
         self.image_dim = params.image_dim
         self.pixel_size = params.pixel_size
+        self.device = params.device
 
         # create distance and bearing layers
         # determine the distance of each pixel from the centre of the image
         self.center = self.image_dim // 2 
         y, x = np.indices((self.image_dim, self.image_dim))
-        self.distance_layer = torch.from_numpy(np.sqrt((self.pixel_size*(x - self.center))**2 + (self.pixel_size*(y - self.center))**2))
+        self.distance_layer = torch.from_numpy(np.sqrt((self.pixel_size*(x - self.center))**2 + (self.pixel_size*(y - self.center))**2)).float()
 
         # average distance from the centre to the perimeter of the pixel (accounting for longer distances at the corners)
         # self.distance_layer[self.center, self.center] = 0.56*self.pixel_size 
@@ -479,8 +425,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         self.distance_layer[self.center, self.center] = 0.3826*self.pixel_size 
 
         # determine the bearing of each pixel from the centre of the image
-        self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y, x - self.center))
-        self.device = params.device
+        self.bearing_layer = torch.from_numpy(np.arctan2(self.center - y, x - self.center)).float()
 
 
     # Gamma densities (on the log-scale) for the mixture distribution
@@ -550,8 +495,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
         gamma_weight2 = gamma_weights[1]
 
         # calculation of Gamma densities
-        gamma_density_layer1 = self.gamma_density(self.distance_layer, gamma_shape1, gamma_scale1).to(device)
-        gamma_density_layer2 = self.gamma_density(self.distance_layer, gamma_shape2, gamma_scale2).to(device)
+        gamma_density_layer1 = self.gamma_density(self.distance_layer, gamma_shape1, gamma_scale1).to(self.device)
+        gamma_density_layer2 = self.gamma_density(self.distance_layer, gamma_shape2, gamma_scale2).to(self.device)
 
         # combining both densities to create a mixture distribution using logsumexp
         logsumexp_gamma_corr = torch.max(gamma_density_layer1, gamma_density_layer2)
@@ -607,12 +552,13 @@ class Params_to_Grid_Block_ChV(nn.Module):
         vonmises_weight2 = vonmises_weights[1]
 
         # calculation of von Mises densities
-        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer, vonmises_kappa1, vonmises_mu1).to(device)
-        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer, vonmises_kappa2, vonmises_mu2).to(device)
+        vonmises_density_layer1 = self.vonmises_density(self.bearing_layer, vonmises_kappa1, vonmises_mu1).to(self.device)
+        vonmises_density_layer2 = self.vonmises_density(self.bearing_layer, vonmises_kappa2, vonmises_mu2).to(self.device)
 
         # combining both densities to create a mixture distribution using the logsumexp trick
         logsumexp_vm_corr = torch.max(vonmises_density_layer1, vonmises_density_layer2)
-        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) + vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
+        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) + 
+                                                               vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
         # print(torch.sum(vonmises_density_layer))
         # print(torch.sum(torch.exp(vonmises_density_layer)))
 
@@ -631,7 +577,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
 
 """
 This block is similar to above, although instead of creating a two-dimnesional grid (in Cartesian coordinates), 
-this block returns the probability density in polar coordinates (i.e. for one-dimensional Gamma and von Mises distributions) 
+this block returns the probability density in polar coordinates (i.e. for univariate Gamma and von Mises distributions) 
 for a single location, given a set of movement parameters that are predicted by the model. 
 """
 class Params_to_Density_Block(nn.Module):
@@ -639,7 +585,10 @@ class Params_to_Density_Block(nn.Module):
         super(Params_to_Density_Block, self).__init__()
 
         # define the parameters
-        self.batch_size = params.batch_size
+        # self.batch_size = params.batch_size
+
+        # Set the device for the model
+        self.device = params.device
 
     # Gamma densities (on the log-scale) for the mixture distribution
     def gamma_density(self, x, shape, scale):
@@ -691,11 +640,11 @@ class Params_to_Density_Block(nn.Module):
         # calculation of Gamma densities
         gamma_density1 = self.gamma_density(step_length,
                                                   gamma_shape1,
-                                                  gamma_scale1).to(device)
+                                                  gamma_scale1).to(self.device)
 
         gamma_density2 = self.gamma_density(step_length,
                                                   gamma_shape2,
-                                                  gamma_scale2).to(device)
+                                                  gamma_scale2).to(self.device)
 
         # combining both densities using the log-sum-exp trick
         # calculation of the maximum log density
@@ -708,7 +657,6 @@ class Params_to_Density_Block(nn.Module):
         
         # print(gamma_density)
         # print(torch.exp(gamma_density))
-
 
         ## Von Mises Distributions
 
@@ -740,11 +688,11 @@ class Params_to_Density_Block(nn.Module):
         # calculation of von Mises densities
         vonmises_density1 = self.vonmises_density(turn_angle + bearing[:, 0],
                                                   vonmises_kappa1,
-                                                  vonmises_mu1).to(device)
+                                                  vonmises_mu1).to(self.device)
 
         vonmises_density2 = self.vonmises_density(turn_angle + bearing[:, 0],
                                                   vonmises_kappa2,
-                                                  vonmises_mu2).to(device)
+                                                  vonmises_mu2).to(self.device)
 
         # combining both densities using the log-sum-exp trick
         # calculation of the maximum log density

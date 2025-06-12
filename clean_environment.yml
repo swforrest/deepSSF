@@ -1,0 +1,8 @@
+name: deepSSF
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - jupyterlab
+  - matplotlib
+prefix: /opt/miniconda3/envs/deepSSF

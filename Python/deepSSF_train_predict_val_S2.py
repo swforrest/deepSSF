@@ -106,13 +106,13 @@ if torch.backends.mps.is_available():
 ### Create a directory for the model training 
 
 # Count existing directories with similar pattern
-pattern = os.path.join(base_path, f'Python/outputs/model_training/djelk_S2_derived_covs_CNN_4L8F_move_*_{today_date}')
+pattern = os.path.join(base_path, f'Python/outputs/model_training/djelk_S2_derived_covs_CNN_move_*_{today_date}')
 print(f"Pattern for existing directories: {pattern}")
 existing_dirs = glob.glob(pattern)
 dir_index = len(existing_dirs) + 1
 
 # Create directory with index
-output_dir = os.path.join(base_path, f'Python/outputs/model_training/djelk_S2_derived_covs_CNN_4L8F_move_{dir_index}_{today_date}')
+output_dir = os.path.join(base_path, f'Python/outputs/model_training/djelk_S2_derived_covs_CNN_move_{dir_index}_{today_date}')
 os.makedirs(output_dir, exist_ok=True)
 
 print(f"Created directory: {output_dir}")

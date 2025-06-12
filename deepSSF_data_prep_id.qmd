@@ -105,11 +105,65 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
 ```{r}
 
 buffalo_all %>%
-  ggplot(aes(x = x_, y = y_, colour = t_)) +
-  geom_point(alpha = 0.25, size = 1) + 
+  ggplot(aes(x = x_, y = y_, colour = id)) +
+  geom_point(alpha = 0.5, size = 0.1) + 
   coord_fixed() +
-  scale_colour_viridis_c() +
-  theme_classic()
+  scale_x_continuous("Easting (m)") +
+  scale_y_continuous("Northing (m)") +
+  scale_colour_viridis_d() +
+  theme_classic() +
+  theme(legend.position = "none") 
+
+ggsave("outputs/data_prep/buffalo_djelk_map.png", 
+       width = 150, height = 150, units = "mm",  dpi = 1000)
+
+```
+
+## Plot a timeline of each individual
+
+```{r}
+
+buffalo_all %>% 
+  ggplot(aes(x = t_, y = as.factor(id), colour = as.factor(id))) +
+  geom_point(alpha = 0.5, size = 0.01) + 
+  scale_x_datetime("Date") +
+  scale_y_discrete("Individual ID") +
+  scale_colour_viridis_d() +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank()) 
+
+ggsave("outputs/data_prep/buffalo_djelk_timeline.png", 
+       width = 150, height = 150, units = "mm",  dpi = 600)
+
+```
+
+## Number of location per day
+
+```{r}
+
+buffalo_daily_locations <- buffalo_all %>% 
+  mutate(date = lubridate::date(t_)) %>% 
+  dplyr::group_by(date) %>% 
+  summarise(
+    n_locations = n(),
+    n_individuals = n_distinct(id)
+)
+
+buffalo_daily_locations %>% 
+  ggplot() + 
+    geom_col(aes(x = date, y = n_locations), 
+             fill = "skyblue") + 
+    geom_col(aes(x = date, y = n_individuals), 
+             fill = "orange") + 
+    scale_x_date("Date") +
+    scale_y_continuous("Number of IDs/Locations") +
+    scale_colour_viridis_d() +
+    theme_classic() +
+    theme(legend.position = "none") 
+
+ggsave("outputs/data_prep/buffalo_djelk_daily_locations.png",
+       width = 150, height = 80, units = "mm",  dpi = 600)
 
 ```
 
@@ -215,8 +269,8 @@ We also have another script that saves all local layers as individual npy arrays
 
 buffalo_all_steps_save <- buffalo_all_steps %>% mutate(
   
-  dt_minute = round(difftime(t2_, t1_, units = "mins"), 0),
-  dt_hour = round(difftime(t2_, t1_, units = "hours"), 2),
+  dt_minute = as.numeric(round(difftime(t2_, t1_, units = "mins"), 0)),
+  dt_hour = as.numeric(round(difftime(t2_, t1_, units = "hours"), 2)),
   
   # add the minutes as a decimal to the hour, and the hour as a decimal to the day
   hour_t1 = round(lubridate::hour(t1_) + lubridate::minute(t1_)/60,2),
@@ -254,7 +308,7 @@ buffalo_all_steps_save <- buffalo_all_steps_save %>%
 
 buffalo_all_steps_save
 
-buffalo_all_steps_save %>% write_csv("data/buffalo_all_steps.csv")
+buffalo_all_steps_save %>% write_csv("data/buffalo_djelk_all_steps.csv")
 
 ```
 

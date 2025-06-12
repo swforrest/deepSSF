@@ -69,7 +69,7 @@ def train_loop(dataloader_train,
         x1 = x1.to(device)
         x2 = x2.to(device)
         x3 = x3.to(device)
-        y = y.to(device)
+        y = [item.to(device) for item in y]
 
         # Forward pass: compute the model output and loss
         with torch.set_grad_enabled(not skip_epoch0_training):
