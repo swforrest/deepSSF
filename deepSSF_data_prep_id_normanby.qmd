@@ -292,6 +292,10 @@ distance %% res == 0
 # buffer distance (add the resolution of the cell/2 as we want a centre cell)
 buffer <- distance + (res/2)
 
+# calculate the number of cells in each axis
+nxn_cells <- buffer*2/res
+print(paste0("Number of cells in each axis: ", nxn_cells))
+
 # calculate proportion
 prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -distance & 
                                              x2_ - x1_ < distance &
@@ -321,7 +325,7 @@ buffalo_all_steps <- buffalo_all_steps %>%
 
 buffalo_all_steps
 
-buffalo_all_steps_save %>% write_csv("data/buffalo_normanby_all_steps.csv")
+buffalo_all_steps %>% write_csv(paste0("data/buffalo_normanby_all_steps_nxn", nxn_cells,".csv"))
 
 ```
 

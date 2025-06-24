@@ -167,35 +167,6 @@ ggsave("outputs/data_prep/buffalo_djelk_daily_locations.png",
 
 ```
 
-## Read in the environmental covariates
-
-```{r}
-
-ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
-terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-15") + months(0:23))
-slope <- rast("mapping/cropped rasters/slope_raster.tif")
-veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
-canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
-
-# change the names (these will become the column names when extracting 
-# covariate values at the used and random steps)
-names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
-names(slope) <- "slope"
-names(veg_herby) <- "veg_herby"
-names(canopy_cover) <- "canopy_cover"
-
-# to plot the rasters
-plot(ndvi_projected)
-plot(ndvi_projected[[1]])
-plot(slope)
-plot(veg_herby)
-plot(canopy_cover)
-
-# get the resolution from the covariates
-res <- terra::res(ndvi_projected)[1]
-
-```
-
 # Generating the data to fit a deepSSF model
 
 ## Create a steps object to check the step lengths
@@ -238,13 +209,17 @@ buffalo_all_steps %>%
 
 # proportion of steps less than the buffer distance
 # the distance should be a multiple of the resolution
-distance <- 1250
+distance <- 1875
 
 # check if multiple of the resolution?
 distance %% res == 0
 
 # buffer distance (add the resolution of the cell/2 as we want a centre cell)
 buffer <- distance + (res/2)
+
+# calculate the number of cells in each axis
+nxn_cells <- buffer*2/res
+print(paste0("Number of cells in each axis: ", nxn_cells))
 
 # calculate proportion
 prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -distance & 
@@ -298,6 +273,12 @@ buffalo_all_steps_save <- buffalo_all_steps %>% mutate(
 
 buffalo_all_steps_save
 
+```
+
+## Save the data to a csv file
+
+```{r}
+
 # remove steps that fall outside of the local spatial extent
 buffalo_all_steps_save <- buffalo_all_steps_save %>%
   filter(x2_ - x1_ > -distance & 
@@ -308,11 +289,40 @@ buffalo_all_steps_save <- buffalo_all_steps_save %>%
 
 buffalo_all_steps_save
 
-buffalo_all_steps_save %>% write_csv("data/buffalo_djelk_all_steps.csv")
+buffalo_all_steps_save %>% write_csv(paste0("data/buffalo_djelk_all_steps_nxn", nxn_cells,".csv"))
 
 ```
 
 In our case over 96% of the steps were less than a distance of 1262.5m in either the x or y direction, which would mean that including 101 x 101 cells (which would be 2525 m x 2525 m) would include at least 96% of the steps. As the distance is further to the corner (but still less than the buffer distance in the x and y directions), there will be step lengths longer than the buffer distance (up to 1785 m).
+
+## Read in the environmental covariates
+
+```{r}
+
+ndvi_projected <- rast("mapping/cropped rasters/ndvi_GEE_projected_watermask20230207.tif")
+terra::time(ndvi_projected) <- as.POSIXct(lubridate::ymd("2018-01-15") + months(0:23))
+slope <- rast("mapping/cropped rasters/slope_raster.tif")
+veg_herby <- rast("mapping/cropped rasters/veg_herby.tif")
+canopy_cover <- rast("mapping/cropped rasters/canopy_cover.tif")
+
+# change the names (these will become the column names when extracting 
+# covariate values at the used and random steps)
+names(ndvi_projected) <- rep("ndvi", terra::nlyr(ndvi_projected))
+names(slope) <- "slope"
+names(veg_herby) <- "veg_herby"
+names(canopy_cover) <- "canopy_cover"
+
+# to plot the rasters
+plot(ndvi_projected)
+plot(ndvi_projected[[1]])
+plot(slope)
+plot(veg_herby)
+plot(canopy_cover)
+
+# get the resolution from the covariates
+res <- terra::res(ndvi_projected)[1]
+
+```
 
 ## Set up the spatial extent of the local covariates
 
