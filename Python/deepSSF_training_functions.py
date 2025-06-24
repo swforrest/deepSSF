@@ -71,6 +71,9 @@ def train_loop(dataloader_train,
         x3 = x3.to(device)
         y = [item.to(device) for item in y]
 
+        if isinstance(y, list):
+            y = torch.stack(y)
+
         # Forward pass: compute the model output and loss
         with torch.set_grad_enabled(not skip_epoch0_training):
             outputs = model((x1, x2, x3))
@@ -174,6 +177,9 @@ def test_loop(dataloader_test, model, loss_fn):
             x2 = x2.to(device)
             x3 = x3.to(device)
             y = y.to(device)
+
+            if isinstance(y, list):
+                y = torch.stack(y)
 
             # Compute the loss on the test set (no backward pass needed)
             total_loss, habitat_loss, movement_loss = loss_fn(model((x1, x2, x3)), y)

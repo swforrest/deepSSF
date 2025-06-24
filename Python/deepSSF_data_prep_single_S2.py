@@ -1,4 +1,45 @@
-### Preparing data for deepSSF model training - Sentinel-2 
+# # %%
+# ---
+# title: "Data Preparation - Single Layers"
+# author:
+#   - name: Scott Forrest
+#     url: https://swforrest.github.io/
+#     orcid: 0000-0001-9529-0108
+#     affiliation: Queensland University of Technology, CSIRO
+#     email: "scottwforrest@gmail.com"
+# date: today
+# format:
+#     html:
+#         toc: true
+#         number_sections: true
+#         code-fold: show
+#         code-tools: true
+#         code-overflow: scroll
+#         # embed-resources: true
+#         css: styles.css
+# bibliography: references.bib
+# abstract: |
+#   There are multiple ways to store all of the local environmental layers required for the deepSSF approach. 
+#   We can save all of the local layers for a single covariate and individual as a single raster file, with *n* 
+#   channels that represent the *n* steps, or we can save each local layer separately, and reference them 
+#   by their image names in the csv that contains the rest of the movement data.
+
+#   For the first attempt when fitting the deepSSF models we saved all of the local layers for each covariate and individual
+#   as a single raster file. However, when we have many data points and/or many individuals, it makes sense to save all of
+#   the local layers for each covariate and individual separately. This is because the raster files can become large
+#   and more difficult to work with, and if we have more data than we can hold in local memory, it makes sense to read in 
+#   the batches of local layers from file as needed.
+
+#   This notebook demonstrates how to prepare the data for the deepSSF approach when saving all of the local layers for each
+#   covariate and individual separately. 
+# ---
+
+# %% [markdown]
+# ## Import packages
+
+# %%
+# If using Google Colab, uncomment the following line
+# !pip install rasterio
 
 import sys
 print(sys.version)  # Print Python version in use
@@ -16,18 +57,30 @@ import rasterio                                         # Geospatial raster data
 from datetime import datetime, timedelta                # Date/time utilities
 from rasterio.plot import show                          # Plot raster data	
 
+import deepSSF_model                                    # Import the deepSSF model
 import deepSSF_utils                                    # Import the deepSSF utilities
 
 # Get today's date
 today_date = datetime.today().strftime('%Y-%m-%d')
 print("Today's date:", today_date)  # Print today's date
 
+# %% [markdown]
+# ### If using Google Colab, uncomment the following lines
+# 
+# The file directories will also need to be changed to match the location of the files in your Google Drive.
 
-## Import the GPS data
+# %%
+# from google.colab import drive
+# drive.mount('/content/drive')
+
+# %% [markdown]
+# ## Import the GPS data
+# 
 # We only use this for selecting a spatial extent for the area we want to predict over.
 
+# %%
 # Specify the path to your CSV file
-csv_file_path = f'../data/buffalo_all_steps.csv'
+csv_file_path = f'../data/buffalo_djelk_all_steps.csv'
 
 # Read the CSV file into a DataFrame
 # When reading from a CSV file, use parse_dates parameter to specify the columns that contain datetimes
@@ -51,17 +104,26 @@ buffalo_df['t2_int'] = buffalo_df['t2_'].astype(np.int64).values
 # Display the first few rows of the DataFrame
 print(buffalo_df.head())
 
+# %% [markdown]
+# ### Check the time component of the GPS data
 
+# %%
+# time of a single location
+print(buffalo_df['t1_'].iloc[0].strftime('%Y-%m-%d %H:%M:%S %Z'))
 
-### Importing spatial data
-# Instead of importing the stacks of local layers (one for each step), 
-# here we want to import the full spatial covariates that we can chop the local layers out from. 
-# We use an extent that covers all of the observed locations, which refer to as the 'landscape'.
+# %% [markdown]
+# # Importing spatial data
+# 
+# Instead of importing the stacks of local layers (one for each step), here we want to import the full spatial covariates that we can chop the local layers out from. We use an extent that covers all of the observed locations, which refer to as the 'landscape'.
 
-## Sentinel-2 bands
+# %% [markdown]
+# ## Sentinel-2 bands
+# 
 # Each stack represents a month of median values of cloud-free pixels, and each layer in the stack are the bands.
+# 
 # During the data preparation all of these layers were scaled by 10,000, and don't need to be scaled any further.
 
+# %%
 # Specify the directory containing your TIFF files
 data_dir = '../mapping/cropped rasters/sentinel2/25m'  # Replace with the actual path to your TIFF files
 
@@ -70,7 +132,7 @@ tif_files = glob.glob(os.path.join(data_dir, 'S2_SR_masked_scaled_25m_*.tif'))
 print(f'Found {len(tif_files)} TIFF files')
 print('\n'.join(tif_files))
 
-
+# %%
 # Initialise a dictionary to store data with date as the key
 data_dict = {}
 
@@ -104,7 +166,7 @@ for tif_file in tif_files:
         data_dict[date_str] = data
 
 
-
+# %%
 # Select some bands from the processed data stored in 'data_dict' for plotting
 layers_to_plot = []
 
@@ -129,11 +191,14 @@ for band, band_number, date_str in layers_to_plot:
     plt.show()
 
 
-
-### Plot as RGB
+# %% [markdown]
+# ### Plot as RGB
+# 
 # We can also visualise the Sentinel-2 bands as an RGB image, using the Red, Green and Blue bands.
+# 
 # The plotting was a bit dark so we will adjust the brightness of the image using a gamma correction.
 
+# %%
 # Specify the date for the RGB layers
 date_str = '2019_01'  
 
@@ -158,10 +223,10 @@ plt.draw()  # Ensure the plot is rendered
 plt.show()
 plt.close()  # Close the figure to free memory
 
+# %% [markdown]
+# ## Slope
 
-
-# Slope
-
+# %%
 # Path to the slope raster file
 file_path = '../mapping/cropped rasters/slope.tif'
 
@@ -173,7 +238,7 @@ with rasterio.open(file_path) as src:
     slope_meta = src.meta
     raster_transform = src.transform 
 
-
+# %%
 # Check the slope metadata:
 print("Slope metadata:")
 print(slope_meta)
@@ -206,11 +271,12 @@ plt.colorbar()
 plt.show()
 
 
+# %% [markdown]
+# ### Convert between numpy array and raster
+# 
+# To check that we can go back and forth between numpy arrays (with pixel coordinates) and rasters (with geographic coordinates), we will convert the slope numpy array to a raster. 
 
-### Convert between numpy array and raster
-# To check that we can go back and forth between numpy arrays (with pixel coordinates) and rasters (with geographic coordinates), 
-# we will convert the slope numpy array to a raster. 
-
+# %%
 # Create a figure and axis with matplotlib
 fig, ax = plt.subplots(figsize=(6, 6))
 
@@ -225,23 +291,25 @@ ax.set_ylabel('Latitude')
 # Show the plot
 plt.show()
 
-
-
-# Subset function (with padding)
-
+# %% [markdown]
+# # Subset function (with padding)
+# 
 # Now that we have our landscape layers imported, we need a way to crop out the local layers that can be saved for training the deepSSF model.
-# We will use the same subset function as in the deepSSF simulation notebook, which we stored in the `deepSSF_utils.py` script. 
-# This function will take the landscape layers and a set of coordinates, and return the local layers for those coordinates.
+# 
+# We will use the same subset function as in the deepSSF simulation notebook, which we stored in the `deepSSF_utils.py` script. This function will take the landscape layers and a set of coordinates, and return the local layers for those coordinates.
+# 
 # This function also has padding for if the simulated individual was to go off the edge of the landscape, which we retain here (although we should not need that functionality).
 
+# %%
 subset_raster = deepSSF_utils.subset_raster_with_padding_npy
 subset_raster
 
-### Testing the subset function
+# %% [markdown]
+# ### Testing the subset function
+# 
+# Use the subset function to crop out the local layers for all covariates. Try different locations using the x and y coordinates, which are in geographic coordinates (x = easting/longitude, y = northing/latitude).
 
-# Use the subset function to crop out the local layers for all covariates. 
-# Try different locations using the x and y coordinates, which are in geographic coordinates (x = easting/longitude, y = northing/latitude).
-
+# %%
 location_index = 100
 
 # Pick a location (x, y) from the buffalo DataFrame
@@ -334,12 +402,15 @@ axs[1, 0].set_title('Band 4 (red) Subset')
 axs[1, 1].imshow(slope_subset, cmap='viridis')
 axs[1, 1].set_title('Slope Subset')
 
+# %% [markdown]
+# # Loop over all steps and save the local layers
+# 
+# ## Create a directory to save the local layers
+# 
+# As some cloud storage systems (e.g. OneDrive) do not work well with many individual files (e.g. 100,000s of local layers), we will save the local layers on the hard drive, near the root of the C drive. We will create a directory to save the local layers in.
 
-
-# Loop over all steps and save the local layers
-## Create a directory to save the local layers
-
-local_root_dir = 'local_layers'  # Directory to save the local layers
+# %%
+local_root_dir = '/Users/scottforrest/deepSSF' 
 os.makedirs(local_root_dir, exist_ok=True)
 
 # Create directories for the different covariates
@@ -374,24 +445,20 @@ os.makedirs(local_s2_b12_dir, exist_ok=True)
 os.makedirs(local_slope_dir, exist_ok=True)
 os.makedirs(local_target_dir, exist_ok=True)
 
+# %% [markdown]
+# ## Check the number of steps in the trajectory
 
-print(f'There are {len(buffalo_df)} steps in the buffalo DataFrame.')
+# %%
+len(buffalo_df)
 
+# %% [markdown]
+# ## Index S2 layers correctly
+# 
+# We need to index the Sentinel-2 layers correctly, based on the time of the simulated location. We'll do this by creating a function that takes day of the year of the simulated location and returns the correct index for the Sentinel-2 layers.
+# 
+# This indexing is slightly different from the indexing we used for the `deepSSF_simulations.ipynb` notebook, which was indexing NDVI layers. In that case we were indexing the layers directly, and therefore the first entry was at 0 (i.e., March was in month_index = 2). Here, we are creating a string that corresponds to the layer name, and therefore the first entry is at 1. (i.e., March will be at month_index = 3)
 
-
-
-## Index S2 layers correctly
-
-# We need to index the Sentinel-2 layers correctly, based on the time of the simulated location. 
-# We'll do this by creating a function that takes day of the year of the simulated location and 
-# returns the correct index for the Sentinel-2 layers.
-
-# This indexing is slightly different from the indexing we used for the `deepSSF_simulations.ipynb` notebook, 
-# which was indexing NDVI layers. In that case we were indexing the layers directly, 
-# and therefore the first entry was at 0 (i.e., March was in month_index = 2). 
-# Here, we are creating a string that corresponds to the layer name, 
-# and therefore the first entry is at 1. (i.e., March will be at month_index = 3)
-
+# %%
 # Create a mapping from day of the year to month index
 def day_to_month_index(day_of_year):
     # Calculate the year and the day within that year
@@ -407,7 +474,7 @@ yday = 35
 month_index = day_to_month_index(yday)
 print(month_index)
 
-
+# %%
 total_steps = len(buffalo_df)
 print(f'Total number of steps: {total_steps}')
 
@@ -588,4 +655,8 @@ for location_index in range(total_steps):
         
 # Save the updated DataFrame to a new CSV file
 buffalo_df.to_csv(f'{local_root_dir}/buffalo_S2_all_steps_with_paths_n{total_steps}_steps.csv', index=False)
+
+# %%
+print(target.shape)
+
 

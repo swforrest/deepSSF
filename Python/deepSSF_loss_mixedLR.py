@@ -64,7 +64,7 @@ class negativeLogLikeLoss(nn.Module):
         """
 
         habitat_probability_surface = predict[:, :, :, 0] * 1.0
-        movement_probability_surface = predict[:, :, :, 1] * 0.0
+        movement_probability_surface = predict[:, :, :, 1] * 1.0
 
         # Sum the log-densities from the two channels
         predict_prod = habitat_probability_surface + movement_probability_surface
@@ -83,7 +83,7 @@ class negativeLogLikeLoss(nn.Module):
 
         # Compute negative log-likelihood by multiplying log-densities with target
         # and then flipping the sign
-        negLogLike = -1 * (predict_prod * target)
+        negLogLike = -1.0 * (predict_prod * target)
 
         # Check for NaNs after computing negative log-likelihood
         if torch.isnan(negLogLike).any():
