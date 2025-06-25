@@ -28,6 +28,62 @@ import glob                                     # Glob - for file path pattern m
 import imageio.v2 as imageio                    # Image manipulation - for creating GIFs
 from IPython.display import Image, display      # For plotting GIFs
 
+def subset_raster_all_bands_torch(raster_tensor, x, y, window_size, transform):
+    """
+    Extract windowed subset for ALL bands at once.
+    
+    Parameters:
+        raster_tensor (torch.Tensor): 3D tensor [bands, height, width]
+        x, y (float): Geographic coordinates
+        window_size (int): Size of the window
+        transform: Transform object
+        
+    Returns:
+        tuple: (subset, col_start, row_start)
+            subset (torch.Tensor): The windowed subset with padding. [bands, window_size, window_size]
+            col_start (int): The starting column index of the window in the raster.
+            row_start (int): The starting row index of the window in the raster.
+    """
+    # Convert GPS location to pixel coordinates
+    px, py = ~transform * (x, y)
+    # Floor the pixel coordinates to the get the pixel that the location is within.
+    px, py = int(np.floor(px)), int(np.floor(py))
+
+    # Compute half the window size to determine the extent around the central pixel.
+    half_window = window_size // 2
+
+    # Determine the boundaries of the window centred on the pixel coordinates.
+    # Note: row_start and col_start are the top-left corner of the window.
+    row_start = py - half_window
+    row_stop = py + half_window + 1
+    col_start = px - half_window
+    col_stop = px + half_window + 1
+    
+    # Create output tensor for all bands
+    n_bands = raster_tensor.shape[0]
+    # Initialise a tensor for the subset with a padding value of -1.0.
+    subset = torch.full((n_bands, window_size, window_size), -1.0, dtype=raster_tensor.dtype)
+    
+    # Calculate the corresponding region within the subset tensor.
+    valid_row_start = max(0, row_start)
+    valid_row_stop = min(raster_tensor.shape[1], row_stop)  # Note: shape[1] for height
+    valid_col_start = max(0, col_start)
+    valid_col_stop = min(raster_tensor.shape[2], col_stop)  # Note: shape[2] for width
+    
+    # Copy the valid region from the raster tensor into the appropriate section of the subset tensor.
+    subset_row_start = valid_row_start - row_start
+    subset_row_stop = subset_row_start + (valid_row_stop - valid_row_start)
+    subset_col_start = valid_col_start - col_start
+    subset_col_stop = subset_col_start + (valid_col_stop - valid_col_start)
+    
+    # Vectorized copy for ALL bands at once
+    subset[:, subset_row_start:subset_row_stop, subset_col_start:subset_col_stop] = \
+        raster_tensor[:, valid_row_start:valid_row_stop, valid_col_start:valid_col_stop]
+    
+    # Return the subset along with the starting column and row indices of the window.
+    return subset, col_start, row_start
+
+
 def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform):
     """
     Extracts a windowed subset from a raster tensor centered at the geographic coordinate (x, y).
@@ -49,7 +105,7 @@ def subset_raster_with_padding_torch(raster_tensor, x, y, window_size, transform
     # Convert geographic coordinates to pixel coordinates using the inverse transform.
     px, py = ~transform * (x, y)
     
-    # # Floor the pixel coordinates to the get the pixel that the location is within.
+    # Floor the pixel coordinates to the get the pixel that the location is within.
     px, py = int(np.floor(px)), int(np.floor(py))
     
     # Compute half the window size to determine the extent around the central pixel.
