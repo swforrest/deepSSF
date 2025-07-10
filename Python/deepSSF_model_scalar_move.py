@@ -30,7 +30,13 @@ import numpy as np
 from torch import nn
 
 # Set the device to be used (GPU or CPU)
-device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+if torch.cuda.is_available():
+    device = "cuda"
+elif torch.backends.mps.is_available():  # For Mac M1/M2/M3
+    device = "mps"
+else:
+    device = "cpu"
+    
 print(f"Using {device} device")
 
 if torch.backends.mps.is_available():
@@ -561,7 +567,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         gamma_scale2 = gamma_scale2.repeat(self.image_dim, self.image_dim, 1)
         gamma_scale2 = gamma_scale2.permute(2, 0, 1)
 
-        gamma_weight2 = torch.exp(x[:, 5]).unsqueeze(0).unsqueeze(0)
+        gamma_weight2 = x[:, 5].unsqueeze(0).unsqueeze(0)
         gamma_weight2 = gamma_weight2.repeat(self.image_dim, self.image_dim, 1)
         gamma_weight2 = gamma_weight2.permute(2, 0, 1)
 
@@ -616,7 +622,7 @@ class Params_to_Grid_Block_ChV(nn.Module):
         vonmises_kappa2 = vonmises_kappa2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_kappa2 = vonmises_kappa2.permute(2, 0, 1)
 
-        vonmises_weight2 = torch.exp(x[:, 11]).unsqueeze(0).unsqueeze(0)
+        vonmises_weight2 = x[:, 11].unsqueeze(0).unsqueeze(0)
         vonmises_weight2 = vonmises_weight2.repeat(self.image_dim, self.image_dim, 1)
         vonmises_weight2 = vonmises_weight2.permute(2, 0, 1)
 
@@ -632,7 +638,8 @@ class Params_to_Grid_Block_ChV(nn.Module):
 
         # combining both densities to create a mixture distribution using the logsumexp trick
         logsumexp_vm_corr = torch.max(vonmises_density_layer1, vonmises_density_layer2)
-        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) + vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
+        vonmises_density_layer = logsumexp_vm_corr + torch.log(vonmises_weight1 * torch.exp(vonmises_density_layer1 - logsumexp_vm_corr) + 
+                                                               vonmises_weight2 * torch.exp(vonmises_density_layer2 - logsumexp_vm_corr))
         # print(torch.sum(vonmises_density_layer))
         # print(torch.sum(torch.exp(vonmises_density_layer)))
 
@@ -715,7 +722,6 @@ class ConvJointModel(nn.Module):
 
         # # Convolutional block for movement extraction (output fed into fully connected layers)
         # self.conv_movement = Conv2d_block_toFC(params)
-
 
         # Fully connected block for movement
         self.fcn_movement_all = FCN_block_all_movement(params)
@@ -802,34 +808,3 @@ class ModelParams():
         self.num_movement_params = dict_params["num_movement_params"]
         self.dropout = dict_params["dropout"]
         self.device = dict_params["device"]
-
-
-### These are defined in each of the scripts that use the model
-
-# """
-# ## Define the parameters for the model
-
-# Here we enter the specific parameter values and hyperparameters for the model. 
-# These are the values that will be used to instantiate the model.
-
-# """
-# # Define the parameters for the model
-# params_dict = {"batch_size": 32, #number of samples in each batch
-#                "image_dim": 101, #number of pixels along the edge of each local patch/image
-#                "pixel_size": 25, #number of metres along the edge of a pixel
-#                "dim_in_nonspatial_to_grid": 4, #the number of scalar predictors that are converted to a grid and appended to the spatial features
-#                "dense_dim_in_nonspatial": 4, #change this to however many other scalar predictors you have (bearing, velocity etc)
-#                "dense_dim_hidden": 128, #number of nodes in the hidden layers
-#                "dense_dim_out": 128, #number of nodes in the output of the fully connected block (FCN)
-#                "dense_dim_in_all": 2500,# + 128, #number of inputs entering the fully connected block once the nonspatial features have been concatenated to the spatial features
-#                "input_channels": 4 + 4, #number of spatial layers in each image + number of scalar layers that are converted to a grid
-#                "output_channels": 4, #number of filters to learn
-#                "kernel_size": 3, #the size of the 2D moving windows / kernels that are being learned
-#                "stride": 1, #the stride used when applying the kernel.  This reduces the dimension of the output if set to greater than 1
-#                "kernel_size_mp": 2, #the size of the kernel that is used in max pooling operations
-#                "stride_mp": 2, #the stride that is used in max pooling operations
-#                "padding": 1, #the amount of padding to apply to images prior to applying the 2D convolution
-#                "num_movement_params": 12, #number of parameters used to parameterise the movement kernel
-#                "dropout": 0.1, #the proportion of nodes that are dropped out in the dropout layers
-#                "device": device
-#                }

@@ -145,7 +145,7 @@ buffalo_id_subset <- buffalo #%>%
 #| message=FALSE
 
 # deepSSF model folder
-deepSSF_dir <- "djelk_derived_covs_CNN_move_7_2025-05-20"
+deepSSF_dir <- "id2005_med_CNN_movement_2_2025-05-10"
 
 # read in multiple csv files with similar filenames and bind them together
 sim_data_full_list <- 

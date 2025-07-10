@@ -324,8 +324,8 @@ gamma_step_dist_2D <- distance_layer
 gamma_step_dist_2D[] <- dgamma(distance_values, 
                                shape = shape, 
                                scale = scale) #/ sum(dgamma(distance_values, 
-                                                           shape = shape, 
-                                                           scale = scale))
+                                                           # shape = shape, 
+                                                           # scale = scale))
 
 # Plot the gamma distribution
 # png("outputs/movement_distributions/2D_gamma_layer.png", width = 1000, height = 750, res = 250)

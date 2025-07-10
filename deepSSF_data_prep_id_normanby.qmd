@@ -107,6 +107,11 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
   # Transformation to GDA94 / Geoscience Australia Lambert (https://epsg.io/3112)
   transform_coords(crs_to = 3112, crs_from = 4326) %>% arrange(id) 
 
+# Number of IDs and locations
+buffalo_all %>%
+  summarise(n_ids = n_distinct(id),
+            n_locations = n())
+
 ```
 
 ## Plot the data coloured by time
@@ -208,6 +213,10 @@ We also have another script that saves all local layers as individual npy arrays
 
 buffalo_all_steps <- buffalo_all_steps %>% mutate(
   
+  # difference in the x and y directions
+  dx = x2_ - x1_,
+  dy = y2_ - y1_,
+  
   dt_minute = as.numeric(round(difftime(t2_, t1_, units = "mins"), 0)),
   dt_hour = as.numeric(round(difftime(t2_, t1_, units = "hours"), 2)),
   
@@ -276,7 +285,27 @@ buffalo_all_steps %>%
 
 ```
 
-## Set the buffer distance
+### Plot the distribution of next steps relative to the current location
+
+```{r}
+
+window_extent <- 2000
+
+buffalo_all_steps %>% 
+  filter(dt_hour < 24) %>%
+  ggplot() +
+  geom_point(aes(x = dx, y = dy), 
+             fill = "black", colour = "black", 
+             alpha = 0.1, size = 0.1) +
+  scale_x_continuous("Next step in x direction (m)", limits = c(-window_extent, window_extent)) +
+  scale_y_continuous("Next step in y direction (m)", limits = c(-window_extent, window_extent)) +
+  coord_equal() +
+  ggtitle("Next steps relative to current location") +
+  theme_classic()
+
+```
+
+## Assess the buffer distance
 
 ```{r}
 
@@ -329,651 +358,137 @@ buffalo_all_steps %>% write_csv(paste0("data/buffalo_normanby_all_steps_nxn", nx
 
 ```
 
-In our case over 96% of the steps were less than a distance of 1262.5m in either the x or y direction, which would mean that including 101 x 101 cells (which would be 2525 m x 2525 m) would include at least 96% of the steps. As the distance is further to the corner (but still less than the buffer distance in the x and y directions), there will be step lengths longer than the buffer distance (up to 1785 m).
+# Spatial covariates
 
-## Set up the spatial extent of the local covariates
-
-We calculate the number of cells in each axis, and set the lag between locations. Typically this will just be 1, as we want the next-step to be the target. However, it may be possible to improve model training by using different lags and including the time difference between locations as a covariate. I expect that this would help to predict across different time scales and not be restricted to the time scale that the data was collected at.
+## Create an AOI for downloading DEM
 
 ```{r}
 
-# calculate the number of cells in each axis
-nxn_cells <- buffer*2/res
-print(paste0("Number of cells in each axis: ", nxn_cells))
-
-# hourly lag - to set larger time differences between locations
-hourly_lag <- 1
-
-```
-
-# Loop over each individual and save the local rasters
-
-This is the main function of the script. It loops over each individual and calculates step level information, such as the location and time of the next step (x2, y2, t2), step length, turning angle, and different time components. 
-
-It also determines where to crop the local layers by subtracting and adding the buffer distance from the location of each step. It then crops out the local layers for each step and saves them as a list entry into the data frame. 
-
-It then creates a raster stack (with the number of layers equal to the number of steps) for each covariate and saves it as a tif.
-
-For each individual, this will therefore create a csv containing the step level information, and a tif for each covariate containing the local layers for each step. 
-
-It takes quite a while to run, around 1 hour per individual in our case, so we will illustrate the function with 10 steps per individual. Uncomment the line specified in the loop to use the full dataset.
-
-
-```{r}
-
-# for(i in 1:length(buffalo_ids)) {
-for(i in 1:1) { # select just the first ID
-
-  buffalo_data <- buffalo_all %>% filter(id == buffalo_ids[i])
-  # all data for that individual
-  buffalo_data <- buffalo_data %>% arrange(t_)
+# Function to create rectangle from coordinate bounds
+create_rectangle_shapefile <- function(df, x_col = "x", y_col = "y", 
+                                       buffer = 0.01, crs = 4326, 
+                                       output_path = "rectangle") {
   
-  # to use a subset of the data for that individual for testing
-  # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
-
-  n_samples <- nrow(buffalo_data)
+  # Calculate bounds with buffer
+  min_x <- min(df[[x_col]], na.rm = TRUE) - buffer
+  max_x <- max(df[[x_col]], na.rm = TRUE) + buffer
+  min_y <- min(df[[y_col]], na.rm = TRUE) - buffer
+  max_y <- max(df[[y_col]], na.rm = TRUE) + buffer
   
-  tic()
+  # Create rectangle coordinates (clockwise from bottom-left)
+  rectangle_coords <- matrix(c(
+    min_x, min_y,  # bottom-left
+    max_x, min_y,  # bottom-right
+    max_x, max_y,  # top-right
+    min_x, max_y,  # top-left
+    min_x, min_y   # close the polygon
+  ), ncol = 2, byrow = TRUE)
   
-  buffalo_data_covs <- buffalo_data %>% mutate(
-    
-    x1_ = x_,
-    y1_ = y_,
-    x2_ = lead(x1_, n = hourly_lag, default = NA),
-    y2_ = lead(y1_, n = hourly_lag, default = NA),
-    x2_cent = x2_ - x1_,
-    y2_cent = y2_ - y1_,
-    t2_ = lead(t_, n = hourly_lag, default = NA),
-    t_diff = round(difftime(t2_, t_, units = "hours"),0),
-    
-    # add the minutes as a decimal to the hour, and the hour as a decimal to the day
-    hour_t1 = round(lubridate::hour(t_) + lubridate::minute(t_)/60,2),
-    yday_t1 = round(lubridate::yday(t_) + lubridate::hour(t_)/24,2),
-    
-    hour_t1_sin1 = sin(2*pi*hour_t1/24),
-    hour_t1_cos1 = cos(2*pi*hour_t1/24),
-    hour_t1_sin2 = sin(4*pi*hour_t1/24),
-    hour_t1_cos2 = cos(4*pi*hour_t1/24),
-    hour_t1_sin3 = sin(6*pi*hour_t1/24),
-    hour_t1_cos3 = cos(6*pi*hour_t1/24),
-    
-    yday_t1_sin1 = sin(2*pi*yday_t1/365.25),
-    yday_t1_cos1 = cos(2*pi*yday_t1/365.25),
-    yday_t1_sin2 = sin(4*pi*yday_t1/365.25),
-    yday_t1_cos2 = cos(4*pi*yday_t1/365.25),
-    yday_t1_sin3 = sin(6*pi*yday_t1/365.25),
-    yday_t1_cos3 = cos(6*pi*yday_t1/365.25),
-    
-    # add the minutes as a decimal to the hour, and the hour as a decimal to the day
-    hour_t2 = round(lubridate::hour(t2_) + lubridate::minute(t2_)/60,2),
-    hour_t2_sin = sin(2*pi*hour_t2/24),
-    hour_t2_cos = cos(2*pi*hour_t2/24),
-    
-    yday_t2 = round(lubridate::yday(t2_) + lubridate::hour(t2_)/24,2),
-    yday_t2_sin = sin(2*pi*yday_t2/365.25),
-    yday_t2_cos = cos(2*pi*yday_t2/365.25),
-    
-    sl = c(sqrt(diff(y_)^2 + diff(x_)^2), NA),
-    log_sl = log(sl),
-    bearing = c(atan2(diff(y_), diff(x_)), NA),
-    bearing_sin = sin(bearing),
-    bearing_cos = cos(bearing),
-    ta = c(NA, ifelse(
-      diff(bearing) > pi, diff(bearing)-(2*pi), ifelse(
-        diff(bearing) < -pi, diff(bearing)+(2*pi), diff(bearing)))),
-    cos_ta = cos(ta),
-      
-    # extent for cropping the spatial covariates
-    x_min = x_ - buffer,
-    x_max = x_ + buffer,
-    y_min = y_ - buffer,
-    y_max = y_ + buffer,
-    
+  # Create polygon geometry
+  rectangle_poly <- st_polygon(list(rectangle_coords))
   
-    # crop out and store the local covariates centered on the animal's location 
-    # with an extent set in the previous chunk
-  ) %>% rowwise() %>% mutate(
-
-    # the extent needs to be the same for saving the stack of rasters
-    extent_00centre = list(ext(x_min - x_, x_max - x_, y_min - y_, y_max - y_)),
-
-    # NDVI
-    ndvi_index = which.min(abs(difftime(t_, terra::time(ndvi_projected)))),
-    ndvi_cent = list({
-      ndvi_cent = crop(ndvi_projected[[ndvi_index]], ext(x_min, x_max, y_min, y_max))
-      ext(ndvi_cent) <- extent_00centre
-      ndvi_cent
-      }),
-
-    # herbaceous vegetation
-    veg_herby_cent = list({
-      veg_herby_cent = crop(veg_herby, ext(x_min, x_max, y_min, y_max))
-      ext(veg_herby_cent) <- extent_00centre
-      veg_herby_cent
-      }),
-
-    # canopy cover
-    canopy_cover_cent = list({
-      canopy_cover_cent = crop(canopy_cover, ext(x_min, x_max, y_min, y_max))
-      ext(canopy_cover_cent) <- extent_00centre
-      canopy_cover_cent
-      }),
-
-    # slope
-    slope_cent = list({
-      slope_cent <- crop(slope, ext(x_min, x_max, y_min, y_max))
-      ext(slope_cent) <- extent_00centre
-      slope_cent
-      }),
-    
-    pres_template = list({
-      pres_template <- crop(slope, ext(x_min, x_max, y_min, y_max))
-      pres_template
-    }),
-    
-    
-    points_vect_cent_x1 = list(terra::vect(cbind(x_, y_), type = "points", crs = "EPSG:3112")),
-    
-    pres_cent_x1 = list({
-      pres_cent_x1 <- rasterize(points_vect_cent_x1, pres_template, background=0)
-      # ext(pres_cent_x1) <- extent_00centre
-      # ext(pres_cent_x1) <- ext(x_min, x_max, y_min, y_max) # should already have this extent
-      pres_cent_x1
-    }),
-    
-    # Recentering method
-    # Can pull locations into different cells
-    # rasterised location of the next step - centred on (0,0)
-    points_vect_cent_x2_recentred = list(terra::vect(cbind(x2_ - x_, y2_ - y_), type = "points", crs = "EPSG:3112")),
-    pres_cent_x2_recentred = list({
-      pres_cent_x2_recentred <- rasterize(points_vect_cent_x2_recentred, ndvi_cent, background=0)
-      # ext(pres_cent_x2) <- extent_00centre # should already have this extent
-      # ext(pres_cent_x2_recentred) <- ext(pres_cent_x1) # to set the natural extent
-      pres_cent_x2_recentred
-      }),
-    
-    # Strict within cell method
-    points_vect_cent_x2_within_cell = list(terra::vect(cbind(x2_, y2_), type = "points", crs = "EPSG:3112")),
-    pres_cent_x2_within_cell = list({
-      pres_cent_x2_within_cell <- rasterize(points_vect_cent_x2_within_cell, pres_template, background=0)
-      ext(pres_cent_x2_within_cell) <- extent_00centre
-      pres_cent_x2_within_cell
-      })
-    
-  ) %>% ungroup() # to remove the 'rowwise' class
-
-
-  toc()
-
-  # remove steps that fall outside of the local spatial extent
-  buffalo_data_covs <- buffalo_data_covs %>%
-    filter(x2_cent > -buffer & x2_cent < buffer & y2_cent > -buffer & y2_cent < buffer) %>%
-    drop_na(ta)
-
-  # remove the columns that are no longer needed
-  buffalo_data_df <- buffalo_data_covs %>%
-  dplyr::select(
-    -extent_00centre,
-    -ndvi_cent,
-    -veg_herby_cent,
-    -canopy_cover_cent,
-    -slope_cent,
-    -pres_template,
-    -points_vect_cent_x1,
-    -pres_cent_x1,
-    -points_vect_cent_x2_recentred,
-    # -pres_cent_x2_recentred,
-    -points_vect_cent_x2_within_cell,
-    -pres_cent_x2_within_cell)
-
-  # # save the data
-  # write_csv(buffalo_data_df, paste0("buffalo_local_data_id/buffalo_temporal_cont_", buffalo_ids[i],
-  #                                   "_data_df_lag_", hourly_lag, "hr_n", n_samples, ".csv"))
-  # 
-  # # saving the raster objects
-  # rast(buffalo_data_covs$ndvi_cent) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_ndvi_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$veg_herby_cent) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_herby_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$canopy_cover_cent) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_canopy_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
-  # 
-  # rast(buffalo_data_covs$slope_cent) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/buffalo_", buffalo_ids[i], "_slope_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
+  # Create sf object
+  rectangle_sf <- st_sf(
+    id = 1,
+    area = st_area(rectangle_poly),
+    geometry = st_sfc(rectangle_poly, crs = crs)
+  )
   
+  rectangle_projected <- st_transform(rectangle_sf, crs = 4326) 
   
-  # rast(buffalo_data_covs$pres_cent_x2_recentred) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/recentred_buffalo_", buffalo_ids[i], "_pres_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
-
-  # rast(buffalo_data_covs$pres_cent_x2_within_cell) %>%
-  #   writeRaster(paste0("buffalo_local_layers_id/within_cell_buffalo_", buffalo_ids[i], "_pres_cent",
-  #                      nxn_cells, "x", nxn_cells, "_lag_", hourly_lag, "hr_n", n_samples, ".tif"),
-  #               overwrite = T)
+  # Export as shapefile
+  st_write(rectangle_projected, paste0(output_path, ".shp"), 
+           delete_dsn = TRUE, quiet = TRUE)
   
+  # Also export as GeoJSON (alternative format)
+  st_write(rectangle_projected, paste0(output_path, ".geojson"), 
+           delete_dsn = TRUE, quiet = TRUE)
+  
+  # Print summary
+  cat("Rectangle created with bounds:\n")
+  cat("X range:", min_x, "to", max_x, "\n")
+  cat("Y range:", min_y, "to", max_y, "\n")
+  cat("Files saved:", paste0(output_path, ".shp"), "and", paste0(output_path, ".geojson"), "\n")
+  
+  return(rectangle_projected)
 }
 
 ```
 
-## Check the outputs
+### Use function to create shapefile and geojson
 
 ```{r}
 
-head(buffalo_data_df)
-head(buffalo_data_covs)
-which(is.na(buffalo_data_covs$ta))
-
-```
-
-# Check which cell is occupied by the next step (the target)
-
-```{r}
-
-n_samples <- 8
-
-print("Current step")
-
-# x1
-for(i in 1:n_samples) {
-  print(rowColFromCell(buffalo_data_covs$pres_cent_x1[[i]], which(buffalo_data_covs$pres_cent_x1[[i]][] == 1)))
-}
-
-print("Next step (target) recentered")
-
-# x2 recentered
-for(i in 1:n_samples) {
-  print(rowColFromCell(buffalo_data_covs$pres_cent_x2_recentred[[i]], which(buffalo_data_covs$pres_cent_x2_recentred[[i]][] == 1)))
-}
-
-print("Next step (target) within cell")
-
-# x2 centered
-for(i in 1:n_samples) {
-  print(rowColFromCell(buffalo_data_covs$pres_cent_x2_within_cell[[i]], which(buffalo_data_covs$pres_cent_x2_within_cell[[i]][] == 1)))
-}
-
-```
-
-## Checking the distribution of next-steps after the discretisation
-
-```{r}
-
-original_target <- rast("buffalo_local_layers_id/buffalo_2005_pres_cent101x101_lag_1hr_n10297.tif")
-fixed_target <- rast("buffalo_local_layers_id/fixed_buffalo_2005_pres_cent101x101_lag_1hr_n10297.tif")
-
-# fixed_target <- rast("buffalo_local_layers_id/within_cell_buffalo_2005_pres_cent101x101_lag_1hr_n100.tif")
-
-```
-
-```{r}
-
-n_samples <- nlyr(original_target)
-# n_samples <- 100
-
-print("Uncorrected target")
-
-x_vals <- rep(NA, n_samples)
-y_vals <- rep(NA, n_samples)
-distance <- rep(NA, n_samples)
-
-# x2 uncentered
-tic()
-for(i in 1:n_samples) {
-  
-  # plot(original_target[[i]])
-  
-  # print(rowColFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
-  # print(xyFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
-  
-  xy <- xyFromCell(original_target[[i]], which(original_target[[i]][] == 1))
-  
-  x_vals[i] <- xy[1]
-  y_vals[i] <- xy[2]
-  
-  distance[i] <- sqrt((x_vals[i])^2 + (y_vals[i])^2)
-  
-}
-toc()
-
-```
-
-### Do the same for the corrected target
-
-```{r}
-
-n_samples <- nlyr(fixed_target)
-# n_samples <- 97
-
-print("Corrected target")
-
-x_vals_corr <- rep(NA, n_samples)
-y_vals_corr <- rep(NA, n_samples)
-distance_corr <- rep(NA, n_samples)
-
-# x2 centered
-tic()
-for(i in 1:n_samples) {
-  
-  # plot(original_target[[i]])
-  # print(rowColfromCell(original_target[[i]], which(original_target[[i]][] == 1)))
-  # print(xyFromCell(original_target[[i]], which(original_target[[i]][] == 1)))
-  xy <- xyFromCell(fixed_target[[i]], which(fixed_target[[i]][] == 1))
-  
-  x_vals_corr[i] <- xy[1]
-  y_vals_corr[i] <- xy[2]
-  
-  distance_corr[i] <- sqrt((x_vals_corr[i])^2 + (y_vals_corr[i])^2)
-  
-}
-toc()
-
-distance[1:100] == distance_corr[1:100]
-
-```
-
-
-### Check the discretised distribution against the observed data
-
-```{r}
-
-buffalo_data <- read_csv("buffalo_local_data_id/buffalo_temporal_cont_2005_data_df_lag_1hr_n10297.csv")
-buffalo_data$discrete_sl_uncorr <- distance
-buffalo_data$discrete_sl_corr <- distance_corr
-
-```
-
-## Checking the observed distribution of small steps 
-
-```{r}
-
-buffalo_data %>% 
-  filter(discrete_sl_corr == 0) %>% 
-  summarise(mean_sl = mean(sl, na.rm = T),
-            median_sl = median(sl, na.rm = T))
-
-buffalo_data %>% 
-  filter(discrete_sl_uncorr == 0) %>% 
-  ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
-  scale_x_continuous("Step length (m)") +
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-```
-
-
-```{r}
-
-buffalo_data <- buffalo_data %>% mutate(
-  discrete_sl_uncorr = ifelse(discrete_sl_uncorr == 0, 10, discrete_sl_uncorr),
-  discrete_sl_uncorr_jitter = discrete_sl_uncorr + rnorm(nrow(buffalo_data), 0, 6.5),
-  # discrete_sl_uncorr_jitter = discrete_sl_uncorr + runif(nrow(buffalo_data), 0, 25),
-  
-  discrete_sl_corr = ifelse(discrete_sl_corr == 0, 10, discrete_sl_corr),
-  discrete_sl_corr_jitter = discrete_sl_corr + rnorm(nrow(buffalo_data), 0, 6.5),
-  # discrete_sl_corr_jitter = discrete_sl_corr + runif(nrow(buffalo_data), 0, 25)
+# Create the rectangle shapefile
+mimal_extent <- create_rectangle_shapefile(
+  df = buffalo_all_steps,
+  x_col = "x1_",           # column name for easting/longitude
+  y_col = "y1_",           # column name for northing/latitude
+  buffer = 5000,           # buffer distance in coordinate units
+  crs = 3112,              # coordinate reference system of GPS locations (will output in 4326)
+  output_path = "mapping/normanby_extent" # without extension
 )
 
+# View the result
+print(mimal_extent)
+plot(st_geometry(mimal_extent), main = "Rectangle from Coordinate Bounds")
+
+# Optional: Add your original points to the plot
+buffalo_all_steps_sf <- st_as_sf(buffalo_all_steps, coords = c("x1_", "y1_"), crs = 3112)
+buffalo_all_steps_sf_wgs84 <- st_transform(buffalo_all_steps_sf, crs = 4326) 
+plot(st_geometry(mimal_extent), main = "Rectangle with Original Points")
+plot(st_geometry(buffalo_all_steps_sf_wgs84), add = TRUE, col = "red")#, pch = 16)
+
 ```
 
+## Check DEM and create slope and roughness layers
+
+We downloaded the DEM from [Geoscience Australia](https://elevation.fsdf.org.au/), which is a 1 second resolution DEM for Australia. We will use this to create slope and roughness layers. We will .
 
 ```{r}
 
-# fixed centre cell adjustment
-buffalo_data %>% 
-  filter(sl < 2000) %>%
-  ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_uncorr),
-                 fill = "purple", colour = "purple", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_corr),
-                 fill = "orange", colour = "orange", alpha = 0.25) +
-  scale_x_continuous("Step length (m)") +
-  # scale_x_log10("Step length (m)") + 
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-# jitter for every cell
-buffalo_data %>% 
-  filter(discrete_sl_uncorr < 2000) %>%
-  ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_uncorr_jitter), 
-                 fill = "purple", colour = "purple", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_corr_jitter), 
-                 fill = "orange", colour = "orange", alpha = 0.25) +
-  scale_x_continuous("Step length (m)") +
-  # scale_x_log10("Step length (m)") + 
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-# fixed centre cell adjustment
-buffalo_data %>% 
-  filter(discrete_sl_uncorr < 2000) %>%
-  ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_uncorr), 
-                 fill = "purple", colour = "purple", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_corr), 
-                 fill = "orange", colour = "orange", alpha = 0.25) +
-  # scale_x_continuous("Step length (m)") + 
-  scale_x_log10("Step length (m)") +
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-# jitter for every cell
-buffalo_data %>% 
-  filter(discrete_sl_uncorr < 2000) %>%
-  ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_uncorr_jitter), 
-                 fill = "purple", colour = "purple", alpha = 0.25) +
-  geom_density(aes(x = discrete_sl_corr_jitter), 
-                 fill = "orange", colour = "orange", alpha = 0.25) +
-  # scale_x_continuous("Step length (m)") + 
-  scale_x_log10("Step length (m)") +
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
+# read in the DEM
+dem <- terra::rast("mapping/cropped rasters/DEM_H_normanby.tif") # hydro-enforced DEM
+dem
+plot(dem)
 
 ```
 
-
-
-## Plot a subset of the local covariates
+## Reproject to match the Sentinel-2 layers
 
 ```{r}
 
-n_plots <- 5
+s2 <- terra::rast("mapping/cropped rasters/sentinel2/25m/normanby/S2_SR_masked_normanby_2023_08.tif")
+plot(s2[[1]])
 
-# NDVI
-walk(buffalo_data_covs$ndvi_cent[1:n_plots], terra::plot)
+# reproject to the coordinates of the buffalo data
+dem <- terra::project(dem, s2)
 
-# Herbaceous vegetation
-walk(buffalo_data_covs$veg_herby_cent[1:n_plots], terra::plot)
+# check the projection
+terra::plot(dem)
+terra::points(buffalo_all_steps[, c("x1_", "y1_")], col = "red")
 
-# Canopy cover
-walk(buffalo_data_covs$canopy_cover_cent[1:n_plots], terra::plot)
-
-# Slope
-walk(buffalo_data_covs$slope_cent[1:n_plots], terra::plot)
-
-# Target (location of the next step)
-walk(buffalo_data_covs$pres_cent_x1[1:n_plots], terra::plot)
-
-# Target (location of the next step)
-walk(buffalo_data_covs$pres_cent_x2_within_cell[1:n_plots], terra::plot)
+# save the reprojected DEM
+terra::writeRaster(dem, "mapping/cropped rasters/DEM_normanby_reprojected.tif", overwrite = T)
 
 ```
 
+## Create slope and roughness layers
+
+There doesn't appear to be much difference in appearance between the slope and roughness layers, so we can use either one. The slope layer is the angle of the terrain, while the roughness layer is a measure of the variability in slope over a given area. We will create both layers and save them as separate raster files.
 
 ```{r}
 
-dummy_extent <- terra::ext(buffalo_data_covs$pres_cent_x1[[1]])
-(dummy_extent[2] - dummy_extent[1])/2 + dummy_extent[1]
-(dummy_extent[4] - dummy_extent[3])/2 + dummy_extent[3]
+# create slope layer
+slope <- terra::terrain(dem, v = "slope", unit = "degrees", neighbors = 8)
+plot(slope)
+
+# create roughness layer
+roughness <- terra::terrain(dem, v = "roughness", unit = "degrees", neighbors = 8)
+plot(roughness)
+
+# save the layers
+terra::writeRaster(slope, "mapping/cropped rasters/slope_normanby.tif", overwrite = T)
+terra::writeRaster(roughness, "mapping/cropped rasters/roughness_normanby.tif", overwrite = T)
 
 ```
-
-The recentred approach (uses the difference between the (x1, y1) and (x2, y2) locations).
-
-```{r}
-
-for(i in 1:nrow(buffalo_data_covs)) {
-  
-  combo_recentred_df <- as.data.frame(buffalo_data_covs$pres_cent_x1[[i]] + buffalo_data_covs$pres_cent_x2_recentred[[i]], xy = TRUE)
-  
-  plot <- ggplot() +
-    geom_raster(data = combo_recentred_df, aes(x, y, fill = last)) +
-    geom_point(data = buffalo_data_covs[i, ], aes(x = x_, y = y_), colour = "black", size = 2) +
-    geom_point(data = buffalo_data_covs[i, ], aes(x = x2_, y = y2_), colour = "red", size = 2) +
-    coord_fixed() +
-    theme_bw() +
-    theme(legend.position = "none") +
-    ggtitle(paste0("Step ", i))
-  
-  print(plot)
-  
-}
-
-```
-
-```{r}
-
-for(i in 1:nrow(buffalo_data_covs)) {
-  
-  combo_within_cell_df <- as.data.frame(buffalo_data_covs$pres_cent_x1[[i]] + buffalo_data_covs$pres_cent_x2_within_cell[[i]], xy = TRUE)
-  
-  plot <- ggplot() +
-    geom_raster(data = combo_within_cell_df, aes(x, y, fill = last)) +
-    geom_point(data = buffalo_data_covs[i, ], aes(x = x_, y = y_), colour = "black", size = 2) +
-    geom_point(data = buffalo_data_covs[i, ], aes(x = x2_, y = y2_), colour = "red", size = 2) +
-    coord_fixed() +
-    theme_bw() +
-    theme(legend.position = "none") +
-    ggtitle(paste0("Step ", i))
-  
-  print(plot)
-  
-}
-
-```
-
-
-## To save the object with all of the local covariates
-
-```{r}
-
-# saveRDS(buffalo_data_covs, paste0("buffalo_data_id_covs_", Sys.Date(), ".rds"))
-
-```
-
-## To save some plots
-
-```{r}
-
-# for(i in 1:n_plots) {
-#   png(filename = paste0("ndvi_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$ndvi_cent[[i]])
-#   dev.off()
-# }
-# 
-# # for the pres layers
-# for(i in 1:n_plots) {
-#   
-#   # change the 0 values to NA
-#   layer <- buffalo_data_covs$pres_cent[[i]]
-#   layer[layer == 0] <- 0.5
-#   
-#   ndvi_layer <- buffalo_data_covs$ndvi_cent[[i]]
-#   new_layer <- layer*ndvi_layer
-#   
-#   # save the plot
-#   png(filename = paste0("pres_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(new_layer)
-#   dev.off()
-# }
-# 
-# 
-# # other plots
-# 
-# n_plots <- 1
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("veg_herby_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$veg_herby_cent[[i]])
-#   dev.off()
-# }
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("canopy_cover_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$canopy_cover_cent[[i]])
-#   dev.off()
-# }
-# 
-# for(i in 1:n_plots) {
-#   png(filename = paste0("slope_cent_", i, ".png"),
-#       width = 150, height = 150, units = "mm", res = 600)
-#   terra::plot(buffalo_data_covs$slope_cent[[i]])
-#   dev.off()
-# }
-
-```
-
-## Plot the step lengths and turning angles
-
-```{r}
-
-# plot step lengths
-buffalo_data_covs %>% ggplot() +
-  geom_density(aes(x = sl), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
-  scale_x_continuous("Step length (m)") + 
-  scale_y_continuous("Density") +
-  ggtitle("Step lengths") +
-  theme_classic()
-
-# ggsave("outputs/step_length.png", height = 60, width = 120, units = "mm", dpi = 600)
-
-
-# plot turning angles
-buffalo_data_covs %>% ggplot() +
-  geom_density(aes(x = ta), 
-                 fill = "skyblue", colour = "skyblue", alpha = 0.75) +
-  scale_x_continuous("Turning angle (radians)", 
-    breaks = c(-pi, -pi/2, 0, pi/2, pi),
-    labels = c(expression(-pi), expression(-pi/2), "0", expression(pi/2), expression(pi))
-  ) +
-  scale_y_continuous("Density") +
-  ggtitle("Turning angles") +
-  theme_classic()
-
-# ggsave("outputs/turning_angle.png", height = 60, width = 120, units = "mm", dpi = 600)  
-
-```
-

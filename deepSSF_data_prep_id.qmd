@@ -98,6 +98,11 @@ buffalo_all <- buffalo_clean %>% mk_track(id = id,
   # Transformation to GDA94 / Geoscience Australia Lambert (https://epsg.io/3112)
   transform_coords(crs_to = 3112, crs_from = 4326) %>% arrange(id) 
 
+# Number of IDs and locations
+buffalo_all %>%
+  summarise(n_ids = n_distinct(id),
+            n_locations = n())
+
 ```
 
 ## Plot the data coloured by time
@@ -209,7 +214,8 @@ buffalo_all_steps %>%
 
 # proportion of steps less than the buffer distance
 # the distance should be a multiple of the resolution
-distance <- 1875
+distance <- 1250
+res <- 25
 
 # check if multiple of the resolution?
 distance %% res == 0
@@ -222,13 +228,13 @@ nxn_cells <- buffer*2/res
 print(paste0("Number of cells in each axis: ", nxn_cells))
 
 # calculate proportion
-prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -distance & 
-                                             x2_ - x1_ < distance &
-                                             y2_ - y1_ > -distance & 
-                                             y2_ - y1_ < distance) %>% 
+prop_steps <- buffalo_all_steps %>% filter(x2_ - x1_ > -buffer & 
+                                             x2_ - x1_ < buffer &
+                                             y2_ - y1_ > -buffer & 
+                                             y2_ - y1_ < buffer) %>% 
   nrow() / buffalo_all_steps %>% nrow()
 
-print(paste0("Proportion of steps less than ", distance, "m in x or y direction: ", round(prop_steps, 4)))
+print(paste0("Proportion of steps less than ", buffer, "m in x or y direction: ", round(prop_steps, 4)))
 
 # maxmimum distance at corner
 max_dist <- sqrt(buffer^2 + buffer^2)
