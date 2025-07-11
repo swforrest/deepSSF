@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-27">
+<meta name="dcterms.date" content="2025-07-10">
 
 <title>deepSSF Landscape Predictions - S2 – deepSSF</title>
 <style>
@@ -353,7 +353,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 27, 2025</p>
+      <p class="date">July 10, 2025</p>
     </div>
   </div>
   
@@ -884,7 +884,7 @@ Selected month: 2019_02
 <p>Here we want to crop the layers to the spatial extent defined above.</p>
 <p>For plotting purposes, we convert the normalised landscape layers back to their natural scale. This is only for plotting and are not used for modelling.</p>
 <p>We also calculate the minimum and maximum values of the normalised landscape subsets, which we will use to define the colour scale when plotting the layers.</p>
-<div id="cell-27" class="cell" data-execution_count="116">
+<div id="cell-27" class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a subset array with zeros (or another padding value) </span></span>
@@ -934,7 +934,7 @@ Selected month: 2019_02
 <span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the subset</span></span>
 <span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>plt.imshow(slope_subset_natural, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>plt.colorbar(shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.colorbar(shrink=0.7)</span></span>
 <span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Slope'</span>)</span>
 <span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f"</span><span class="sc">{</span>base_id_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_slope.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
 <span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>plt.show()</span>

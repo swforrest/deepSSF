@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-27">
+<meta name="dcterms.date" content="2025-07-10">
 
 <title>deepSSF Model Overview – deepSSF</title>
 <style>
@@ -315,7 +315,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 27, 2025</p>
+      <p class="date">July 10, 2025</p>
     </div>
   </div>
   
@@ -379,7 +379,7 @@ window.Quarto = {
 <p>If we wanted a single gamma distribution (described by a shape and scale parameter) and a von Mises distribution (described by a mean, <span class="math inline">\(\mu\)</span>, and concentration, <span class="math inline">\(\kappa\)</span> parameter), as is a common movement kernel for an SSF, we could make the neural network output four numbers, a, b, c and d.&nbsp;We could then take a and b to be our shape and scale, and using the gamma density function turn these into a gamma distribution, and the c and d to be a <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\kappa\)</span>.</p>
 <p>We can then turn these into the two-dimensional movement kernel:</p>
 <p><img src="figures\params_move_kernel.png" class="img-fluid"></p>
-<p>Because we can make the movement subnetwork output any number of parameters (it doesn’t know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a ‘weight’ parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\kappa\)</span> and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.</p>
+<p>Because we can make the movement subnetwork output any number of parameters (it doesn’t explicitly know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a ‘weight’ parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\kappa\)</span> and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/model_diagram_move.png" class="img-fluid figure-img"></p>

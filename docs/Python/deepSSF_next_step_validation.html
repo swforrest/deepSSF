@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2025-02-27">
+<meta name="dcterms.date" content="2025-07-10">
 
 <title>deepSSF Validation – deepSSF</title>
 <style>
@@ -253,7 +253,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../validation_comparison.html" class="sidebar-item-text sidebar-link">
+  <a href="../validation_comparison_id.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Comparing SSF and deepSSF Predictions</span></a>
   </div>
 </li>
@@ -346,7 +346,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 27, 2025</p>
+      <p class="date">July 10, 2025</p>
     </div>
   </div>
   
@@ -944,7 +944,7 @@ Number of NA values in the slope raster:
 <section id="create-a-mask-for-edge-cells" class="level2">
 <h2 class="anchored" data-anchor-id="create-a-mask-for-edge-cells">Create a mask for edge cells</h2>
 <p>Due to the padding at the edges of the covariates, convolutional layers create artifacts that can affect the colour scale of the predictions when plotting. To avoid this, we will create a mask that we can apply to the predictions to remove the edge cells.</p>
-<div id="cell-29" class="cell" data-execution_count="16">
+<div id="cell-29" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a mask to remove the edge values for plotting </span></span>
@@ -958,6 +958,20 @@ Number of NA values in the slope raster:
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>y_mask[:<span class="dv">3</span>, :] <span class="op">=</span> <span class="op">-</span>np.inf</span>
 <span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>y_mask[<span class="dv">98</span>:, :] <span class="op">=</span> <span class="op">-</span>np.inf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-error">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-red-fg ansi-bold">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg ansi-bold">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg ansi-bold">In[1], line 3</span>
+<span class="ansi-green-fg">      1</span> <span style="font-style:italic;color:rgb(95,135,135)"># Create a mask to remove the edge values for plotting </span>
+<span class="ansi-green-fg">      2</span> <span style="font-style:italic;color:rgb(95,135,135)"># (as it affects the colour scale)</span>
+<span class="ansi-green-fg ansi-bold">----&gt; 3</span> x_mask <span style="color:rgb(98,98,98)">=</span> np<span style="color:rgb(98,98,98)">.</span>ones_like(ndvi_subset)
+<span class="ansi-green-fg">      4</span> y_mask <span style="color:rgb(98,98,98)">=</span> np<span style="color:rgb(98,98,98)">.</span>ones_like(ndvi_subset)
+<span class="ansi-green-fg">      6</span> <span style="font-style:italic;color:rgb(95,135,135)"># Mask out bordering cells</span>
+
+<span class="ansi-red-fg ansi-bold">NameError</span>: name 'np' is not defined</pre>
+</div>
+</div>
 </div>
 </section>
 </section>
@@ -1144,204 +1158,205 @@ Number of NA values in the slope raster:
 </section>
 <section id="loop-over-each-step" class="level2">
 <h2 class="anchored" data-anchor-id="loop-over-each-step">Loop over each step</h2>
-<div id="cell-45" class="cell" data-execution_count="24">
+<div id="cell-45" class="cell" data-execution_count="28">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start at 1 so the bearing at t - 1 is available</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n_samples):</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  sample <span class="op">=</span> test_data.iloc[i]</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Current location (x1, y1)</span></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> sample[<span class="st">'x1_'</span>]</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  y <span class="op">=</span> sample[<span class="st">'y1_'</span>]</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  px, py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x, y)</span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Next step location (x2, y2)</span></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  x2 <span class="op">=</span> sample[<span class="st">'x2_'</span>]</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  y2 <span class="op">=</span> sample[<span class="st">'y2_'</span>]</span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  px2, py2 <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x2, y2)</span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The difference in x and y coordinates</span></span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  d_x <span class="op">=</span> x2 <span class="op">-</span> x</span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  d_y <span class="op">=</span> y2 <span class="op">-</span> y</span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('d_x and d_y are ', d_x, d_y) # Debugging</span></span>
-<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Temporal covariates</span></span>
-<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  hour_t2_sin <span class="op">=</span> sample[<span class="st">'hour_t2_sin'</span>]</span>
-<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  hour_t2_cos <span class="op">=</span> sample[<span class="st">'hour_t2_cos'</span>]</span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  yday_t2_sin <span class="op">=</span> sample[<span class="st">'yday_t2_sin'</span>]</span>
-<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>  yday_t2_cos <span class="op">=</span> sample[<span class="st">'yday_t2_cos'</span>]</span>
-<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Bearing of previous step (t - 1)</span></span>
-<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>  bearing <span class="op">=</span> sample[<span class="st">'bearing_tm1'</span>]</span>
-<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Hour of the day (for saving the plot)</span></span>
-<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>  hour_t2 <span class="op">=</span> sample[<span class="st">'hour_t2'</span>]</span>
-<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Day of the year</span></span>
-<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>  yday <span class="op">=</span> sample[<span class="st">'yday_t2'</span>]</span>
-<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert day of the year to month index</span></span>
-<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>  month_index <span class="op">=</span> day_to_month_index(yday)</span>
-<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(month_index)</span></span>
-<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the subset of the covariates at the location of x1, y1</span></span>
-<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NDVI</span></span>
-<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>  ndvi_subset, origin_x, origin_y <span class="op">=</span> subset_raster(ndvi_landscape_norm[month_index,:,:], </span>
-<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>                                                  x, y, </span>
-<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>                                                  window_size, </span>
-<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>                                                  raster_transform)</span>
-<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Canopy cover</span></span>
-<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>  canopy_subset, origin_x, origin_y <span class="op">=</span> subset_raster(canopy_landscape_norm, </span>
-<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>                                                    x, y, </span>
-<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a>                                                    window_size, </span>
-<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>                                                    raster_transform)</span>
-<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Herbaceous vegetation</span></span>
-<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>  herby_subset, origin_x, origin_y <span class="op">=</span> subset_raster(herby_landscape_norm, </span>
-<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>                                                   x, y, </span>
-<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>                                                   window_size, </span>
-<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>                                                   raster_transform)</span>
-<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Slope</span></span>
-<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>  slope_subset, origin_x, origin_y <span class="op">=</span> subset_raster(slope_landscape_norm, </span>
-<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>                                                   x, y, </span>
-<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a>                                                   window_size, </span>
-<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>                                                   raster_transform)</span>
-<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Location of the next step in local pixel coordinates</span></span>
-<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>  px2_subset <span class="op">=</span> px2 <span class="op">-</span> origin_x</span>
-<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>  py2_subset <span class="op">=</span> py2 <span class="op">-</span> origin_y</span>
-<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('px2_subset and py2_subset are ', px2_subset, py2_subset) # Debugging</span></span>
-<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
-<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>  <span class="co"># value = ndvi_subset.detach().cpu().numpy()[(int(py2_subset), int(px2_subset))]</span></span>
-<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Stack the channels along a new axis</span></span>
-<span id="cb36-78"><a href="#cb36-78" aria-hidden="true" tabindex="-1"></a>  x1 <span class="op">=</span> torch.stack([ndvi_subset, canopy_subset, herby_subset, slope_subset], dim<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a batch dimension (required to be the correct dimension for the model)</span></span>
-<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>  x1 <span class="op">=</span> x1.unsqueeze(<span class="dv">0</span>)</span>
-<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x1.shape)</span></span>
-<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert lists to PyTorch tensors</span></span>
-<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>  hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>()</span>
-<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>  hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>()</span>
-<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a>  yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>()</span>
-<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a>  yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>()</span>
-<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Stack tensors</span></span>
-<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a>  x2 <span class="op">=</span> torch.stack((hour_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>                    hour_t2_cos_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>                    yday_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>                    yday_t2_cos_tensor.unsqueeze(<span class="dv">0</span>)),  </span>
-<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>                    dim<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x2)</span></span>
-<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x2.shape)</span></span>
-<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Put bearing in the correct dimension (batch_size, 1)</span></span>
-<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a>  bearing <span class="op">=</span> torch.tensor(bearing).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)</span>
-<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(bearing)</span></span>
-<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(bearing.shape)</span></span>
-<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># for i in range(1, n_samples):</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">100</span>):</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  sample <span class="op">=</span> test_data.iloc[i]</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Current location (x1, y1)</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> sample[<span class="st">'x1_'</span>]</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  y <span class="op">=</span> sample[<span class="st">'y1_'</span>]</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  px, py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x, y)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Next step location (x2, y2)</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  x2 <span class="op">=</span> sample[<span class="st">'x2_'</span>]</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  y2 <span class="op">=</span> sample[<span class="st">'y2_'</span>]</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  px2, py2 <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x2, y2)</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The difference in x and y coordinates</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  d_x <span class="op">=</span> x2 <span class="op">-</span> x</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  d_y <span class="op">=</span> y2 <span class="op">-</span> y</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('d_x and d_y are ', d_x, d_y) # Debugging</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Temporal covariates</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  hour_t2_sin <span class="op">=</span> sample[<span class="st">'hour_t2_sin'</span>]</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  hour_t2_cos <span class="op">=</span> sample[<span class="st">'hour_t2_cos'</span>]</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>  yday_t2_sin <span class="op">=</span> sample[<span class="st">'yday_t2_sin'</span>]</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>  yday_t2_cos <span class="op">=</span> sample[<span class="st">'yday_t2_cos'</span>]</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Bearing of previous step (t - 1)</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>  bearing <span class="op">=</span> sample[<span class="st">'bearing_tm1'</span>]</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Hour of the day (for saving the plot)</span></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>  hour_t2 <span class="op">=</span> sample[<span class="st">'hour_t2'</span>]</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Day of the year</span></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>  yday <span class="op">=</span> sample[<span class="st">'yday_t2'</span>]</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert day of the year to month index</span></span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>  month_index <span class="op">=</span> day_to_month_index(yday)</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(month_index)</span></span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the subset of the covariates at the location of x1, y1</span></span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NDVI</span></span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>  ndvi_subset, origin_x, origin_y <span class="op">=</span> subset_raster(ndvi_landscape_norm[month_index,:,:], </span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>                                                  x, y, </span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>                                                  window_size, </span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>                                                  raster_transform)</span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Canopy cover</span></span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>  canopy_subset, origin_x, origin_y <span class="op">=</span> subset_raster(canopy_landscape_norm, </span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a>                                                    x, y, </span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>                                                    window_size, </span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>                                                    raster_transform)</span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Herbaceous vegetation</span></span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>  herby_subset, origin_x, origin_y <span class="op">=</span> subset_raster(herby_landscape_norm, </span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>                                                   x, y, </span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>                                                   window_size, </span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>                                                   raster_transform)</span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Slope</span></span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>  slope_subset, origin_x, origin_y <span class="op">=</span> subset_raster(slope_landscape_norm, </span>
+<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a>                                                   x, y, </span>
+<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>                                                   window_size, </span>
+<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a>                                                   raster_transform)</span>
+<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Location of the next step in local pixel coordinates</span></span>
+<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>  px2_subset <span class="op">=</span> px2 <span class="op">-</span> origin_x</span>
+<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a>  py2_subset <span class="op">=</span> py2 <span class="op">-</span> origin_y</span>
+<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('px2_subset and py2_subset are ', px2_subset, py2_subset) # Debugging</span></span>
+<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
+<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>  <span class="co"># value = ndvi_subset.detach().cpu().numpy()[(int(py2_subset), int(px2_subset))]</span></span>
+<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-78"><a href="#cb36-78" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Stack the channels along a new axis</span></span>
+<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a>  x1 <span class="op">=</span> torch.stack([ndvi_subset, canopy_subset, herby_subset, slope_subset], dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a batch dimension (required to be the correct dimension for the model)</span></span>
+<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>  x1 <span class="op">=</span> x1.unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x1.shape)</span></span>
+<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert lists to PyTorch tensors</span></span>
+<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>  hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>()</span>
+<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a>  hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>()</span>
+<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a>  yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>()</span>
+<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a>  yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>()</span>
+<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Stack tensors</span></span>
+<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>  x2 <span class="op">=</span> torch.stack((hour_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>                    hour_t2_cos_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>                    yday_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>                    yday_t2_cos_tensor.unsqueeze(<span class="dv">0</span>)),  </span>
+<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>                    dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x2)</span></span>
+<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(x2.shape)</span></span>
+<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Put bearing in the correct dimension (batch_size, 1)</span></span>
+<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a>  bearing <span class="op">=</span> torch.tensor(bearing).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(bearing)</span></span>
+<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(bearing.shape)</span></span>
 <span id="cb36-104"><a href="#cb36-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-105"><a href="#cb36-105" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-106"><a href="#cb36-106" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Run the model</span></span>
-<span id="cb36-107"><a href="#cb36-107" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-108"><a href="#cb36-108" aria-hidden="true" tabindex="-1"></a>  model_output <span class="op">=</span> model((x1, x2, bearing))</span>
-<span id="cb36-109"><a href="#cb36-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-105"><a href="#cb36-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-106"><a href="#cb36-106" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-107"><a href="#cb36-107" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Run the model</span></span>
+<span id="cb36-108"><a href="#cb36-108" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-109"><a href="#cb36-109" aria-hidden="true" tabindex="-1"></a>  model_output <span class="op">=</span> model((x1, x2, bearing))</span>
 <span id="cb36-110"><a href="#cb36-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-111"><a href="#cb36-111" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-112"><a href="#cb36-112" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Habitat selection probability</span></span>
-<span id="cb36-113"><a href="#cb36-113" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-114"><a href="#cb36-114" aria-hidden="true" tabindex="-1"></a>  hab_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">0</span>]</span>
-<span id="cb36-115"><a href="#cb36-115" aria-hidden="true" tabindex="-1"></a>  hab_density_exp <span class="op">=</span> np.exp(hab_density)</span>
-<span id="cb36-116"><a href="#cb36-116" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(np.sum(hab_density_exp)) # Should be 1</span></span>
-<span id="cb36-117"><a href="#cb36-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-118"><a href="#cb36-118" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store the probability of habitat selection at the location of x2, y2</span></span>
-<span id="cb36-119"><a href="#cb36-119" aria-hidden="true" tabindex="-1"></a>  <span class="co"># These probabilities are normalised in the model function</span></span>
-<span id="cb36-120"><a href="#cb36-120" aria-hidden="true" tabindex="-1"></a>  habitat_probs[i] <span class="op">=</span> hab_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb36-121"><a href="#cb36-121" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Habitat probability value = ', habitat_probs[i])</span></span>
-<span id="cb36-122"><a href="#cb36-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-111"><a href="#cb36-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-112"><a href="#cb36-112" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-113"><a href="#cb36-113" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Habitat selection probability</span></span>
+<span id="cb36-114"><a href="#cb36-114" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-115"><a href="#cb36-115" aria-hidden="true" tabindex="-1"></a>  hab_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">0</span>]</span>
+<span id="cb36-116"><a href="#cb36-116" aria-hidden="true" tabindex="-1"></a>  hab_density_exp <span class="op">=</span> np.exp(hab_density)</span>
+<span id="cb36-117"><a href="#cb36-117" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(np.sum(hab_density_exp)) # Should be 1</span></span>
+<span id="cb36-118"><a href="#cb36-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-119"><a href="#cb36-119" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store the probability of habitat selection at the location of x2, y2</span></span>
+<span id="cb36-120"><a href="#cb36-120" aria-hidden="true" tabindex="-1"></a>  <span class="co"># These probabilities are normalised in the model function</span></span>
+<span id="cb36-121"><a href="#cb36-121" aria-hidden="true" tabindex="-1"></a>  habitat_probs[i] <span class="op">=</span> hab_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb36-122"><a href="#cb36-122" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Habitat probability value = ', habitat_probs[i])</span></span>
 <span id="cb36-123"><a href="#cb36-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-124"><a href="#cb36-124" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-125"><a href="#cb36-125" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Movement probability</span></span>
-<span id="cb36-126"><a href="#cb36-126" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-127"><a href="#cb36-127" aria-hidden="true" tabindex="-1"></a>  move_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">1</span>]</span>
-<span id="cb36-128"><a href="#cb36-128" aria-hidden="true" tabindex="-1"></a>  move_density_exp <span class="op">=</span> np.exp(move_density)</span>
-<span id="cb36-129"><a href="#cb36-129" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(np.sum(move_density_exp))  # Should be 1</span></span>
-<span id="cb36-130"><a href="#cb36-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-131"><a href="#cb36-131" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store the movement probability at the location of x2, y2</span></span>
-<span id="cb36-132"><a href="#cb36-132" aria-hidden="true" tabindex="-1"></a>  <span class="co"># These probabilities are normalised in the model function</span></span>
-<span id="cb36-133"><a href="#cb36-133" aria-hidden="true" tabindex="-1"></a>  move_probs[i] <span class="op">=</span> move_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb36-134"><a href="#cb36-134" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Movement probability value = ', move_probs[i])</span></span>
-<span id="cb36-135"><a href="#cb36-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-124"><a href="#cb36-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-125"><a href="#cb36-125" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-126"><a href="#cb36-126" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Movement probability</span></span>
+<span id="cb36-127"><a href="#cb36-127" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-128"><a href="#cb36-128" aria-hidden="true" tabindex="-1"></a>  move_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">1</span>]</span>
+<span id="cb36-129"><a href="#cb36-129" aria-hidden="true" tabindex="-1"></a>  move_density_exp <span class="op">=</span> np.exp(move_density)</span>
+<span id="cb36-130"><a href="#cb36-130" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(np.sum(move_density_exp))  # Should be 1</span></span>
+<span id="cb36-131"><a href="#cb36-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-132"><a href="#cb36-132" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store the movement probability at the location of x2, y2</span></span>
+<span id="cb36-133"><a href="#cb36-133" aria-hidden="true" tabindex="-1"></a>  <span class="co"># These probabilities are normalised in the model function</span></span>
+<span id="cb36-134"><a href="#cb36-134" aria-hidden="true" tabindex="-1"></a>  move_probs[i] <span class="op">=</span> move_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb36-135"><a href="#cb36-135" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Movement probability value = ', move_probs[i])</span></span>
 <span id="cb36-136"><a href="#cb36-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-137"><a href="#cb36-137" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-138"><a href="#cb36-138" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Next step probability</span></span>
-<span id="cb36-139"><a href="#cb36-139" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-140"><a href="#cb36-140" aria-hidden="true" tabindex="-1"></a>  step_density <span class="op">=</span> hab_density <span class="op">+</span> move_density</span>
-<span id="cb36-141"><a href="#cb36-141" aria-hidden="true" tabindex="-1"></a>  step_density_exp <span class="op">=</span> np.exp(step_density)</span>
-<span id="cb36-142"><a href="#cb36-142" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Sum of step density exp = ', np.sum(step_density_exp)) # Won't be 1</span></span>
-<span id="cb36-143"><a href="#cb36-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-144"><a href="#cb36-144" aria-hidden="true" tabindex="-1"></a>  step_density_exp_norm <span class="op">=</span> step_density_exp <span class="op">/</span> np.<span class="bu">sum</span>(step_density_exp)</span>
-<span id="cb36-145"><a href="#cb36-145" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Sum of step density exp norm = ', np.sum(step_density_exp_norm)) # Should be 1</span></span>
-<span id="cb36-146"><a href="#cb36-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-147"><a href="#cb36-147" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
-<span id="cb36-148"><a href="#cb36-148" aria-hidden="true" tabindex="-1"></a>  next_step_probs[i] <span class="op">=</span> step_density_exp_norm[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb36-149"><a href="#cb36-149" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Next-step probability value = ', next_step_probs[i])</span></span>
-<span id="cb36-150"><a href="#cb36-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-137"><a href="#cb36-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-138"><a href="#cb36-138" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-139"><a href="#cb36-139" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Next step probability</span></span>
+<span id="cb36-140"><a href="#cb36-140" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-141"><a href="#cb36-141" aria-hidden="true" tabindex="-1"></a>  step_density <span class="op">=</span> hab_density <span class="op">+</span> move_density</span>
+<span id="cb36-142"><a href="#cb36-142" aria-hidden="true" tabindex="-1"></a>  step_density_exp <span class="op">=</span> np.exp(step_density)</span>
+<span id="cb36-143"><a href="#cb36-143" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Sum of step density exp = ', np.sum(step_density_exp)) # Won't be 1</span></span>
+<span id="cb36-144"><a href="#cb36-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-145"><a href="#cb36-145" aria-hidden="true" tabindex="-1"></a>  step_density_exp_norm <span class="op">=</span> step_density_exp <span class="op">/</span> np.<span class="bu">sum</span>(step_density_exp)</span>
+<span id="cb36-146"><a href="#cb36-146" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Sum of step density exp norm = ', np.sum(step_density_exp_norm)) # Should be 1</span></span>
+<span id="cb36-147"><a href="#cb36-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-148"><a href="#cb36-148" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
+<span id="cb36-149"><a href="#cb36-149" aria-hidden="true" tabindex="-1"></a>  next_step_probs[i] <span class="op">=</span> step_density_exp_norm[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb36-150"><a href="#cb36-150" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print('Next-step probability value = ', next_step_probs[i])</span></span>
 <span id="cb36-151"><a href="#cb36-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-152"><a href="#cb36-152" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-153"><a href="#cb36-153" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot the next-step predictions</span></span>
-<span id="cb36-154"><a href="#cb36-154" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb36-155"><a href="#cb36-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-156"><a href="#cb36-156" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot the first few probability surfaces - change the condition to i &lt; n_steps to plot all</span></span>
-<span id="cb36-157"><a href="#cb36-157" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> i <span class="op">&lt;</span> <span class="dv">6</span>:</span>
-<span id="cb36-158"><a href="#cb36-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-159"><a href="#cb36-159" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mask out bordering cells</span></span>
-<span id="cb36-160"><a href="#cb36-160" aria-hidden="true" tabindex="-1"></a>    hab_density_mask <span class="op">=</span> hab_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
-<span id="cb36-161"><a href="#cb36-161" aria-hidden="true" tabindex="-1"></a>    move_density_mask <span class="op">=</span> move_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
-<span id="cb36-162"><a href="#cb36-162" aria-hidden="true" tabindex="-1"></a>    step_density_mask <span class="op">=</span> step_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
-<span id="cb36-163"><a href="#cb36-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-164"><a href="#cb36-164" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a mask for the next step</span></span>
-<span id="cb36-165"><a href="#cb36-165" aria-hidden="true" tabindex="-1"></a>    next_step_mask <span class="op">=</span> np.ones_like(hab_density)</span>
-<span id="cb36-166"><a href="#cb36-166" aria-hidden="true" tabindex="-1"></a>    next_step_mask[<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset)] <span class="op">=</span> <span class="op">-</span>np.inf</span>
-<span id="cb36-167"><a href="#cb36-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-168"><a href="#cb36-168" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the outputs</span></span>
-<span id="cb36-169"><a href="#cb36-169" aria-hidden="true" tabindex="-1"></a>    fig_out, axs_out <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
-<span id="cb36-170"><a href="#cb36-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-171"><a href="#cb36-171" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot NDVI</span></span>
-<span id="cb36-172"><a href="#cb36-172" aria-hidden="true" tabindex="-1"></a>    im1 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">0</span>].imshow(ndvi_subset.numpy(), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb36-173"><a href="#cb36-173" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">0</span>, <span class="dv">0</span>].set_title(<span class="st">'NDVI'</span>)</span>
-<span id="cb36-174"><a href="#cb36-174" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im1, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb36-175"><a href="#cb36-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-176"><a href="#cb36-176" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot habitat selection log-probability</span></span>
-<span id="cb36-177"><a href="#cb36-177" aria-hidden="true" tabindex="-1"></a>    im2 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">1</span>].imshow(hab_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb36-178"><a href="#cb36-178" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">0</span>, <span class="dv">1</span>].set_title(<span class="st">'Habitat selection log-probability'</span>)</span>
-<span id="cb36-179"><a href="#cb36-179" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im2, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb36-180"><a href="#cb36-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-181"><a href="#cb36-181" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Movement density log-probability</span></span>
-<span id="cb36-182"><a href="#cb36-182" aria-hidden="true" tabindex="-1"></a>    im3 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">0</span>].imshow(move_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb36-183"><a href="#cb36-183" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">1</span>, <span class="dv">0</span>].set_title(<span class="st">'Movement log-probability'</span>)</span>
-<span id="cb36-184"><a href="#cb36-184" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im3, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb36-185"><a href="#cb36-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-186"><a href="#cb36-186" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Next-step probability</span></span>
-<span id="cb36-187"><a href="#cb36-187" aria-hidden="true" tabindex="-1"></a>    im4 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">1</span>].imshow(step_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
-<span id="cb36-188"><a href="#cb36-188" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">1</span>, <span class="dv">1</span>].set_title(<span class="st">'Next-step log-probability'</span>)</span>
-<span id="cb36-189"><a href="#cb36-189" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im4, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb36-190"><a href="#cb36-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-191"><a href="#cb36-191" aria-hidden="true" tabindex="-1"></a>    filename_covs <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_step</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">_yday</span><span class="sc">{</span>yday<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png'</span></span>
-<span id="cb36-192"><a href="#cb36-192" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb36-193"><a href="#cb36-193" aria-hidden="true" tabindex="-1"></a>    plt.savefig(filename_covs, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb36-194"><a href="#cb36-194" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
-<span id="cb36-195"><a href="#cb36-195" aria-hidden="true" tabindex="-1"></a>    plt.close()  <span class="co"># Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-152"><a href="#cb36-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-153"><a href="#cb36-153" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-154"><a href="#cb36-154" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot the next-step predictions</span></span>
+<span id="cb36-155"><a href="#cb36-155" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb36-156"><a href="#cb36-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-157"><a href="#cb36-157" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot the first few probability surfaces - change the condition to i &lt; n_steps to plot all</span></span>
+<span id="cb36-158"><a href="#cb36-158" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> i <span class="op">&lt;</span> <span class="dv">3</span>:</span>
+<span id="cb36-159"><a href="#cb36-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-160"><a href="#cb36-160" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mask out bordering cells</span></span>
+<span id="cb36-161"><a href="#cb36-161" aria-hidden="true" tabindex="-1"></a>    hab_density_mask <span class="op">=</span> hab_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb36-162"><a href="#cb36-162" aria-hidden="true" tabindex="-1"></a>    move_density_mask <span class="op">=</span> move_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb36-163"><a href="#cb36-163" aria-hidden="true" tabindex="-1"></a>    step_density_mask <span class="op">=</span> step_density <span class="op">*</span> x_mask <span class="op">*</span> y_mask</span>
+<span id="cb36-164"><a href="#cb36-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-165"><a href="#cb36-165" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a mask for the next step</span></span>
+<span id="cb36-166"><a href="#cb36-166" aria-hidden="true" tabindex="-1"></a>    next_step_mask <span class="op">=</span> np.ones_like(hab_density)</span>
+<span id="cb36-167"><a href="#cb36-167" aria-hidden="true" tabindex="-1"></a>    next_step_mask[<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset)] <span class="op">=</span> <span class="op">-</span>np.inf</span>
+<span id="cb36-168"><a href="#cb36-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-169"><a href="#cb36-169" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the outputs</span></span>
+<span id="cb36-170"><a href="#cb36-170" aria-hidden="true" tabindex="-1"></a>    fig_out, axs_out <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
+<span id="cb36-171"><a href="#cb36-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-172"><a href="#cb36-172" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot NDVI</span></span>
+<span id="cb36-173"><a href="#cb36-173" aria-hidden="true" tabindex="-1"></a>    im1 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">0</span>].imshow(ndvi_subset.numpy(), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb36-174"><a href="#cb36-174" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">0</span>, <span class="dv">0</span>].set_title(<span class="st">'NDVI'</span>)</span>
+<span id="cb36-175"><a href="#cb36-175" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im1, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb36-176"><a href="#cb36-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-177"><a href="#cb36-177" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot habitat selection log-probability</span></span>
+<span id="cb36-178"><a href="#cb36-178" aria-hidden="true" tabindex="-1"></a>    im2 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">1</span>].imshow(hab_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb36-179"><a href="#cb36-179" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">0</span>, <span class="dv">1</span>].set_title(<span class="st">'Habitat selection log-probability'</span>)</span>
+<span id="cb36-180"><a href="#cb36-180" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im2, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb36-181"><a href="#cb36-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-182"><a href="#cb36-182" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Movement density log-probability</span></span>
+<span id="cb36-183"><a href="#cb36-183" aria-hidden="true" tabindex="-1"></a>    im3 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">0</span>].imshow(move_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb36-184"><a href="#cb36-184" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">1</span>, <span class="dv">0</span>].set_title(<span class="st">'Movement log-probability'</span>)</span>
+<span id="cb36-185"><a href="#cb36-185" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im3, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb36-186"><a href="#cb36-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-187"><a href="#cb36-187" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Next-step probability</span></span>
+<span id="cb36-188"><a href="#cb36-188" aria-hidden="true" tabindex="-1"></a>    im4 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">1</span>].imshow(step_density_mask <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb36-189"><a href="#cb36-189" aria-hidden="true" tabindex="-1"></a>    axs_out[<span class="dv">1</span>, <span class="dv">1</span>].set_title(<span class="st">'Next-step log-probability'</span>)</span>
+<span id="cb36-190"><a href="#cb36-190" aria-hidden="true" tabindex="-1"></a>    fig_out.colorbar(im4, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb36-191"><a href="#cb36-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-192"><a href="#cb36-192" aria-hidden="true" tabindex="-1"></a>    filename_covs <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_step</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">_yday</span><span class="sc">{</span>yday<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png'</span></span>
+<span id="cb36-193"><a href="#cb36-193" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb36-194"><a href="#cb36-194" aria-hidden="true" tabindex="-1"></a>    plt.savefig(filename_covs, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb36-195"><a href="#cb36-195" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb36-196"><a href="#cb36-196" aria-hidden="true" tabindex="-1"></a>    plt.close()  <span class="co"># Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1357,47 +1372,137 @@ Number of NA values in the slope raster:
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-24-output-3.png" class="img-fluid figure-img"></p>
-</figure>
 </div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-24-output-4.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-24-output-5.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="cell-46" class="cell" data-execution_count="25">
+<div id="cell-46" class="cell" data-execution_count="33">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(next_step_probs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> threshold_top_probability(prob_surface, target_percentage<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Set the top X% of probability mass to 1 and the rest to 0.</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Parameters:</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co">    -----------</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co">    prob_surface : numpy.ndarray</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="co">        2D array representing a probability surface</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="co">    target_percentage : float</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="co">        Percentage of total probability mass to capture (0.0 to 1.0)</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a><span class="co">    --------</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a><span class="co">    binary_mask : numpy.ndarray</span></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a><span class="co">        Binary mask where 1 represents the areas with highest probability</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="co">    threshold : float</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="co">        The probability threshold used</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a><span class="co">    captured_percentage : float</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a><span class="co">        Actual percentage of probability mass captured</span></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Flatten the array</span></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>    flat_probs <span class="op">=</span> prob_surface.flatten()</span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sort probabilities in descending order</span></span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>    sorted_probs <span class="op">=</span> np.sort(flat_probs)[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate total probability</span></span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>    total_prob <span class="op">=</span> np.<span class="bu">sum</span>(prob_surface)</span>
+<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find threshold that captures target percentage of probability mass</span></span>
+<span id="cb37-31"><a href="#cb37-31" aria-hidden="true" tabindex="-1"></a>    cumulative_prob <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb37-32"><a href="#cb37-32" aria-hidden="true" tabindex="-1"></a>    threshold_idx <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a>    target_prob <span class="op">=</span> total_prob <span class="op">*</span> target_percentage</span>
+<span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> cumulative_prob <span class="op">&lt;</span> target_prob <span class="kw">and</span> threshold_idx <span class="op">&lt;</span> <span class="bu">len</span>(sorted_probs):</span>
+<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>        cumulative_prob <span class="op">+=</span> sorted_probs[threshold_idx]</span>
+<span id="cb37-37"><a href="#cb37-37" aria-hidden="true" tabindex="-1"></a>        threshold_idx <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb37-38"><a href="#cb37-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-39"><a href="#cb37-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the threshold value</span></span>
+<span id="cb37-40"><a href="#cb37-40" aria-hidden="true" tabindex="-1"></a>    threshold <span class="op">=</span> sorted_probs[threshold_idx <span class="op">-</span> <span class="dv">1</span>] <span class="cf">if</span> threshold_idx <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb37-41"><a href="#cb37-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-42"><a href="#cb37-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create binary mask</span></span>
+<span id="cb37-43"><a href="#cb37-43" aria-hidden="true" tabindex="-1"></a>    binary_mask <span class="op">=</span> np.where(prob_surface <span class="op">&gt;=</span> threshold, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb37-44"><a href="#cb37-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-45"><a href="#cb37-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate actual captured probability</span></span>
+<span id="cb37-46"><a href="#cb37-46" aria-hidden="true" tabindex="-1"></a>    captured_prob <span class="op">=</span> np.<span class="bu">sum</span>(prob_surface <span class="op">*</span> binary_mask)</span>
+<span id="cb37-47"><a href="#cb37-47" aria-hidden="true" tabindex="-1"></a>    captured_percentage <span class="op">=</span> captured_prob <span class="op">/</span> total_prob</span>
+<span id="cb37-48"><a href="#cb37-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-49"><a href="#cb37-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> binary_mask, threshold, captured_percentage</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="cell-47" class="cell" data-execution_count="46">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>habitat_threshold <span class="op">=</span> threshold_top_probability(hab_density_exp, target_percentage<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>plt.imshow(habitat_threshold[<span class="dv">0</span>], cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>plt.colorbar()</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Habitat Threshold'</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-26-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-48" class="cell" data-execution_count="47">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the outputs</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>fig_out, axs_out <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot NDVI</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>im1 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">0</span>].imshow(habitat_threshold[<span class="dv">0</span>], cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>axs_out[<span class="dv">0</span>, <span class="dv">0</span>].set_title(<span class="st">'NDVI'</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>fig_out.colorbar(im1, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot habitat selection log-probability</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>im2 <span class="op">=</span> axs_out[<span class="dv">0</span>, <span class="dv">1</span>].imshow(hab_density_exp <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>axs_out[<span class="dv">0</span>, <span class="dv">1</span>].set_title(<span class="st">'Habitat selection log-probability'</span>)</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>fig_out.colorbar(im2, ax<span class="op">=</span>axs_out[<span class="dv">0</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Movement density log-probability</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>im3 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">0</span>].imshow(move_density <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>axs_out[<span class="dv">1</span>, <span class="dv">0</span>].set_title(<span class="st">'Movement log-probability'</span>)</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>fig_out.colorbar(im3, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">0</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Next-step probability</span></span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>im4 <span class="op">=</span> axs_out[<span class="dv">1</span>, <span class="dv">1</span>].imshow(step_density <span class="op">*</span> next_step_mask, cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>axs_out[<span class="dv">1</span>, <span class="dv">1</span>].set_title(<span class="st">'Next-step log-probability'</span>)</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>fig_out.colorbar(im4, ax<span class="op">=</span>axs_out[<span class="dv">1</span>, <span class="dv">1</span>], shrink<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>filename_covs <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_step</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">_yday</span><span class="sc">{</span>yday<span class="sc">}</span><span class="ss">_hour</span><span class="sc">{</span>hour_t2<span class="sc">}</span><span class="ss">.png'</span></span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>plt.savefig(filename_covs, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>plt.close()  <span class="co"># Close the figure to free memory</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-27-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-49" class="cell" data-execution_count="29">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(next_step_probs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[0.00000000e+00 1.56298383e-03 3.48594738e-03 ... 1.82799941e-03
- 8.51432093e-05 2.47654880e-04]</code></pre>
+<pre><code>[0.         0.00106759 0.00159554 ... 0.         0.         0.        ]</code></pre>
 </div>
 </div>
 </section>
 <section id="calculate-the-null-probabilities" class="level2">
 <h2 class="anchored" data-anchor-id="calculate-the-null-probabilities">Calculate the null probabilities</h2>
 <p>As each cell has a probability values, we can calculate what the probability would be if the model provided no information at all, and each cell was equally likely to be the next step. This is just 1 divided by the total number of cells.</p>
-<div id="cell-48" class="cell" data-execution_count="26">
+<div id="cell-51" class="cell" data-execution_count="30">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>null_prob <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (window_size <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Null probability: </span><span class="sc">{</span>null_prob<span class="sc">:.3e}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>null_prob <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (window_size <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Null probability: </span><span class="sc">{</span>null_prob<span class="sc">:.3e}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Null probability: 9.803e-05</code></pre>
@@ -1406,15 +1511,15 @@ Number of NA values in the slope raster:
 </section>
 <section id="compute-the-rolling-average-of-the-probabilities" class="level2">
 <h2 class="anchored" data-anchor-id="compute-the-rolling-average-of-the-probabilities">Compute the rolling average of the probabilities</h2>
-<div id="cell-50" class="cell" data-execution_count="27">
+<div id="cell-53" class="cell" data-execution_count="31">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>rolling_window_size <span class="op">=</span> <span class="dv">100</span> <span class="co"># Rolling window size</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to pandas Series and compute rolling mean</span></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>rolling_mean_habitat <span class="op">=</span> pd.Series(habitat_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>rolling_mean_movement <span class="op">=</span> pd.Series(move_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>rolling_mean_next_step <span class="op">=</span> pd.Series(next_step_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>rolling_window_size <span class="op">=</span> <span class="dv">100</span> <span class="co"># Rolling window size</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to pandas Series and compute rolling mean</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>rolling_mean_habitat <span class="op">=</span> pd.Series(habitat_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>rolling_mean_movement <span class="op">=</span> pd.Series(move_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>rolling_mean_next_step <span class="op">=</span> pd.Series(next_step_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -1422,339 +1527,41 @@ Number of NA values in the slope raster:
 <section id="plot-the-probabilities" class="level1">
 <h1>Plot the probabilities</h1>
 <p>We can get an idea of how variable the probabilities are for the habitat selection and movement surfaces, and for the next-step probabilities, by plotting them across the trajectory</p>
-<div id="cell-52" class="cell" data-execution_count="28">
+<div id="cell-55" class="cell" data-execution_count="32">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the habitat probs through time as a line graph</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>plt.plot(habitat_probs[habitat_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Habitat Probabilities'</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_habitat[rolling_mean_habitat <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Habitat Probability'</span>)</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the movement probs through time as a line graph</span></span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>plt.plot(move_probs[move_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Movement Probabilities'</span>)</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_movement[rolling_mean_movement <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Movement Probability'</span>)</span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the next step probs through time as a line graph</span></span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>plt.plot(next_step_probs[next_step_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Next Step Probabilities'</span>)</span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_next_step[rolling_mean_next_step <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Next Step Probability'</span>)</span>
-<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-28-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-28-output-2.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-28-output-3.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="save-the-probabilities" class="level1">
-<h1>Save the probabilities</h1>
-<p>We can save the probabilities to a csv file to compare with the SSF probabilities.</p>
-<div id="cell-54" class="cell" data-execution_count="29">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># output directory for saving probability values</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>output_dir <span class="op">=</span> <span class="ss">f'../outputs/next_step_validation'</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>os.makedirs(output_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the probabilities to the dataframe</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'habitat_probs'</span>] <span class="op">=</span> habitat_probs</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'move_probs'</span>] <span class="op">=</span> move_probs</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'next_step_probs'</span>] <span class="op">=</span> next_step_probs</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>csv_filename <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/deepSSF_id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_n</span><span class="sc">{</span><span class="bu">len</span>(test_data)<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>today_date<span class="sc">}</span><span class="ss">.csv'</span></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(csv_filename)</span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>buffalo_df.to_csv(csv_filename, index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>../outputs/next_step_validation/deepSSF_id2005_n10103_2025-02-13.csv</code></pre>
-</div>
-</div>
-</section>
-<section id="calculate-probability-values-for-other-individuals" class="level1">
-<h1>Calculate probability values for other individuals</h1>
-<p>Here we want to take the model that we fitted to the focal individual, and see how well it can predict the steps of other individuals, which are in quite different areas of the landscape and occupy different environmental spaces.</p>
-<p>We follow exactly the same process as above (but with the different locations). We are still trying the predict the next step of the individual, but they are different trajectories.</p>
-<p>We consider this an out-of-sample test of the model.</p>
-<section id="load-dataframes-for-each-individual" class="level2">
-<h2 class="anchored" data-anchor-id="load-dataframes-for-each-individual">Load dataframes for each individual</h2>
-<p>As a check that the function is giving us what we expect we also load in the focal individual’s data and calculate the probabilities for that individual (which should give exactly the same values as above).</p>
-<div id="cell-56" class="cell" data-execution_count="30">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Specify the directory containing your TIFF files</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> <span class="st">'../buffalo_local_data_id/'</span>  <span class="co"># Replace with the actual path to your TIFF files</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Use glob to get a list of all TIFF files matching the pattern</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>csv_files <span class="op">=</span> glob.glob(os.path.join(data_dir, <span class="st">'buffalo_*.csv'</span>)) </span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Found </span><span class="sc">{</span><span class="bu">len</span>(csv_files)<span class="sc">}</span><span class="ss"> CSV files'</span>)</span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>.join(csv_files))</span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co"># select only 2005</span></span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>csv_files <span class="op">=</span> csv_files</span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="co"># csv_files = [csv_files[0]] # to select a single id</span></span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co"># print(csv_files)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Found 13 CSV files
-../buffalo_local_data_id/validation\validation_buffalo_2005_data_df_lag_1hr_n10297.csv
-../buffalo_local_data_id/validation\validation_buffalo_2014_data_df_lag_1hr_n6572.csv
-../buffalo_local_data_id/validation\validation_buffalo_2018_data_df_lag_1hr_n9440.csv
-../buffalo_local_data_id/validation\validation_buffalo_2021_data_df_lag_1hr_n6928.csv
-../buffalo_local_data_id/validation\validation_buffalo_2022_data_df_lag_1hr_n9099.csv
-../buffalo_local_data_id/validation\validation_buffalo_2024_data_df_lag_1hr_n9531.csv
-../buffalo_local_data_id/validation\validation_buffalo_2039_data_df_lag_1hr_n5569.csv
-../buffalo_local_data_id/validation\validation_buffalo_2154_data_df_lag_1hr_n10417.csv
-../buffalo_local_data_id/validation\validation_buffalo_2158_data_df_lag_1hr_n9700.csv
-../buffalo_local_data_id/validation\validation_buffalo_2223_data_df_lag_1hr_n5310.csv
-../buffalo_local_data_id/validation\validation_buffalo_2327_data_df_lag_1hr_n8983.csv
-../buffalo_local_data_id/validation\validation_buffalo_2387_data_df_lag_1hr_n10409.csv
-../buffalo_local_data_id/validation\validation_buffalo_2393_data_df_lag_1hr_n5299.csv</code></pre>
-</div>
-</div>
-</section>
-</section>
-<section id="loop-over-each-individual" class="level1">
-<h1>Loop over each individual</h1>
-<div id="cell-58" class="cell" data-execution_count="31">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(csv_files)):</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Read one of the CSV files into a DataFrame</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    buffalo_df <span class="op">=</span> pd.read_csv(csv_files[j])</span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract ID from the string for saving the file</span></span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    buffalo_id <span class="op">=</span> csv_files[j][<span class="dv">55</span>:<span class="dv">59</span>]</span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Lag the bearing values in column 'A' by one index (to get the previous bearing)</span></span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    buffalo_df[<span class="st">'bearing_tm1'</span>] <span class="op">=</span> buffalo_df[<span class="st">'bearing'</span>].shift(<span class="dv">1</span>)</span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pad the missing value with a specified value, e.g., 0</span></span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    buffalo_df[<span class="st">'bearing_tm1'</span>] <span class="op">=</span> buffalo_df[<span class="st">'bearing_tm1'</span>].fillna(<span class="dv">0</span>)</span>
-<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>    test_data <span class="op">=</span> buffalo_df</span>
-<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    n_samples <span class="op">=</span> <span class="bu">len</span>(test_data)</span>
-<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create empty vectors to store the predicted probabilities</span></span>
-<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>    habitat_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
-<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>    move_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
-<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>    next_step_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
-<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># start at 1 so the bearing at t - 1 is available</span></span>
-<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n_samples):</span>
-<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> test_data.iloc[i]</span>
-<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Current location (x1, y1)</span></span>
-<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> sample[<span class="st">'x1_'</span>]</span>
-<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> sample[<span class="st">'y1_'</span>]</span>
-<span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
-<span id="cb47-32"><a href="#cb47-32" aria-hidden="true" tabindex="-1"></a>        px, py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x, y)</span>
-<span id="cb47-33"><a href="#cb47-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-34"><a href="#cb47-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Next step location (x2, y2)</span></span>
-<span id="cb47-35"><a href="#cb47-35" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> sample[<span class="st">'x2_'</span>]</span>
-<span id="cb47-36"><a href="#cb47-36" aria-hidden="true" tabindex="-1"></a>        y2 <span class="op">=</span> sample[<span class="st">'y2_'</span>]</span>
-<span id="cb47-37"><a href="#cb47-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-38"><a href="#cb47-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
-<span id="cb47-39"><a href="#cb47-39" aria-hidden="true" tabindex="-1"></a>        px2, py2 <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x2, y2)</span>
-<span id="cb47-40"><a href="#cb47-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-41"><a href="#cb47-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The difference in x and y coordinates</span></span>
-<span id="cb47-42"><a href="#cb47-42" aria-hidden="true" tabindex="-1"></a>        d_x <span class="op">=</span> x2 <span class="op">-</span> x</span>
-<span id="cb47-43"><a href="#cb47-43" aria-hidden="true" tabindex="-1"></a>        d_y <span class="op">=</span> y2 <span class="op">-</span> y</span>
-<span id="cb47-44"><a href="#cb47-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('d_x and d_y are ', d_x, d_y) # Debugging</span></span>
-<span id="cb47-45"><a href="#cb47-45" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb47-46"><a href="#cb47-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Temporal covariates</span></span>
-<span id="cb47-47"><a href="#cb47-47" aria-hidden="true" tabindex="-1"></a>        hour_t2_sin <span class="op">=</span> sample[<span class="st">'hour_t2_sin'</span>]</span>
-<span id="cb47-48"><a href="#cb47-48" aria-hidden="true" tabindex="-1"></a>        hour_t2_cos <span class="op">=</span> sample[<span class="st">'hour_t2_cos'</span>]</span>
-<span id="cb47-49"><a href="#cb47-49" aria-hidden="true" tabindex="-1"></a>        yday_t2_sin <span class="op">=</span> sample[<span class="st">'yday_t2_sin'</span>]</span>
-<span id="cb47-50"><a href="#cb47-50" aria-hidden="true" tabindex="-1"></a>        yday_t2_cos <span class="op">=</span> sample[<span class="st">'yday_t2_cos'</span>]</span>
-<span id="cb47-51"><a href="#cb47-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-52"><a href="#cb47-52" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Bearing of previous step (t - 1)</span></span>
-<span id="cb47-53"><a href="#cb47-53" aria-hidden="true" tabindex="-1"></a>        bearing <span class="op">=</span> sample[<span class="st">'bearing_tm1'</span>]</span>
-<span id="cb47-54"><a href="#cb47-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-55"><a href="#cb47-55" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Day of the year</span></span>
-<span id="cb47-56"><a href="#cb47-56" aria-hidden="true" tabindex="-1"></a>        yday <span class="op">=</span> sample[<span class="st">'yday_t2'</span>]</span>
-<span id="cb47-57"><a href="#cb47-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-58"><a href="#cb47-58" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert day of the year to month index</span></span>
-<span id="cb47-59"><a href="#cb47-59" aria-hidden="true" tabindex="-1"></a>        month_index <span class="op">=</span> day_to_month_index(yday)</span>
-<span id="cb47-60"><a href="#cb47-60" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(month_index)</span></span>
-<span id="cb47-61"><a href="#cb47-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-62"><a href="#cb47-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the subset of the covariates at the location of x1, y1</span></span>
-<span id="cb47-63"><a href="#cb47-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># NDVI</span></span>
-<span id="cb47-64"><a href="#cb47-64" aria-hidden="true" tabindex="-1"></a>        ndvi_subset, origin_x, origin_y <span class="op">=</span> subset_raster(ndvi_landscape_norm[month_index,:,:], </span>
-<span id="cb47-65"><a href="#cb47-65" aria-hidden="true" tabindex="-1"></a>                                                        x, y, </span>
-<span id="cb47-66"><a href="#cb47-66" aria-hidden="true" tabindex="-1"></a>                                                        window_size, </span>
-<span id="cb47-67"><a href="#cb47-67" aria-hidden="true" tabindex="-1"></a>                                                        raster_transform)</span>
-<span id="cb47-68"><a href="#cb47-68" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb47-69"><a href="#cb47-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Canopy cover</span></span>
-<span id="cb47-70"><a href="#cb47-70" aria-hidden="true" tabindex="-1"></a>        canopy_subset, origin_x, origin_y <span class="op">=</span> subset_raster(canopy_landscape_norm, </span>
-<span id="cb47-71"><a href="#cb47-71" aria-hidden="true" tabindex="-1"></a>                                                          x, y, </span>
-<span id="cb47-72"><a href="#cb47-72" aria-hidden="true" tabindex="-1"></a>                                                          window_size, </span>
-<span id="cb47-73"><a href="#cb47-73" aria-hidden="true" tabindex="-1"></a>                                                          raster_transform)</span>
-<span id="cb47-74"><a href="#cb47-74" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb47-75"><a href="#cb47-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Herbaceous vegetation</span></span>
-<span id="cb47-76"><a href="#cb47-76" aria-hidden="true" tabindex="-1"></a>        herby_subset, origin_x, origin_y <span class="op">=</span> subset_raster(herby_landscape_norm,</span>
-<span id="cb47-77"><a href="#cb47-77" aria-hidden="true" tabindex="-1"></a>                                                         x, y, </span>
-<span id="cb47-78"><a href="#cb47-78" aria-hidden="true" tabindex="-1"></a>                                                         window_size, </span>
-<span id="cb47-79"><a href="#cb47-79" aria-hidden="true" tabindex="-1"></a>                                                         raster_transform)</span>
-<span id="cb47-80"><a href="#cb47-80" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb47-81"><a href="#cb47-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Slope</span></span>
-<span id="cb47-82"><a href="#cb47-82" aria-hidden="true" tabindex="-1"></a>        slope_subset, origin_x, origin_y <span class="op">=</span> subset_raster(slope_landscape_norm, </span>
-<span id="cb47-83"><a href="#cb47-83" aria-hidden="true" tabindex="-1"></a>                                                         x, y, </span>
-<span id="cb47-84"><a href="#cb47-84" aria-hidden="true" tabindex="-1"></a>                                                         window_size, </span>
-<span id="cb47-85"><a href="#cb47-85" aria-hidden="true" tabindex="-1"></a>                                                         raster_transform)</span>
-<span id="cb47-86"><a href="#cb47-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-87"><a href="#cb47-87" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Location of the next step in local pixel coordinates</span></span>
-<span id="cb47-88"><a href="#cb47-88" aria-hidden="true" tabindex="-1"></a>        px2_subset <span class="op">=</span> px2 <span class="op">-</span> origin_x</span>
-<span id="cb47-89"><a href="#cb47-89" aria-hidden="true" tabindex="-1"></a>        py2_subset <span class="op">=</span> py2 <span class="op">-</span> origin_y</span>
-<span id="cb47-90"><a href="#cb47-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('px2_subset and py2_subset are ', px2_subset, py2_subset) # Debugging</span></span>
-<span id="cb47-91"><a href="#cb47-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-92"><a href="#cb47-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
-<span id="cb47-93"><a href="#cb47-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># value = ndvi_subset.detach().cpu().numpy()[(int(py2_subset), int(px2_subset))]</span></span>
-<span id="cb47-94"><a href="#cb47-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-95"><a href="#cb47-95" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Stack the channels along a new axis; here, 1 is commonly used for channel axis in PyTorch</span></span>
-<span id="cb47-96"><a href="#cb47-96" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> torch.stack([ndvi_subset, canopy_subset, herby_subset, slope_subset], dim<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb47-97"><a href="#cb47-97" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> x1.unsqueeze(<span class="dv">0</span>)</span>
-<span id="cb47-98"><a href="#cb47-98" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(x1.shape)</span></span>
-<span id="cb47-99"><a href="#cb47-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-100"><a href="#cb47-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert lists to PyTorch tensors</span></span>
-<span id="cb47-101"><a href="#cb47-101" aria-hidden="true" tabindex="-1"></a>        hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>()</span>
-<span id="cb47-102"><a href="#cb47-102" aria-hidden="true" tabindex="-1"></a>        hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>()</span>
-<span id="cb47-103"><a href="#cb47-103" aria-hidden="true" tabindex="-1"></a>        yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>()</span>
-<span id="cb47-104"><a href="#cb47-104" aria-hidden="true" tabindex="-1"></a>        yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>()</span>
-<span id="cb47-105"><a href="#cb47-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-106"><a href="#cb47-106" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Stack tensors</span></span>
-<span id="cb47-107"><a href="#cb47-107" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> torch.stack((hour_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb47-108"><a href="#cb47-108" aria-hidden="true" tabindex="-1"></a>                            hour_t2_cos_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb47-109"><a href="#cb47-109" aria-hidden="true" tabindex="-1"></a>                            yday_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
-<span id="cb47-110"><a href="#cb47-110" aria-hidden="true" tabindex="-1"></a>                            yday_t2_cos_tensor.unsqueeze(<span class="dv">0</span>)),  </span>
-<span id="cb47-111"><a href="#cb47-111" aria-hidden="true" tabindex="-1"></a>                            dim<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb47-112"><a href="#cb47-112" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(x2.shape)</span></span>
-<span id="cb47-113"><a href="#cb47-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-114"><a href="#cb47-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Put bearing in the correct dimension (batch_size, 1)</span></span>
-<span id="cb47-115"><a href="#cb47-115" aria-hidden="true" tabindex="-1"></a>        bearing <span class="op">=</span> torch.tensor(bearing).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)</span>
-<span id="cb47-116"><a href="#cb47-116" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(bearing)</span></span>
-<span id="cb47-117"><a href="#cb47-117" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(bearing.shape)</span></span>
-<span id="cb47-118"><a href="#cb47-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-119"><a href="#cb47-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-120"><a href="#cb47-120" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-121"><a href="#cb47-121" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run the model</span></span>
-<span id="cb47-122"><a href="#cb47-122" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-123"><a href="#cb47-123" aria-hidden="true" tabindex="-1"></a>        model_output <span class="op">=</span> model((x1, x2, bearing))</span>
-<span id="cb47-124"><a href="#cb47-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-125"><a href="#cb47-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-126"><a href="#cb47-126" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-127"><a href="#cb47-127" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Habitat selection probability</span></span>
-<span id="cb47-128"><a href="#cb47-128" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-129"><a href="#cb47-129" aria-hidden="true" tabindex="-1"></a>        hab_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">0</span>]</span>
-<span id="cb47-130"><a href="#cb47-130" aria-hidden="true" tabindex="-1"></a>        hab_density_exp <span class="op">=</span> np.exp(hab_density)</span>
-<span id="cb47-131"><a href="#cb47-131" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(np.sum(hab_density_exp)) # Should be 1</span></span>
-<span id="cb47-132"><a href="#cb47-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-133"><a href="#cb47-133" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Store the probability of habitat selection at the location of x2, y2</span></span>
-<span id="cb47-134"><a href="#cb47-134" aria-hidden="true" tabindex="-1"></a>        <span class="co"># These probabilities are normalised in the model function</span></span>
-<span id="cb47-135"><a href="#cb47-135" aria-hidden="true" tabindex="-1"></a>        habitat_probs[i] <span class="op">=</span> hab_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb47-136"><a href="#cb47-136" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Habitat probability value = ', habitat_probs[i])</span></span>
-<span id="cb47-137"><a href="#cb47-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-138"><a href="#cb47-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-139"><a href="#cb47-139" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-140"><a href="#cb47-140" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Movement probability</span></span>
-<span id="cb47-141"><a href="#cb47-141" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-142"><a href="#cb47-142" aria-hidden="true" tabindex="-1"></a>        move_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">1</span>]</span>
-<span id="cb47-143"><a href="#cb47-143" aria-hidden="true" tabindex="-1"></a>        move_density_exp <span class="op">=</span> np.exp(move_density)</span>
-<span id="cb47-144"><a href="#cb47-144" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(np.sum(move_density_exp))  # Should be 1</span></span>
-<span id="cb47-145"><a href="#cb47-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-146"><a href="#cb47-146" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Store the movement probability at the location of x2, y2</span></span>
-<span id="cb47-147"><a href="#cb47-147" aria-hidden="true" tabindex="-1"></a>        <span class="co"># These probabilities are normalised in the model function</span></span>
-<span id="cb47-148"><a href="#cb47-148" aria-hidden="true" tabindex="-1"></a>        move_probs[i] <span class="op">=</span> move_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb47-149"><a href="#cb47-149" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Movement probability value = ', move_probs[i])</span></span>
-<span id="cb47-150"><a href="#cb47-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-151"><a href="#cb47-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-152"><a href="#cb47-152" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-153"><a href="#cb47-153" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Next step probability</span></span>
-<span id="cb47-154"><a href="#cb47-154" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
-<span id="cb47-155"><a href="#cb47-155" aria-hidden="true" tabindex="-1"></a>        step_density <span class="op">=</span> hab_density <span class="op">+</span> move_density</span>
-<span id="cb47-156"><a href="#cb47-156" aria-hidden="true" tabindex="-1"></a>        step_density_exp <span class="op">=</span> np.exp(step_density)</span>
-<span id="cb47-157"><a href="#cb47-157" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Sum of step density exp = ', np.sum(step_density_exp)) # Won't be 1</span></span>
-<span id="cb47-158"><a href="#cb47-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-159"><a href="#cb47-159" aria-hidden="true" tabindex="-1"></a>        step_density_exp_norm <span class="op">=</span> step_density_exp <span class="op">/</span> np.<span class="bu">sum</span>(step_density_exp)</span>
-<span id="cb47-160"><a href="#cb47-160" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Sum of step density exp norm = ', np.sum(step_density_exp_norm)) # Should be 1</span></span>
-<span id="cb47-161"><a href="#cb47-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-162"><a href="#cb47-162" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
-<span id="cb47-163"><a href="#cb47-163" aria-hidden="true" tabindex="-1"></a>        next_step_probs[i] <span class="op">=</span> step_density_exp_norm[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
-<span id="cb47-164"><a href="#cb47-164" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Next-step probability value = ', next_step_probs[i])</span></span>
-<span id="cb47-165"><a href="#cb47-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-166"><a href="#cb47-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-167"><a href="#cb47-167" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert to pandas Series and compute rolling mean</span></span>
-<span id="cb47-168"><a href="#cb47-168" aria-hidden="true" tabindex="-1"></a>    rolling_mean_habitat <span class="op">=</span> pd.Series(habitat_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb47-169"><a href="#cb47-169" aria-hidden="true" tabindex="-1"></a>    rolling_mean_movement <span class="op">=</span> pd.Series(move_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb47-170"><a href="#cb47-170" aria-hidden="true" tabindex="-1"></a>    rolling_mean_next_step <span class="op">=</span> pd.Series(next_step_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb47-171"><a href="#cb47-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-172"><a href="#cb47-172" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the habitat probs through time as a line graph</span></span>
-<span id="cb47-173"><a href="#cb47-173" aria-hidden="true" tabindex="-1"></a>    plt.plot(habitat_probs[habitat_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Habitat Probabilities'</span>)</span>
-<span id="cb47-174"><a href="#cb47-174" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_habitat[rolling_mean_habitat <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb47-175"><a href="#cb47-175" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb47-176"><a href="#cb47-176" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb47-177"><a href="#cb47-177" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb47-178"><a href="#cb47-178" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Habitat Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb47-179"><a href="#cb47-179" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb47-180"><a href="#cb47-180" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
-<span id="cb47-181"><a href="#cb47-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-182"><a href="#cb47-182" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the movement probs through time as a line graph</span></span>
-<span id="cb47-183"><a href="#cb47-183" aria-hidden="true" tabindex="-1"></a>    plt.plot(move_probs[move_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Movement Probabilities'</span>)</span>
-<span id="cb47-184"><a href="#cb47-184" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_movement[rolling_mean_movement <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb47-185"><a href="#cb47-185" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb47-186"><a href="#cb47-186" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb47-187"><a href="#cb47-187" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb47-188"><a href="#cb47-188" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Movement Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb47-189"><a href="#cb47-189" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb47-190"><a href="#cb47-190" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
-<span id="cb47-191"><a href="#cb47-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-192"><a href="#cb47-192" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the next step probs through time as a line graph</span></span>
-<span id="cb47-193"><a href="#cb47-193" aria-hidden="true" tabindex="-1"></a>    plt.plot(next_step_probs[next_step_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Next Step Probabilities'</span>)</span>
-<span id="cb47-194"><a href="#cb47-194" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_next_step[rolling_mean_next_step <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
-<span id="cb47-195"><a href="#cb47-195" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
-<span id="cb47-196"><a href="#cb47-196" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
-<span id="cb47-197"><a href="#cb47-197" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
-<span id="cb47-198"><a href="#cb47-198" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Next Step Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb47-199"><a href="#cb47-199" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
-<span id="cb47-200"><a href="#cb47-200" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
-<span id="cb47-201"><a href="#cb47-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-202"><a href="#cb47-202" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save the data to a CSV file</span></span>
-<span id="cb47-203"><a href="#cb47-203" aria-hidden="true" tabindex="-1"></a>    csv_filename <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/deepSSF_id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_n</span><span class="sc">{</span><span class="bu">len</span>(test_data)<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>today_date<span class="sc">}</span><span class="ss">.csv'</span></span>
-<span id="cb47-204"><a href="#cb47-204" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'File saved as:     </span><span class="sc">{</span>csv_filename<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb47-205"><a href="#cb47-205" aria-hidden="true" tabindex="-1"></a>    buffalo_df.to_csv(csv_filename, index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the habitat probs through time as a line graph</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>plt.plot(habitat_probs[habitat_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Habitat Probabilities'</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_habitat[rolling_mean_habitat <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Habitat Probability'</span>)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_habitat_probs.png'</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the movement probs through time as a line graph</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>plt.plot(move_probs[move_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Movement Probabilities'</span>)</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_movement[rolling_mean_movement <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Movement Probability'</span>)</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_movement_probs.png'</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the next step probs through time as a line graph</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>plt.plot(next_step_probs[next_step_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Next Step Probabilities'</span>)</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>plt.plot(rolling_mean_next_step[rolling_mean_next_step <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Next Step Probability'</span>)</span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_next_step_probs.png'</span>, dpi<span class="op">=</span><span class="dv">600</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1777,27 +1584,328 @@ Number of NA values in the slope raster:
 </figure>
 </div>
 </div>
+</div>
+</section>
+<section id="save-the-probabilities" class="level1">
+<h1>Save the probabilities</h1>
+<p>We can save the probabilities to a csv file to compare with the SSF probabilities.</p>
+<div id="cell-57" class="cell" data-execution_count="29">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># output directory for saving probability values</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>output_dir <span class="op">=</span> <span class="ss">f'../outputs/next_step_validation'</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>os.makedirs(output_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the probabilities to the dataframe</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'habitat_probs'</span>] <span class="op">=</span> habitat_probs</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'move_probs'</span>] <span class="op">=</span> move_probs</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>buffalo_df[<span class="st">'next_step_probs'</span>] <span class="op">=</span> next_step_probs</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>csv_filename <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/deepSSF_id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_n</span><span class="sc">{</span><span class="bu">len</span>(test_data)<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>today_date<span class="sc">}</span><span class="ss">.csv'</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(csv_filename)</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>buffalo_df.to_csv(csv_filename, index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>../outputs/next_step_validation/deepSSF_id2005_n10103_2025-02-13.csv</code></pre>
+</div>
+</div>
+</section>
+<section id="calculate-probability-values-for-other-individuals" class="level1">
+<h1>Calculate probability values for other individuals</h1>
+<p>Here we want to take the model that we fitted to the focal individual, and see how well it can predict the steps of other individuals, which are in quite different areas of the landscape and occupy different environmental spaces.</p>
+<p>We follow exactly the same process as above (but with the different locations). We are still trying the predict the next step of the individual, but they are different trajectories.</p>
+<p>We consider this an out-of-sample test of the model.</p>
+<section id="load-dataframes-for-each-individual" class="level2">
+<h2 class="anchored" data-anchor-id="load-dataframes-for-each-individual">Load dataframes for each individual</h2>
+<p>As a check that the function is giving us what we expect we also load in the focal individual’s data and calculate the probabilities for that individual (which should give exactly the same values as above).</p>
+<div id="cell-59" class="cell" data-execution_count="30">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Specify the directory containing your TIFF files</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> <span class="st">'../buffalo_local_data_id/'</span>  <span class="co"># Replace with the actual path to your TIFF files</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Use glob to get a list of all TIFF files matching the pattern</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>csv_files <span class="op">=</span> glob.glob(os.path.join(data_dir, <span class="st">'buffalo_*.csv'</span>)) </span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Found </span><span class="sc">{</span><span class="bu">len</span>(csv_files)<span class="sc">}</span><span class="ss"> CSV files'</span>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>.join(csv_files))</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># select only 2005</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>csv_files <span class="op">=</span> csv_files</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="co"># csv_files = [csv_files[0]] # to select a single id</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="co"># print(csv_files)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Found 13 CSV files
+../buffalo_local_data_id/validation\validation_buffalo_2005_data_df_lag_1hr_n10297.csv
+../buffalo_local_data_id/validation\validation_buffalo_2014_data_df_lag_1hr_n6572.csv
+../buffalo_local_data_id/validation\validation_buffalo_2018_data_df_lag_1hr_n9440.csv
+../buffalo_local_data_id/validation\validation_buffalo_2021_data_df_lag_1hr_n6928.csv
+../buffalo_local_data_id/validation\validation_buffalo_2022_data_df_lag_1hr_n9099.csv
+../buffalo_local_data_id/validation\validation_buffalo_2024_data_df_lag_1hr_n9531.csv
+../buffalo_local_data_id/validation\validation_buffalo_2039_data_df_lag_1hr_n5569.csv
+../buffalo_local_data_id/validation\validation_buffalo_2154_data_df_lag_1hr_n10417.csv
+../buffalo_local_data_id/validation\validation_buffalo_2158_data_df_lag_1hr_n9700.csv
+../buffalo_local_data_id/validation\validation_buffalo_2223_data_df_lag_1hr_n5310.csv
+../buffalo_local_data_id/validation\validation_buffalo_2327_data_df_lag_1hr_n8983.csv
+../buffalo_local_data_id/validation\validation_buffalo_2387_data_df_lag_1hr_n10409.csv
+../buffalo_local_data_id/validation\validation_buffalo_2393_data_df_lag_1hr_n5299.csv</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="loop-over-each-individual" class="level1">
+<h1>Loop over each individual</h1>
+<div id="cell-61" class="cell" data-execution_count="31">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(csv_files)):</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Read one of the CSV files into a DataFrame</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    buffalo_df <span class="op">=</span> pd.read_csv(csv_files[j])</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract ID from the string for saving the file</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    buffalo_id <span class="op">=</span> csv_files[j][<span class="dv">55</span>:<span class="dv">59</span>]</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Lag the bearing values in column 'A' by one index (to get the previous bearing)</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>    buffalo_df[<span class="st">'bearing_tm1'</span>] <span class="op">=</span> buffalo_df[<span class="st">'bearing'</span>].shift(<span class="dv">1</span>)</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pad the missing value with a specified value, e.g., 0</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>    buffalo_df[<span class="st">'bearing_tm1'</span>] <span class="op">=</span> buffalo_df[<span class="st">'bearing_tm1'</span>].fillna(<span class="dv">0</span>)</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>    test_data <span class="op">=</span> buffalo_df</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>    n_samples <span class="op">=</span> <span class="bu">len</span>(test_data)</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create empty vectors to store the predicted probabilities</span></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>    habitat_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>    move_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>    next_step_probs <span class="op">=</span> np.repeat(<span class="fl">0.</span>, n_samples)</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># start at 1 so the bearing at t - 1 is available</span></span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n_samples):</span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> test_data.iloc[i]</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Current location (x1, y1)</span></span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> sample[<span class="st">'x1_'</span>]</span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> sample[<span class="st">'y1_'</span>]</span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a>        px, py <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x, y)</span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Next step location (x2, y2)</span></span>
+<span id="cb50-35"><a href="#cb50-35" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> sample[<span class="st">'x2_'</span>]</span>
+<span id="cb50-36"><a href="#cb50-36" aria-hidden="true" tabindex="-1"></a>        y2 <span class="op">=</span> sample[<span class="st">'y2_'</span>]</span>
+<span id="cb50-37"><a href="#cb50-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-38"><a href="#cb50-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert geographic coordinates to pixel coordinates</span></span>
+<span id="cb50-39"><a href="#cb50-39" aria-hidden="true" tabindex="-1"></a>        px2, py2 <span class="op">=</span> <span class="op">~</span>raster_transform <span class="op">*</span> (x2, y2)</span>
+<span id="cb50-40"><a href="#cb50-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-41"><a href="#cb50-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The difference in x and y coordinates</span></span>
+<span id="cb50-42"><a href="#cb50-42" aria-hidden="true" tabindex="-1"></a>        d_x <span class="op">=</span> x2 <span class="op">-</span> x</span>
+<span id="cb50-43"><a href="#cb50-43" aria-hidden="true" tabindex="-1"></a>        d_y <span class="op">=</span> y2 <span class="op">-</span> y</span>
+<span id="cb50-44"><a href="#cb50-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('d_x and d_y are ', d_x, d_y) # Debugging</span></span>
+<span id="cb50-45"><a href="#cb50-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb50-46"><a href="#cb50-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Temporal covariates</span></span>
+<span id="cb50-47"><a href="#cb50-47" aria-hidden="true" tabindex="-1"></a>        hour_t2_sin <span class="op">=</span> sample[<span class="st">'hour_t2_sin'</span>]</span>
+<span id="cb50-48"><a href="#cb50-48" aria-hidden="true" tabindex="-1"></a>        hour_t2_cos <span class="op">=</span> sample[<span class="st">'hour_t2_cos'</span>]</span>
+<span id="cb50-49"><a href="#cb50-49" aria-hidden="true" tabindex="-1"></a>        yday_t2_sin <span class="op">=</span> sample[<span class="st">'yday_t2_sin'</span>]</span>
+<span id="cb50-50"><a href="#cb50-50" aria-hidden="true" tabindex="-1"></a>        yday_t2_cos <span class="op">=</span> sample[<span class="st">'yday_t2_cos'</span>]</span>
+<span id="cb50-51"><a href="#cb50-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-52"><a href="#cb50-52" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Bearing of previous step (t - 1)</span></span>
+<span id="cb50-53"><a href="#cb50-53" aria-hidden="true" tabindex="-1"></a>        bearing <span class="op">=</span> sample[<span class="st">'bearing_tm1'</span>]</span>
+<span id="cb50-54"><a href="#cb50-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-55"><a href="#cb50-55" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Day of the year</span></span>
+<span id="cb50-56"><a href="#cb50-56" aria-hidden="true" tabindex="-1"></a>        yday <span class="op">=</span> sample[<span class="st">'yday_t2'</span>]</span>
+<span id="cb50-57"><a href="#cb50-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-58"><a href="#cb50-58" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert day of the year to month index</span></span>
+<span id="cb50-59"><a href="#cb50-59" aria-hidden="true" tabindex="-1"></a>        month_index <span class="op">=</span> day_to_month_index(yday)</span>
+<span id="cb50-60"><a href="#cb50-60" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(month_index)</span></span>
+<span id="cb50-61"><a href="#cb50-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-62"><a href="#cb50-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the subset of the covariates at the location of x1, y1</span></span>
+<span id="cb50-63"><a href="#cb50-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># NDVI</span></span>
+<span id="cb50-64"><a href="#cb50-64" aria-hidden="true" tabindex="-1"></a>        ndvi_subset, origin_x, origin_y <span class="op">=</span> subset_raster(ndvi_landscape_norm[month_index,:,:], </span>
+<span id="cb50-65"><a href="#cb50-65" aria-hidden="true" tabindex="-1"></a>                                                        x, y, </span>
+<span id="cb50-66"><a href="#cb50-66" aria-hidden="true" tabindex="-1"></a>                                                        window_size, </span>
+<span id="cb50-67"><a href="#cb50-67" aria-hidden="true" tabindex="-1"></a>                                                        raster_transform)</span>
+<span id="cb50-68"><a href="#cb50-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb50-69"><a href="#cb50-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Canopy cover</span></span>
+<span id="cb50-70"><a href="#cb50-70" aria-hidden="true" tabindex="-1"></a>        canopy_subset, origin_x, origin_y <span class="op">=</span> subset_raster(canopy_landscape_norm, </span>
+<span id="cb50-71"><a href="#cb50-71" aria-hidden="true" tabindex="-1"></a>                                                          x, y, </span>
+<span id="cb50-72"><a href="#cb50-72" aria-hidden="true" tabindex="-1"></a>                                                          window_size, </span>
+<span id="cb50-73"><a href="#cb50-73" aria-hidden="true" tabindex="-1"></a>                                                          raster_transform)</span>
+<span id="cb50-74"><a href="#cb50-74" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb50-75"><a href="#cb50-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Herbaceous vegetation</span></span>
+<span id="cb50-76"><a href="#cb50-76" aria-hidden="true" tabindex="-1"></a>        herby_subset, origin_x, origin_y <span class="op">=</span> subset_raster(herby_landscape_norm,</span>
+<span id="cb50-77"><a href="#cb50-77" aria-hidden="true" tabindex="-1"></a>                                                         x, y, </span>
+<span id="cb50-78"><a href="#cb50-78" aria-hidden="true" tabindex="-1"></a>                                                         window_size, </span>
+<span id="cb50-79"><a href="#cb50-79" aria-hidden="true" tabindex="-1"></a>                                                         raster_transform)</span>
+<span id="cb50-80"><a href="#cb50-80" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb50-81"><a href="#cb50-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Slope</span></span>
+<span id="cb50-82"><a href="#cb50-82" aria-hidden="true" tabindex="-1"></a>        slope_subset, origin_x, origin_y <span class="op">=</span> subset_raster(slope_landscape_norm, </span>
+<span id="cb50-83"><a href="#cb50-83" aria-hidden="true" tabindex="-1"></a>                                                         x, y, </span>
+<span id="cb50-84"><a href="#cb50-84" aria-hidden="true" tabindex="-1"></a>                                                         window_size, </span>
+<span id="cb50-85"><a href="#cb50-85" aria-hidden="true" tabindex="-1"></a>                                                         raster_transform)</span>
+<span id="cb50-86"><a href="#cb50-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-87"><a href="#cb50-87" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Location of the next step in local pixel coordinates</span></span>
+<span id="cb50-88"><a href="#cb50-88" aria-hidden="true" tabindex="-1"></a>        px2_subset <span class="op">=</span> px2 <span class="op">-</span> origin_x</span>
+<span id="cb50-89"><a href="#cb50-89" aria-hidden="true" tabindex="-1"></a>        py2_subset <span class="op">=</span> py2 <span class="op">-</span> origin_y</span>
+<span id="cb50-90"><a href="#cb50-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('px2_subset and py2_subset are ', px2_subset, py2_subset) # Debugging</span></span>
+<span id="cb50-91"><a href="#cb50-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-92"><a href="#cb50-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
+<span id="cb50-93"><a href="#cb50-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># value = ndvi_subset.detach().cpu().numpy()[(int(py2_subset), int(px2_subset))]</span></span>
+<span id="cb50-94"><a href="#cb50-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-95"><a href="#cb50-95" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Stack the channels along a new axis; here, 1 is commonly used for channel axis in PyTorch</span></span>
+<span id="cb50-96"><a href="#cb50-96" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> torch.stack([ndvi_subset, canopy_subset, herby_subset, slope_subset], dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb50-97"><a href="#cb50-97" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> x1.unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb50-98"><a href="#cb50-98" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(x1.shape)</span></span>
+<span id="cb50-99"><a href="#cb50-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-100"><a href="#cb50-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert lists to PyTorch tensors</span></span>
+<span id="cb50-101"><a href="#cb50-101" aria-hidden="true" tabindex="-1"></a>        hour_t2_sin_tensor <span class="op">=</span> torch.tensor(hour_t2_sin).<span class="bu">float</span>()</span>
+<span id="cb50-102"><a href="#cb50-102" aria-hidden="true" tabindex="-1"></a>        hour_t2_cos_tensor <span class="op">=</span> torch.tensor(hour_t2_cos).<span class="bu">float</span>()</span>
+<span id="cb50-103"><a href="#cb50-103" aria-hidden="true" tabindex="-1"></a>        yday_t2_sin_tensor <span class="op">=</span> torch.tensor(yday_t2_sin).<span class="bu">float</span>()</span>
+<span id="cb50-104"><a href="#cb50-104" aria-hidden="true" tabindex="-1"></a>        yday_t2_cos_tensor <span class="op">=</span> torch.tensor(yday_t2_cos).<span class="bu">float</span>()</span>
+<span id="cb50-105"><a href="#cb50-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-106"><a href="#cb50-106" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Stack tensors</span></span>
+<span id="cb50-107"><a href="#cb50-107" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> torch.stack((hour_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb50-108"><a href="#cb50-108" aria-hidden="true" tabindex="-1"></a>                            hour_t2_cos_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb50-109"><a href="#cb50-109" aria-hidden="true" tabindex="-1"></a>                            yday_t2_sin_tensor.unsqueeze(<span class="dv">0</span>), </span>
+<span id="cb50-110"><a href="#cb50-110" aria-hidden="true" tabindex="-1"></a>                            yday_t2_cos_tensor.unsqueeze(<span class="dv">0</span>)),  </span>
+<span id="cb50-111"><a href="#cb50-111" aria-hidden="true" tabindex="-1"></a>                            dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb50-112"><a href="#cb50-112" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(x2.shape)</span></span>
+<span id="cb50-113"><a href="#cb50-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-114"><a href="#cb50-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Put bearing in the correct dimension (batch_size, 1)</span></span>
+<span id="cb50-115"><a href="#cb50-115" aria-hidden="true" tabindex="-1"></a>        bearing <span class="op">=</span> torch.tensor(bearing).<span class="bu">float</span>().unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb50-116"><a href="#cb50-116" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(bearing)</span></span>
+<span id="cb50-117"><a href="#cb50-117" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(bearing.shape)</span></span>
+<span id="cb50-118"><a href="#cb50-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-119"><a href="#cb50-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-120"><a href="#cb50-120" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-121"><a href="#cb50-121" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run the model</span></span>
+<span id="cb50-122"><a href="#cb50-122" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-123"><a href="#cb50-123" aria-hidden="true" tabindex="-1"></a>        model_output <span class="op">=</span> model((x1, x2, bearing))</span>
+<span id="cb50-124"><a href="#cb50-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-125"><a href="#cb50-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-126"><a href="#cb50-126" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-127"><a href="#cb50-127" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Habitat selection probability</span></span>
+<span id="cb50-128"><a href="#cb50-128" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-129"><a href="#cb50-129" aria-hidden="true" tabindex="-1"></a>        hab_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">0</span>]</span>
+<span id="cb50-130"><a href="#cb50-130" aria-hidden="true" tabindex="-1"></a>        hab_density_exp <span class="op">=</span> np.exp(hab_density)</span>
+<span id="cb50-131"><a href="#cb50-131" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(np.sum(hab_density_exp)) # Should be 1</span></span>
+<span id="cb50-132"><a href="#cb50-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-133"><a href="#cb50-133" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Store the probability of habitat selection at the location of x2, y2</span></span>
+<span id="cb50-134"><a href="#cb50-134" aria-hidden="true" tabindex="-1"></a>        <span class="co"># These probabilities are normalised in the model function</span></span>
+<span id="cb50-135"><a href="#cb50-135" aria-hidden="true" tabindex="-1"></a>        habitat_probs[i] <span class="op">=</span> hab_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb50-136"><a href="#cb50-136" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Habitat probability value = ', habitat_probs[i])</span></span>
+<span id="cb50-137"><a href="#cb50-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-138"><a href="#cb50-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-139"><a href="#cb50-139" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-140"><a href="#cb50-140" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Movement probability</span></span>
+<span id="cb50-141"><a href="#cb50-141" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-142"><a href="#cb50-142" aria-hidden="true" tabindex="-1"></a>        move_density <span class="op">=</span> model_output.detach().cpu().numpy()[<span class="dv">0</span>,:,:,<span class="dv">1</span>]</span>
+<span id="cb50-143"><a href="#cb50-143" aria-hidden="true" tabindex="-1"></a>        move_density_exp <span class="op">=</span> np.exp(move_density)</span>
+<span id="cb50-144"><a href="#cb50-144" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(np.sum(move_density_exp))  # Should be 1</span></span>
+<span id="cb50-145"><a href="#cb50-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-146"><a href="#cb50-146" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Store the movement probability at the location of x2, y2</span></span>
+<span id="cb50-147"><a href="#cb50-147" aria-hidden="true" tabindex="-1"></a>        <span class="co"># These probabilities are normalised in the model function</span></span>
+<span id="cb50-148"><a href="#cb50-148" aria-hidden="true" tabindex="-1"></a>        move_probs[i] <span class="op">=</span> move_density_exp[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb50-149"><a href="#cb50-149" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Movement probability value = ', move_probs[i])</span></span>
+<span id="cb50-150"><a href="#cb50-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-151"><a href="#cb50-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-152"><a href="#cb50-152" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-153"><a href="#cb50-153" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Next step probability</span></span>
+<span id="cb50-154"><a href="#cb50-154" aria-hidden="true" tabindex="-1"></a>        <span class="co"># -------------------------------------------------------------------------</span></span>
+<span id="cb50-155"><a href="#cb50-155" aria-hidden="true" tabindex="-1"></a>        step_density <span class="op">=</span> hab_density <span class="op">+</span> move_density</span>
+<span id="cb50-156"><a href="#cb50-156" aria-hidden="true" tabindex="-1"></a>        step_density_exp <span class="op">=</span> np.exp(step_density)</span>
+<span id="cb50-157"><a href="#cb50-157" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Sum of step density exp = ', np.sum(step_density_exp)) # Won't be 1</span></span>
+<span id="cb50-158"><a href="#cb50-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-159"><a href="#cb50-159" aria-hidden="true" tabindex="-1"></a>        step_density_exp_norm <span class="op">=</span> step_density_exp <span class="op">/</span> np.<span class="bu">sum</span>(step_density_exp)</span>
+<span id="cb50-160"><a href="#cb50-160" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Sum of step density exp norm = ', np.sum(step_density_exp_norm)) # Should be 1</span></span>
+<span id="cb50-161"><a href="#cb50-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-162"><a href="#cb50-162" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Extract the value of the covariates at the location of x2, y2</span></span>
+<span id="cb50-163"><a href="#cb50-163" aria-hidden="true" tabindex="-1"></a>        next_step_probs[i] <span class="op">=</span> step_density_exp_norm[(<span class="bu">int</span>(py2_subset), <span class="bu">int</span>(px2_subset))]</span>
+<span id="cb50-164"><a href="#cb50-164" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print('Next-step probability value = ', next_step_probs[i])</span></span>
+<span id="cb50-165"><a href="#cb50-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-166"><a href="#cb50-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-167"><a href="#cb50-167" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert to pandas Series and compute rolling mean</span></span>
+<span id="cb50-168"><a href="#cb50-168" aria-hidden="true" tabindex="-1"></a>    rolling_mean_habitat <span class="op">=</span> pd.Series(habitat_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
+<span id="cb50-169"><a href="#cb50-169" aria-hidden="true" tabindex="-1"></a>    rolling_mean_movement <span class="op">=</span> pd.Series(move_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
+<span id="cb50-170"><a href="#cb50-170" aria-hidden="true" tabindex="-1"></a>    rolling_mean_next_step <span class="op">=</span> pd.Series(next_step_probs).rolling(window<span class="op">=</span>window_size, center<span class="op">=</span><span class="va">True</span>).mean()</span>
+<span id="cb50-171"><a href="#cb50-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-172"><a href="#cb50-172" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the habitat probs through time as a line graph</span></span>
+<span id="cb50-173"><a href="#cb50-173" aria-hidden="true" tabindex="-1"></a>    plt.plot(habitat_probs[habitat_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Habitat Probabilities'</span>)</span>
+<span id="cb50-174"><a href="#cb50-174" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_habitat[rolling_mean_habitat <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb50-175"><a href="#cb50-175" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb50-176"><a href="#cb50-176" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb50-177"><a href="#cb50-177" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb50-178"><a href="#cb50-178" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Habitat Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb50-179"><a href="#cb50-179" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb50-180"><a href="#cb50-180" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb50-181"><a href="#cb50-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-182"><a href="#cb50-182" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the movement probs through time as a line graph</span></span>
+<span id="cb50-183"><a href="#cb50-183" aria-hidden="true" tabindex="-1"></a>    plt.plot(move_probs[move_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Movement Probabilities'</span>)</span>
+<span id="cb50-184"><a href="#cb50-184" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_movement[rolling_mean_movement <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb50-185"><a href="#cb50-185" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb50-186"><a href="#cb50-186" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb50-187"><a href="#cb50-187" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb50-188"><a href="#cb50-188" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Movement Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb50-189"><a href="#cb50-189" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb50-190"><a href="#cb50-190" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb50-191"><a href="#cb50-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-192"><a href="#cb50-192" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the next step probs through time as a line graph</span></span>
+<span id="cb50-193"><a href="#cb50-193" aria-hidden="true" tabindex="-1"></a>    plt.plot(next_step_probs[next_step_probs <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">'Next Step Probabilities'</span>)</span>
+<span id="cb50-194"><a href="#cb50-194" aria-hidden="true" tabindex="-1"></a>    plt.plot(rolling_mean_next_step[rolling_mean_next_step <span class="op">&gt;</span> <span class="dv">0</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Rolling Mean'</span>)</span>
+<span id="cb50-195"><a href="#cb50-195" aria-hidden="true" tabindex="-1"></a>    plt.axhline(y<span class="op">=</span>null_prob, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Null Probability'</span>)  <span class="co"># null probs</span></span>
+<span id="cb50-196"><a href="#cb50-196" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Index'</span>)</span>
+<span id="cb50-197"><a href="#cb50-197" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Probability'</span>)</span>
+<span id="cb50-198"><a href="#cb50-198" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Next Step Probability - ID </span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb50-199"><a href="#cb50-199" aria-hidden="true" tabindex="-1"></a>    plt.legend()  <span class="co"># Add legend to differentiate lines</span></span>
+<span id="cb50-200"><a href="#cb50-200" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb50-201"><a href="#cb50-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-202"><a href="#cb50-202" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save the data to a CSV file</span></span>
+<span id="cb50-203"><a href="#cb50-203" aria-hidden="true" tabindex="-1"></a>    csv_filename <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">/deepSSF_id</span><span class="sc">{</span>buffalo_id<span class="sc">}</span><span class="ss">_n</span><span class="sc">{</span><span class="bu">len</span>(test_data)<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>today_date<span class="sc">}</span><span class="ss">.csv'</span></span>
+<span id="cb50-204"><a href="#cb50-204" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'File saved as:     </span><span class="sc">{</span>csv_filename<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb50-205"><a href="#cb50-205" aria-hidden="true" tabindex="-1"></a>    buffalo_df.to_csv(csv_filename, index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code>File saved as:     ../outputs/next_step_validation/deepSSF_id2005_n10100_2025-02-13.csv</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-5.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-5.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-6.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-6.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-7.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-7.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1807,21 +1915,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-9.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-9.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-10.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-10.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-11.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-11.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1831,21 +1939,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-13.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-13.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-14.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-14.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-15.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-15.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1855,21 +1963,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-17.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-17.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-18.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-18.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-19.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-19.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1879,21 +1987,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-21.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-21.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-22.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-22.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-23.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-23.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1903,21 +2011,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-25.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-25.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-26.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-26.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-27.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-27.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1927,21 +2035,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-29.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-29.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-30.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-30.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-31.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-31.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1951,21 +2059,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-33.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-33.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-34.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-34.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-35.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-35.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1975,21 +2083,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-37.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-37.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-38.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-38.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-39.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-39.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1999,21 +2107,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-41.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-41.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-42.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-42.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-43.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-43.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2023,21 +2131,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-45.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-45.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-46.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-46.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-47.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-47.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2047,21 +2155,21 @@ Number of NA values in the slope raster:
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-49.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-49.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-50.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-50.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepSSF_next_step_validation_files/figure-html/cell-31-output-51.png" class="img-fluid figure-img"></p>
+<p><img src="deepSSF_next_step_validation_files/figure-html/cell-34-output-51.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
