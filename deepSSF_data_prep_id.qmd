@@ -369,7 +369,7 @@ for(i in 1:1) { # select just the first ID
   
   # to use a subset of the data for that individual for testing
   # COMMENT THIS LINE OUT TO USE THE FULL DATASET
-  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:10)
+  buffalo_data <- buffalo_data %>% arrange(t_) |>  slice(1:100)
 
   n_samples <- nrow(buffalo_data)
   

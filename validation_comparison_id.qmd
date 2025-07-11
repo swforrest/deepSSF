@@ -57,7 +57,7 @@ options(scipen = 0)  # Reset
 ```{r}
 #| message=FALSE
 
-uniform_probs <- 1/(101*101) # uniform probability for each cell
+uniform_prob <- 1/(101*101) # uniform probability for each cell
 
 focal_id <- 2005
 
@@ -103,7 +103,7 @@ train_samples <- nrow(validation_ssf_all) * 0.8
 val_test_samples <- nrow(validation_ssf_all) * 0.1
 
 # For plotting
-train_val_split <- validation_ssf_all[test_samples,]$t_
+train_val_split <- validation_ssf_all[train_samples,]$t_
 val_test_split <- validation_ssf_all[train_samples + val_test_samples,]$t_
 
 # For plotting where example locations were taken from
@@ -567,7 +567,7 @@ validation_all_long <- validation_all_long %>%
 
 ggplot() +
   
-  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   geom_density_ridges(data = validation_all_long %>%
                  filter(probability == "habitat" & value > lower_habitat & value < upper_habitat),
@@ -805,7 +805,7 @@ validation_all_long <- validation_all_long %>%
 
 ggplot() +
   
-  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   geom_density_ridges(data = validation_all_long %>%
                  filter(probability == "move" & value > lower_habitat & value < upper_habitat),
@@ -1098,7 +1098,7 @@ validation_all_long <- validation_all_long %>%
 
 ggplot() +
   
-  geom_vline(xintercept = uniform_probs, linetype = "dashed", linewidth = 0.5) +
+  geom_vline(xintercept = uniform_prob, linetype = "dashed", linewidth = 0.5) +
   
   geom_density_ridges(data = validation_all_long %>%
                  filter(probability == "next_step" & value > lower_habitat & value < upper_habitat),

@@ -1,6 +1,6 @@
 project:
   type: website
-  output-dir: docs
+  output-dir: docs2
 
 website:
   title: "deepSSF"
@@ -97,7 +97,7 @@ website:
           - Python/deepSSF_next_step_validation_S2.ipynb
           - ssf_model_fit_id.qmd
           - ssf_validation.qmd
-          - validation_comparison.qmd
+          - validation_comparison_id.qmd
 
   page-footer:
     background: light

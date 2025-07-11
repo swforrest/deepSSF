@@ -310,8 +310,7 @@ for(k in 1:1) {
   # write_csv(data_id, paste0("buffalo_local_data_id/validation/validation_", buffalo_data_ids[k]))
   
   
-  # model_harmonics <- c("0p", "2p")
-  model_harmonics <- c("2p")
+  model_harmonics <- c("0p", "2p")
   
   test_data <- data_id %>% slice(1:100) # test with a subset of the data
   # test_data <- data_id
@@ -377,7 +376,7 @@ for(k in 1:1) {
       
     sample_plot <- 1
       
-    for (i in sample_plot:(sample_plot+50)) {
+    for (i in sample_plot:(sample_plot+10)) {
     # for (i in sample_plot:sample_plot) {
     
     # for the subset
