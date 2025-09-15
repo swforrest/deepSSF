@@ -1,6 +1,6 @@
 project:
   type: website
-  output-dir: docs2
+  output-dir: docs
 
 website:
   title: "deepSSF"
