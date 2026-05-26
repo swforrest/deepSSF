@@ -83,6 +83,33 @@ buffalo_ids <- unique(buffalo_clean$id)
 
 ```
 
+## Create a subset of the data to export for testing the deepSSF package
+
+We'll select the ID 2005, as that was used for training the model in the MEE paper
+
+```{r}
+
+buffalo_clean_2005 <- buffalo_clean %>% filter(id == 2005) 
+
+# convert to sf object and transform to the same projection as the covariates (GDA94 / Geoscience Australia Lambert, EPSG:3112)
+buffalo_clean_2005_sf <- buffalo_clean_2005 %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
+  st_transform(crs = 3112) 
+
+# add the coordinates back to the data frame
+buffalo_clean_2005_coords <- buffalo_clean_2005_sf %>% 
+  st_coordinates() %>% 
+  as.data.frame() %>% 
+  rename(x = X, y = Y)
+
+buffalo_clean_2005_proj <- buffalo_clean_2005 %>% 
+  bind_cols(buffalo_clean_2005_coords) %>% 
+  dplyr::select(id, time, x, y)
+
+buffalo_clean_2005_proj %>% write_csv("data/buffalo_djelk_id2005.csv")
+
+```
+
 ## Setup trajectory
 
 Use the `amt` package to create a trajectory object from the cleaned data. 
@@ -329,6 +356,43 @@ plot(canopy_cover)
 res <- terra::res(ndvi_projected)[1]
 
 ```
+
+## Create some layers for testing the deepSSF package
+
+These will be cropped to the extent of the ID 2005 data. We will also take an average of the NDVI values for simplicity.
+
+```{r}
+
+buffer_distance <- 2500 # add a generous buffer distance to ensure we capture all steps for this ID
+
+ndvi_average <- terra::app(ndvi_projected, mean)
+plot(ndvi_average)
+
+# create a buffer around the buffalo 2005 data
+buffalo_clean_2005_sf <- buffalo_clean_2005 %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
+  st_transform(crs = 3112) 
+
+buffalo_clean_2005_extent <- buffalo_clean_2005_sf %>% 
+  st_buffer(dist = buffer_distance) %>% 
+  st_bbox() %>% 
+  st_as_sfc()
+
+# crop the rasters to the extent of the buffalo 2005 data with the buffer distance
+ndvi_2005 <- terra::crop(ndvi_average, buffalo_clean_2005_extent)
+slope_2005 <- terra::crop(slope, buffalo_clean_2005_extent)
+
+plot(ndvi_2005)
+points(buffalo_clean_2005_sf$geometry, pch = 16, cex = 0.5, col = "red")
+plot(slope_2005)
+points(buffalo_clean_2005_sf$geometry, pch = 16, cex = 0.5, col = "red")
+
+# write the rasters to file
+terra::writeRaster(ndvi_2005, "mapping/cropped rasters/ndvi_2005.tif", overwrite = T)
+terra::writeRaster(slope_2005, "mapping/cropped rasters/slope_2005.tif", overwrite = T)
+
+```
+
 
 ## Set up the spatial extent of the local covariates
 

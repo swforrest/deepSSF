@@ -200,3 +200,4 @@ cython_debug/
 .Rproj.user
 
 /.quarto/
+.positai
