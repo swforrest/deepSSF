@@ -201,3 +201,5 @@ cython_debug/
 
 /.quarto/
 .positai
+
+**/*.quarto_ipynb
