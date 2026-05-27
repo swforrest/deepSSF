@@ -14,6 +14,16 @@ format: html
 bibliography: references.bib
 ---
 
+## UPDATE (27th May 2026) 
+
+We have updated the data preparation process to avoid the need to crop out and save individual availability layers for each step. Now, individual availability layers are generated on-the-fly during the training process in Python. This functionality is incorporated into the Python package see here - [https://github.com/swforrest/deepSSF_package](https://github.com/swforrest/deepSSF_package) and here - [https://pypi.org/project/deepSSF/](https://pypi.org/project/deepSSF/). Now, a script can just recieve a csv file with a timestamp, and lat and lon coordinates for each step, and the full raster layers that cover the trajectory. This avoids the need to use R for any data preparation, and is much better as all of the local layers for every step don't need to be stored in RAM, but are generated for every training batch.
+
+We have left the previous code here for now, as it is still helpful to understand what the model is processing during training. Every step is associated with a set of local availability layers (one for each covariate) that are centred on the current step, and a target layer that has a value of 1 at the location of the next step and 0 everywhere else. The model is trained with convolution layers to predict the target layer from the local availability layers (through generating a habitat selection probability surface). The code in the Python package does exactly the same thing, but generates the local availability layers on-the-fly during training, which is much more efficient and avoids the need to use R for data preparation.
+
+---
+
+## Data Preparation
+
 To train the deepSSF model, we need to crop out local layers for each of our covariates at every observed step in the trajectory. These local layers must be centred on the current step (as the movement kernel is centred on the centre cell), and the next step becomes our 'target'.
 
 An example for a single step may look something like the image below, where we have a local covariate that is 101 x 101 cells (an odd number so we have a central cell) that are 25 m x 25 m each, resulting in a map that is 2525 m x 2525 m. This is a distance of 1262.5 m to the nearest edge from the central cell, which covers about 97% of the observed step lengths.
