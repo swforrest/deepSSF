@@ -26,18 +26,20 @@ website:
         href: inference.qmd
       - text: "Validation"
         href: validation.qmd
+      - text: "deepSSF Package"
+        href: Python/deepssf_train_validate_example.ipynb
 
     right:
-    - text: "Website"
-      href: https://swforrest.github.io
+    # - text: "Website"
+    #   href: https://swforrest.github.io
     - icon: github
       href: https://github.com/swforrest/deepSSF
     - icon: envelope-at-fill
       href: mailto:scottwforrest@gmail.com
     - icon: linkedin
       href: https://www.linkedin.com/in/swforrest/
-    - text: "Bluesky"
-      href: https://bsky.app/profile/scottwilliamf.bsky.social
+    # - text: "Bluesky"
+    #   href: https://bsky.app/profile/scottwilliamf.bsky.social
 
   sidebar:
 
