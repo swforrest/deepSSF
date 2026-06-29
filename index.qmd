@@ -17,7 +17,7 @@ Forrest, S. W., Pagendam, D., Hassan, C., Potts, J. R., Drovandi, C., Bode, M., 
 
 ![](icons/both_icons.png)
 
-The Python package can be viewed on GitHub [https://github.com/swforrest/deepSSF_package](https://github.com/swforrest/deepSSF_package) and PyPi [https://pypi.org/project/deepSSF/](https://pypi.org/project/deepSSF/). In the GitHub repository, there is an [example Jupyter Notebook](https://github.com/swforrest/deepSSF_package/tree/main/examples) (as a .ipynb and .html) that shows how to use the functions in the package to import and prepare data, train and test a deepSSF model, and generate simulations of animal trajectories. You can also see the knitted version of that notebook on this website in the top panel under [deepSSF Package](Python/deepSSF_package_example.ipynb).
+The Python package can be viewed on GitHub [https://github.com/swforrest/deepSSF_package](https://github.com/swforrest/deepSSF_package) and PyPi [https://pypi.org/project/deepSSF/](https://pypi.org/project/deepSSF/). In the GitHub repository, there is an [example Jupyter Notebook](https://github.com/swforrest/deepSSF_package/tree/main/examples) (as a .ipynb and .html) that shows how to use the functions in the package to import and prepare data, train and test a deepSSF model, and generate simulations of animal trajectories. You can also see the knitted version of that notebook on this website in the top panel under [deepSSF Package](Python/deepssf_train_validate_example.ipynb).
 
 We are currently developing an R package, which will be a reticulate wrapper around the functions in the Python package. Currently, it is only available in Python.
 

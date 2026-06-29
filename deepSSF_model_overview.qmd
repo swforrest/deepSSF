@@ -71,7 +71,7 @@ If we wanted a single gamma distribution (described by a shape and scale paramet
 
 We can then turn these into the two-dimensional movement kernel:
 
-![](figures\params_move_kernel.png)
+![](figures/params_move_kernel.png)
 
 Because we can make the movement subnetwork output any number of parameters (it doesn't explicitly know they are parameters of distributions after all), we can make the movement kernel more complex. This allowed us to use finite mixtures of two Gamma distributions for the step lengths and two von Mises distributions for the turning angles. This just means that we have two gamma distributions for step lengths which are added together, and their relative contribution is denoted by a 'weight' parameter. This movement kernel therefore requires a total of 12 predicted parameters - a shape, scale and weight for each Gamma distribution and a $\mu$, $\kappa$ and weight for each von Mises distribution, so we make the final output of the movement subnetwork a vector with 12 values.
 
@@ -102,7 +102,7 @@ And what we are trying to predict, or the **target**, is the *location of the ne
 
 ![The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell](figures/example_target.png)
 
-![**Note**: the model is being trained on *all* of the observed data, which are iterated over many times, but here we just show a single set of covariates (i.e. one step) to highlight how the predictions for that set of covariates changes throughout the training process.](figures\model_training.gif)
+![**Note**: the model is being trained on *all* of the observed data, which are iterated over many times, but here we just show a single set of covariates (i.e. one step) to highlight how the predictions for that set of covariates changes throughout the training process.](figures/model_training.gif)
 
 All of the parameters start as random values, but as the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
 

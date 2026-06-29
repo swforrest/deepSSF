@@ -28,7 +28,7 @@ And what we are trying to predict, or the **target**, is the *location of the ne
 
 ![The target location we are trying to predict by giving the underlying covariates and the movement kernel a high probability weight for that location, where the current location is the central cell](figures/example_target.png)
 
-![**Note**: the model is being trained on *all* of the observed data, which are iterated over many times, but we just show a single set of covariates to highlight how the predictions for that set of covariates changes throughout the training process.](figures\model_training.gif)
+![**Note**: the model is being trained on *all* of the observed data, which are iterated over many times, but we just show a single set of covariates to highlight how the predictions for that set of covariates changes throughout the training process.](figures/model_training.gif)
 
 All of the parameters start as random values, but as the model learns it starts to pick out certain features of the landscape that buffalo moved towards or away from, and the movement and habitat selection probabilities start to balance as the model gives weight to both processes. As these processes are being trained we can see the loss function decreasing, indicating that the probability values at the observed next step are increasing.
 

@@ -1,0 +1,18 @@
+\contentsline {subsection}{\nonumberline Loading packages}{1}{subsection*.3}%
+\contentsline {subsection}{\nonumberline Reading in the environmental covariates}{2}{subsection*.5}%
+\contentsline {section}{\nonumberline Generating the data to fit a deepSSF model}{4}{section*.7}%
+\contentsline {subsection}{\nonumberline Set up the spatial extent of the local covariates}{4}{subsection*.9}%
+\contentsline {section}{\nonumberline Evaluate next-step ahead predictions}{4}{section*.11}%
+\contentsline {subsection}{\nonumberline Create distance and bearing layers for the movement probability}{4}{subsection*.13}%
+\contentsline {section}{\nonumberline Calculating the habitat selection probabilities}{6}{section*.15}%
+\contentsline {section}{\nonumberline Calculating the next-step probabilities for the 0p and 2p models}{7}{section*.17}%
+\contentsline {subsection}{\nonumberline Select model coefficients}{7}{subsection*.19}%
+\contentsline {subsection}{\nonumberline Setting up the data}{7}{subsection*.21}%
+\contentsline {section}{\nonumberline Calculating the next-step probabilities}{8}{section*.23}%
+\contentsline {subsection}{\nonumberline Loop over all individuals and models}{8}{subsection*.25}%
+\contentsline {subsubsection}{\nonumberline Outermost loop: \texttt {for(k\ in\ 1:length(buffalo\_id\_list))\ \{...\}}}{8}{subsubsection*.27}%
+\contentsline {subsubsection}{\nonumberline Middle loop: \texttt {for(j\ in\ 1:length(model\_harmonics))\ \{...\}}}{9}{subsubsection*.29}%
+\contentsline {subsubsection}{\nonumberline Inner loop: \texttt {for\ (i\ in\ 2:n)\ \{..\}}}{9}{subsubsection*.31}%
+\contentsline {subsubsection}{\nonumberline \textbf {Outputs}}{10}{subsubsection*.33}%
+\contentsline {subsubsection}{\nonumberline \textbf {Diagnostic Plots}}{10}{subsubsection*.35}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

@@ -1,0 +1,13 @@
+\contentsline {subsection}{\nonumberline Loading packages}{1}{subsection*.3}%
+\contentsline {subsection}{\nonumberline Import data and clean}{1}{subsection*.5}%
+\contentsline {subsection}{\nonumberline Setup trajectory}{2}{subsection*.7}%
+\contentsline {subsection}{\nonumberline Plot the data coloured by time}{3}{subsection*.9}%
+\contentsline {subsection}{\nonumberline Reading in the environmental covariates}{3}{subsection*.11}%
+\contentsline {subsection}{\nonumberline Sentinel-2 spectral layers}{4}{subsection*.13}%
+\contentsline {subsubsection}{\nonumberline Import the layers and add times}{4}{subsubsection*.15}%
+\contentsline {subsubsection}{\nonumberline Combine into a list}{8}{subsubsection*.17}%
+\contentsline {section}{\nonumberline Generating the data to fit a deepSSF model}{8}{section*.19}%
+\contentsline {subsection}{\nonumberline Set up the spatial extent of the local covariates}{8}{subsection*.21}%
+\contentsline {subsection}{\nonumberline Check the outputs}{15}{subsection*.23}%
+\contentsline {subsection}{\nonumberline Plot a subset of the local covariates}{15}{subsection*.25}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

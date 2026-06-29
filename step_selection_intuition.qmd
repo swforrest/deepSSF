@@ -21,11 +21,11 @@ In this section we hope to provide some intuition for how we set up the deepSSF 
 
 Firstly, when we have animal movement data, we can consider it as a series of steps, each with a step length and a turning angle:
 
-![](figures\movement_steps.png)
+![](figures/movement_steps.png)
 
 If we aggregate every step across the trajectory (which may be many thousands of steps long), the step lengths and turning angles form distributions:
 
-![](figures\movement_distributions.png)
+![](figures/movement_distributions.png)
 
 If we wanted to simulate from this movement process, we could simply sample values from these step length and turning angle distributions (either from the observed values or by fitting parametric distributions and sampling from those). This would be a correlated random walk; correlated as it has persistence in some direction, usually in the forward direction. 
 
@@ -34,18 +34,18 @@ If we wanted to simulate from this movement process, we could simply sample valu
 
 We can also consider the step lengths and turning angles to be a two-dimensional distribution or a 'movement probability surface'. We could then introduce correlation between the step lengths and the turning angles (i.e. straight turning angles with long steps), giving a more realistic *movement kernel*. But mainly it is helpful to visualise the movement kernel as a 2D surface, which we can sample our next-steps from.
 
-![](figures\movement_kernel.png)
+![](figures/movement_kernel.png)
 
 
 # Habitat selection
 
 However, animals also respond to environmental features. If we take the local landscape that is within the range of movement (i.e. containing most of the movement kernel's probability), we can imagine this landscape being comprised of different components, such as the vegetation (described through something like Normalised Difference Vegetation Index - NDVI), how dense the canopy is, or what the terrain is like. We would call these our *spatial covariates*.
 
-![](figures\local_habitat.png)
+![](figures/local_habitat.png)
 
 We then need some way to describe or quantify a relationship between the animal and the spatial covariates. One way to do this is by using (log-)linear relationships, where increasing values of the covariate lead to increasing or decreasing selection, or via quadratic relationships which add some more flexibility. These relationships can be encoded in coefficients, which may be positive or negative. If we then sum these outputs together we get a habitat selection (log-)probability surface. Something like this is usually called a resource selection function (shown here on the log-scale and unnormalised).
 
-![](figures\local_rsf.png)
+![](figures/local_rsf.png)
 
 We now have a **movement probability surface** and a **habitat selection probability surface**.
 
@@ -54,13 +54,13 @@ We now have a **movement probability surface** and a **habitat selection probabi
 
 If we then combine those surfaces together (by adding on the log-scale or multiplying on the natural probability scale), we get the probability of the next step that the animal may take, or the **next-step probability surface**.
 
-![](figures\ssf_surfaces.png)
+![](figures/ssf_surfaces.png)
 
 Essentially, we have (simplistically) described a step selection function (SSF), where the probability of *selecting the next step* is described by a movement process and a habitat selection process. 
 
 *Note: the movement parameters are typically estimated at the same time as the habitat selection, resulting in movement distributions that would be observed in the absence of any external covariates, also called the 'selection-free movement kernel' [@Avgar2016-pb].*
 
-![](figures\ssf.png)
+![](figures/ssf.png)
 
 
 # Simulating trajectories
