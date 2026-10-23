@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Scott Forrest">
-<meta name="dcterms.date" content="2026-06-29">
+<meta name="dcterms.date" content="2026-10-23">
 
 <title>deepSSF Package Walkthrough – deepSSF</title>
 <style>
@@ -89,6 +89,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../icons/deepSSF_hex_textured_Python.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -198,7 +199,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
 <span class="menu-text">Validation</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../Python/deepssf_train_validate_example.html" aria-current="page"> 
+    <a class="nav-link" href="../Python/deepssf_train_validate_example_v0_3_0.html"> 
 <span class="menu-text">deepSSF Package</span></a>
   </li>  
 </ul>
@@ -312,7 +313,7 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 29, 2026</p>
+      <p class="date">October 23, 2026</p>
     </div>
   </div>
   
@@ -323,7 +324,8 @@ gtag('config', 'G-BYRMN2C7ZE', { 'anonymize_ip': true});
   <div class="abstract">
     <div class="block-title">Abstract</div>
     <p>Here we show an example of how to use the functions in the deepSSF package, showing data loading, model training and testing and generating simulations.</p>
-    <p>To install and use the package, visit the GitHub repository here: <a href="https://github.com/swforrest/deepSSF_package">https://github.com/swforrest/deepSSF_package</a>, which has instructions in the README. This script will not download with the package, but it can be accessed from the deepSSF_package repo, under the ‘examples’ folder (as a Jupyter notebook or a html file).</p>
+    <p>To install and use the package, visit the GitHub repository here: <a href="https://github.com/swforrest/deepSSF_package">https://github.com/swforrest/deepSSF_package</a>, which has instructions in the README. If you install the package via PyPI using <code>pip install deepssf</code>, this script will not download, but it can be accessed from the deepSSF_package repo here: <a href="https://github.com/swforrest/deepSSF_package/tree/main/examples">https://github.com/swforrest/deepSSF_package/tree/main/examples</a>, under the ‘examples’ folder. You can then download it directly, or clone/fork the repository to download the package locally.</p>
+    <p>Note, the GitHub repository that is associated with this website <a href="https://github.com/swforrest/deepSSF">https://github.com/swforrest/deepSSF</a>, is <strong>NOT</strong> the repository for the package, which is <a href="https://github.com/swforrest/deepSSF_package">https://github.com/swforrest/deepSSF_package</a>. The website illustrates how deepSSF works, and was created to be associated with the <a href="https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.70136">deepSSF paper</a> in Methods in Ecology and Evolution, but the package has been created as a separate repository.</p>
     <p>We use data that comes with the package in the <strong>datasets</strong> folder, which is the GPS tracking data of a single water buffalo (~10,000 locations), and two spatial layers: NDVI (the average from 2018-2019, which covers the temporal extent of the data), and slope.</p>
   </div>
 </div>
@@ -556,7 +558,7 @@ Layers loaded: ['ndvi', 'slope']
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepssf_train_validate_example_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="deepssf_train_validate_example_v0_2_3_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2214,7 +2216,7 @@ Training GIF → outputs/training_progress.gif</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepssf_train_validate_example_files/figure-html/cell-25-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="deepssf_train_validate_example_v0_2_3_files/figure-html/cell-25-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2379,7 +2381,7 @@ max        0.000675     0.254268        0.552189</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepssf_train_validate_example_files/figure-html/cell-29-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="deepssf_train_validate_example_v0_2_3_files/figure-html/cell-29-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2579,7 +2581,7 @@ max        0.000675     0.254268        0.552189</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="deepssf_train_validate_example_files/figure-html/cell-32-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="deepssf_train_validate_example_v0_2_3_files/figure-html/cell-32-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -2591,7 +2593,7 @@ max        0.000675     0.254268        0.552189</code></pre>
 </section>
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-Signer2019-fi" class="csl-entry" role="listitem">
 Signer, Johannes, John Fieberg, and Tal Avgar. 2019. <span>“Animal Movement Tools (Amt): <span>R</span> Package for Managing Tracking Data and Conducting Habitat Selection Analyses.”</span> <em>Ecology and Evolution</em> 9 (2): 880–90. <a href="https://doi.org/10.1002/ece3.4823">https://doi.org/10.1002/ece3.4823</a>.
 </div>
