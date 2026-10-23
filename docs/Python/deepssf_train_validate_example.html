@@ -4867,7 +4867,7 @@ best_model_habitat.pt  saved on 'habitat' = 9.129542</code></pre>
 <h2 class="anchored" data-anchor-id="convert-the-numpy-rasters-loaded-earlier-into-pytorch-tensors.">Convert the NumPy rasters loaded earlier into PyTorch tensors.</h2>
 <p>Both validate_next_step_probs() and simulate_trajectory() call <code>get_landscape(month_index)</code> at each step to fetch the current environmental layers as a list of 2-D tensors.</p>
 <p>With static (non-seasonal) rasters the month_index argument is unused. For seasonal data (e.g.&nbsp;monthly NDVI composites) you would index into a stack of layers here based on the current month.</p>
-<div id="cell-77" class="cell" data-execution_count="39">
+<div id="cell-77" class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># validate_next_step_probs() and simulate_trajectory() both stack the list returned</span></span>
@@ -4888,7 +4888,7 @@ best_model_habitat.pt  saved on 'habitat' = 9.129542</code></pre>
 <span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Take the last 10 % of steps as a test sample.  CAVEAT: make_dataloaders() uses a</span></span>
 <span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a><span class="co"># random_split, so these steps were mostly *seen during training* — the numbers below</span></span>
 <span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a><span class="co"># are not a clean out-of-sample estimate.  Because step_df is ordered by individual</span></span>
-<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a><span class="co"># name, this slice is also just the last few pigs alphabetically rather than the</span></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a><span class="co"># name, this slice is also just the last few ids alphabetically rather than the</span></span>
 <span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a><span class="co"># latest steps in time.  Hold out individuals or a date range explicitly for a real test.</span></span>
 <span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>n_test      <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(step_df) <span class="op">*</span> <span class="fl">0.1</span>)</span>
 <span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a>test_sample <span class="op">=</span> step_df.iloc[<span class="op">-</span>n_test:].reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
@@ -5159,7 +5159,7 @@ probabilities sum to  : 1.0000</code></pre>
 <h3 class="anchored" data-anchor-id="how-does-habitat-selection-change-through-the-day">How does habitat selection change through the day?</h3>
 <p>The scalar covariates are inputs to the habitat CNN, so the <em>same</em> landscape produces a different surface at different times of day. Re-running the prediction at different times of day shows what the model has learned.</p>
 <p>Each surface is normalised over the landscape independently, so the panels show where selection is concentrated at that hour, not the overall level of activity.</p>
-<p>These surfaces <strong>only</strong> show the habitat selection, and not where would expect to find pigs, as these maps do not take movement into consideration. To generate distribution maps we need to simulate movement trajectories.</p>
+<p>These surfaces <strong>only</strong> show the habitat selection, and not where would expect to find buffalo, as these maps do not take movement into consideration. To generate distribution maps we need to simulate movement trajectories.</p>
 <div id="cell-87" class="cell" data-execution_count="44">
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -66969,14 +66969,14 @@ Starting time      : day 206, 10.57 h</code></pre>
 <section id="save-the-simulated-trajectoes" class="level3">
 <h3 class="anchored" data-anchor-id="save-the-simulated-trajectoes">Save the simulated trajectoes</h3>
 <p><code>split=False</code> (the default) writes one combined CSV with the <code>trajectory_id</code> column; <code>split=True</code> writes one file per simulated individual.</p>
-<div id="cell-111" class="cell" data-execution_count="56">
+<div id="cell-111" class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>deepssf.save_trajectories(sim_many, TRAJ_DIR, prefix<span class="op">=</span><span class="st">"deepSSF_buffalo_many"</span>)</span>
 <span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>deepssf.save_trajectories(sim_scattered, TRAJ_DIR, prefix<span class="op">=</span><span class="st">"deepSSF_buffalo_scattered"</span>)</span>
 <span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...or one file per simulated animal:</span></span>
-<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save_trajectories(sim_many, TRAJ_DIR, prefix="deepSSF_pigs", split=True)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save_trajectories(sim_many, TRAJ_DIR, prefix="deepSSF_buffalo", split=True)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Saved: outputs/deepSSF_trajectories/deepSSF_buffalo_many_1000traj_1000steps_2026-10-23_2.csv
@@ -189940,9 +189940,9 @@ Saved: outputs/deepSSF_trajectories/deepSSF_buffalo_scattered_1000traj_1000steps
 <h2 class="anchored" data-anchor-id="how-it-is-calculated-here">How it is calculated here</h2>
 <p>Following the R script, in four steps:</p>
 <ol type="1">
-<li><strong>A coarse grid of nodes.</strong> The landscape rasters are 20 m, much finer than the scale connectivity is meaningful at, so they are aggregated by <code>BETWEENNESS_AGG</code> into 500 m cells. Each cell is one node in the network. The grid keeps the rasters’ origin and CRS, so it lines up with the covariates and with the heatmap above.</li>
-<li><strong>Transitions become edges.</strong> Every simulated path is walked cell by cell, and each move from one cell into the next is an edge. A trajectory contributes a given <code>(from, to)</code> pair <em>once</em>, however often it repeats it (<code>singlecount = TRUE</code> in the R script), so the pooled count is “how many of the simulated pigs ever made this move”, not “how many times it happened”.</li>
-<li><strong>Edge weights invert the counts</strong>: <code>weight = mean(count) / count</code>. networkx reads the weight as a <em>cost</em>, so a transition many pigs made is cheap and shortest paths follow the routes the simulation actually took.</li>
+<li><strong>A coarse grid of nodes.</strong> The landscape rasters are 25 m, which can make calculating betweenness very computationally expensive, so they are aggregated by <code>BETWEENNESS_AGG</code> into larger cells. Each cell is one node in the network. The grid keeps the rasters’ origin and CRS, so it lines up with the covariates and with the heatmap above (although different aggregation factors may mean they don’t have the same resolution).</li>
+<li><strong>Transitions become edges.</strong> Each move from one cell into another is an edge. It is constrained here that trajectory contributes a given <code>(from, to)</code> pair only <em>once</em>, however often it repeats it (<code>singlecount = TRUE</code> in the R script), so the pooled count is “how many of the simulated individuals ever made this move”, not “how many times it happened”. This prevents artifacts with really high counts from if some simulated individuals got stuck into a small area and went back and forth thousands of times between just a couple cells.</li>
+<li><strong>Edge weights invert the counts</strong>: <code>weight = mean(count) / count</code>. networkx reads the weight as a <em>cost</em>, so a transition many simulated individuals made is cheap and shortest paths follow the routes the simulation actually took.</li>
 <li><strong>Betweenness</strong> of a node is the number of those shortest paths running through it. Cells with high betweenness are the ones movement is funnelled through.</li>
 </ol>
 <section id="path_cells-and-transition_counts" class="level3">
@@ -189974,7 +189974,7 @@ Saved: outputs/deepSSF_trajectories/deepSSF_buffalo_scattered_1000traj_1000steps
 <li><strong>Outputs</strong>: <code>betweenness</code> — a <code>float32</code> array on the coarsened grid, plus its affine transform <code>bet_transform</code>, ready for <code>save_raster()</code> and <code>add_heatmap_overlay()</code> just like the heatmap.</li>
 </ul>
 <p><strong><code>BETWEENNESS_MAX_STEPS</code></strong> Given enough steps every trajectory eventually visits most of the landscape, every adjacent pair of cells picks up an edge from nearly every trajectory, the weights flatten towards uniform, and betweenness ends up describing the <em>grid</em> rather than the <em>movement</em>. The R script on David’s GitHub handles this by recomputing the map at several step budgets (<code>design$steps = c(125, 500, 2000)</code>) and checking the pattern has settled; the same is worth doing here.</p>
-<div id="cell-139" class="cell" data-execution_count="70">
+<div id="cell-139" class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>BETWEENNESS_DF        <span class="op">=</span> sim_scattered  <span class="co"># trajectories to build the network from</span></span>
@@ -189997,7 +189997,7 @@ Saved: outputs/deepSSF_trajectories/deepSSF_buffalo_scattered_1000traj_1000steps
 <span id="cb113-18"><a href="#cb113-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The sequence of network cells one simulated path passes through.</span></span>
 <span id="cb113-19"><a href="#cb113-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb113-20"><a href="#cb113-20" aria-hidden="true" tabindex="-1"></a><span class="co">    Points outside the raster come back as -1 rather than being dropped, so that</span></span>
-<span id="cb113-21"><a href="#cb113-21" aria-hidden="true" tabindex="-1"></a><span class="co">    a pig which leaves the landscape and returns does not look like one long</span></span>
+<span id="cb113-21"><a href="#cb113-21" aria-hidden="true" tabindex="-1"></a><span class="co">    a buffalo which leaves the landscape and returns does not look like one long</span></span>
 <span id="cb113-22"><a href="#cb113-22" aria-hidden="true" tabindex="-1"></a><span class="co">    move between the cells either side of the excursion.</span></span>
 <span id="cb113-23"><a href="#cb113-23" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
 <span id="cb113-24"><a href="#cb113-24" aria-hidden="true" tabindex="-1"></a>    col, row <span class="op">=</span> <span class="op">~</span>bet_transform <span class="op">*</span> (np.asarray(x, dtype<span class="op">=</span><span class="bu">float</span>), np.asarray(y, dtype<span class="op">=</span><span class="bu">float</span>))</span>
