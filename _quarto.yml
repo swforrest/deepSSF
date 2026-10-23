@@ -4,7 +4,9 @@ project:
 
 website:
   title: "deepSSF"
+  favicon: icons/deepSSF_hex_textured_Python.png
   page-navigation: true
+  back-to-top-navigation: true
   google-analytics: 
     tracking-id: "G-BYRMN2C7ZE"
     storage: none
